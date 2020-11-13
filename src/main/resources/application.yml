@@ -1,0 +1,10 @@
+spring:
+  profiles:
+    active: local
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  thymeleaf:
+    reactive:
+      max-chunk-size: 8192

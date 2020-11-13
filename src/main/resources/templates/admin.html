@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Я никогда не..!</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="../static/vendor/bootstrap/css/bootstrap.min.css" th:href="@{/vendor/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
+
+    <!-- Custom fonts for this template -->
+    <link href="../static/vendor/font-awesome/css/font-awesome.min.css" th:href="@{/vendor/font-awesome/css/font-awesome.min.css}" rel="stylesheet" type="text/css">
+    <link href="../static/vendor/simple-line-icons/css/simple-line-icons.css" th:href="@{/vendor/simple-line-icons/css/simple-line-icons.css}" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
+
+    <!-- Custom styles for this template -->
+    <link href="../static/css/landing-page.css" th:href="@{/css/landing-page.css}" rel="stylesheet">
+
+  </head>
+
+  <body>
+
+    <!-- Masthead -->
+    <main class="masthead text-white text-center">
+      <div class="overlay"></div>
+      <div class="container-fluid">
+        <div class="row mb-1">
+          <div class="col text-left">
+            <form th:action="@{/admin/refreshAll}" method="post">
+              <button type="submit" class="btn btn-sm btn-secondary" onClick="return confirm('sure?')">Refresh all</button>
+            </form>
+          </div>
+          <div class="col-5">
+            <div class="alert alert-danger m-0 p-1" role="alert" th:if="${hasError}">
+              <strong>Error:</strong>
+              <span th:text="${message}"></span>
+            </div>
+          </div>
+          <div class="col text-right">
+            <form method="POST" th:action="@{/admin/import-csv}" enctype="multipart/form-data">
+              <div class="form-group mb-0">
+                <label for="file" class="float-left m-1">Select a CSV file</label>
+                <input type="file" name="file" class="float-left w-25" id="file" accept=".csv">
+                <button type="submit" class="btn btn-sm btn-primary">Import</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="row">
+          <table id="allQuestions" class="table table-hover table-striped table-dark table table-hover table-striped table-dark table-lg-responsive">
+            <thead>
+              <tr class="d-flex">
+                <th scope="col" class="col-1">#</th>
+                <th scope="col" class="col-1">Id</th>
+                <th scope="col" class="col-7">Question</th>
+                <th scope="col" class="col-1">Shown</th>
+                <th scope="col" class="col-2"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="result d-flex" th:each="question, i : ${questions}">
+                <th class="col-1" scope="row" th:text="${i.index + 1}"></th>
+                <th class="col-1">[[${question.id}]]</th>
+                <td class="col-7">[[${question.question}]]</td>
+                <td class="col-1">[[${question.wasShown}]]</td>
+                <td class="col-2 btn-group">
+                  <form th:action="@{/admin/switchRead/{id}(id=${question.id})}" th:object="${question}" method="post">
+                    <button type="submit" class="btn btn-sm mr-1" onClick="return confirm('sure?')">Switch read</button>
+                  </form>
+                  <form th:action="@{/admin/delete/{id}(id=${question.id})}" th:object="${question}" method="post">
+<!--                    <input type="hidden" th:field="${question}">Delete</input>-->
+                    <button type="submit" class="btn btn-sm btn-danger" onClick="return confirm('sure?')">Delete</button>
+                  </form>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="../static/vendor/jquery/jquery.min.js" th:src="@{/vendor/jquery/jquery.min.js}"></script>
+    <script src="../static/vendor/bootstrap/js/bootstrap.bundle.min.js" th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
+  </body>
+
+</html>

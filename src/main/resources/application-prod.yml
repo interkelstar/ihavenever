@@ -1,0 +1,5 @@
+spring:
+  profiles:
+    include: mysql
+server:
+  port: 8080

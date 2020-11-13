@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${DB_URL:localhost}:${DB_PORT:3306}/ihne
+    username: ${DB_USER:root}
+    password: ${DB_PASS:pw}
+    hikari:
+      connection-test-query: SELECT 1
+      connection-timeout: 60000 #1 min
+      validation-timeout: 1000 #1 sec
+      idle-timeout: 300000 #5 mins
+      minimum-idle: 2
+      maximum-pool-size: 5
+      max-lifetime: 600000 #10 mins

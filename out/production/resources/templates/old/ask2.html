@@ -1,0 +1,32 @@
+<!DOCTYPE>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Welcome</title>
+</head>
+<body>
+<h1>Welcome</h1>
+<form th:action="@{/addQuestion}"
+      th:object="${questionForm}" method="POST">
+    Question:
+    <input type="text" th:field="*{question}" />
+    <br/>
+    <input type="submit" value="Submit" />
+</form>
+
+<!-- Check if errorMessage is not null and not empty -->
+
+<div th:if="${errorMessage}" th:utext="${errorMessage}"
+     style="color:red;font-style:italic;">
+    ...
+</div>
+
+<!-- Check if errorMessage is not null and not empty -->
+
+<div th:if="${okMessage}" th:utext="${okMessage}"
+     style="color:greenyellow;font-style:italic;">
+    ...
+</div>
+</body>
+
+</html>
