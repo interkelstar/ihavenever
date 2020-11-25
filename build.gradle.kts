@@ -30,7 +30,6 @@ tasks {
         }
     }
     bootJar {
-        launchScript()
         destinationDirectory.set(File("./release"))
         archiveFileName.set("ihne.jar")
     }
