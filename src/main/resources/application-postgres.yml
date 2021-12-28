@@ -1,9 +1,9 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${DB_URL:localhost}:${DB_PORT:5432}/ihne?sslmode=require
-    username: ${DB_USER:root}
-    password: ${DB_PASS:pw}
+    url: jdbc:postgresql://${DB_PG_URL:localhost}:${DB_PG_PORT:5432}/ihne?sslmode=require
+    username: ${DB_PG_USER:root}
+    password: ${DB_PG_PASS:pw}
     hikari:
       connection-test-query: SELECT 1
       connection-timeout: 60000 #1 min
