@@ -27,7 +27,6 @@
 
     <!-- Masthead -->
     <main class="masthead text-white text-center">
-      <div class="overlay"></div>
       <div class="container-fluid">
         <div class="row mb-1">
           <div class="col text-left">
@@ -45,7 +44,7 @@
             <form method="POST" th:action="@{/admin/import-csv}" enctype="multipart/form-data">
               <div class="form-group mb-0">
                 <label for="file" class="float-left m-1">Select a CSV file</label>
-                <input type="file" name="file" class="float-left w-25" id="file" accept=".csv">
+                <input type="file" name="file" class="form-control-file float-left w-25" id="file" accept=".csv">
                 <button type="submit" class="btn btn-sm btn-primary">Import</button>
               </div>
             </form>
