@@ -1,7 +1,7 @@
 package com.kelstar.ihne.service
 
 import com.kelstar.ihne.model.Question
-import com.kelstar.ihne.model.QuestionDto
+import com.kelstar.ihne.model.dto.QuestionDto
 import com.kelstar.ihne.repository.QuestionRepository
 import org.springframework.data.domain.Example
 import org.springframework.data.domain.ExampleMatcher

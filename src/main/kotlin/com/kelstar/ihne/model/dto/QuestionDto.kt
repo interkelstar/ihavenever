@@ -1,4 +1,4 @@
-package com.kelstar.ihne.model
+package com.kelstar.ihne.model.dto
 
 import com.opencsv.bean.CsvBindByPosition
 

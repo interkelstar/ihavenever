@@ -1,7 +1,7 @@
 package com.kelstar.ihne.controller.rest
 
 import com.kelstar.ihne.model.Question
-import com.kelstar.ihne.model.QuestionDto
+import com.kelstar.ihne.model.dto.QuestionDto
 import com.kelstar.ihne.service.QuestionService
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Flux

@@ -1,6 +1,6 @@
 package com.kelstar.ihne.controller.templating
 
-import com.kelstar.ihne.model.QuestionDto
+import com.kelstar.ihne.model.dto.QuestionDto
 import com.kelstar.ihne.service.QuestionService
 import com.opencsv.bean.CsvToBeanBuilder
 import org.springframework.stereotype.Controller
