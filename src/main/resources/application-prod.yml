@@ -1,5 +1,5 @@
 spring:
   profiles:
-    include: mysql
+    include: ${DB_PROFILE:mysql}
 server:
   port: 8080
