@@ -1,35 +1,26 @@
 package com.kelstar.ihne.controller.templating
 
-import com.kelstar.ihne.model.dto.QuestionDto
-import com.kelstar.ihne.service.QuestionService
+import com.kelstar.ihne.service.RoomService
 import org.springframework.stereotype.Controller
-import org.springframework.ui.Model
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestParam
 
 
 @Controller
 class IndexController(
-    private val questionService: QuestionService
+    private val roomService: RoomService
 ) {
 
     @GetMapping
-    fun showAskPage(model: Model): String {
-        model.addAttribute(QuestionDto())
-        return "index"
-    }
+    fun showIndexPage() = "index"
+    
+    @GetMapping("/join")
+    fun joinGame(@RequestParam code: Int) = "redirect:/room/$code"
 
-    @PostMapping
-    fun saveQuestion(model: Model, @ModelAttribute("questionForm") questionDto: QuestionDto): String {
-        try {
-            if (questionService.addQuestion(questionDto)) {
-                model.addAttribute("okMessage", "Хорошо, давай ещё!")
-            } else {
-                model.addAttribute("errorMessage", "Такой вопрос уже есть!")
-            }
-        } catch (e: Exception) {
-            model.addAttribute("errorMessage", "Error during saving!")
-        }
-        model.addAttribute(QuestionDto())
-        return "index"
+    @PostMapping("/create")
+    fun createNewGame(): String {
+        val (code) = roomService.createNewRoom()
+        return "redirect:/room/$code/host"
     }
 }

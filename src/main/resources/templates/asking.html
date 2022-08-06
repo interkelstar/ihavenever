@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="layout :: layout(~{::title}, ~{::.container})">
+  <head>
+    <title>Я никогда не!..</title>
+  </head>
+  
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-xl-9 mx-auto">
+          <h1 class="mb-5">Задавай свой каверзный вопрос!</h1>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-10 col-lg-8 col-xl-7 mx-auto">
+          <form id="form" th:action="${#httpServletRequest.requestURI}" th:object="${questionDto}" method="POST">
+            <div class="row">
+              <div class="col-12 col-md-9 mb-2">
+                <input id="question" type="text" th:field="*{question}" class="form-control form-control-lg" maxlength="255" placeholder="Я никогда не...">
+              </div>
+              <div class="col-12 col-md-3">
+                <div class="d-grid">
+                  <button type="submit" class="btn btn-block btn-lg btn-primary" id="send">Отправить!</button>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-12 col-md-9 mt-2">
+                <div class="alert alert-success" role="alert" th:if="${okMessage}" th:utext="${okMessage}">
+                  ...
+                </div>
+                <div class="alert alert-danger" role="alert" th:if="${errorMessage}" th:utext="${errorMessage}">
+                  ...
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+
+</html>

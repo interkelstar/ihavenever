@@ -17,7 +17,10 @@ h6 {
 
 main.masthead {
   position: relative;
-  background: #343a40 url("../img/bg.png") repeat center center;
+  background: linear-gradient(
+      rgba(0, 0, 0, 0.3),
+      rgba(0, 0, 0, 0.6)
+    ), url("../img/bg.png") repeat center center;
   padding-top: 8rem;
   padding-bottom: 8rem; 
   height: 100%;
@@ -35,15 +38,16 @@ main.masthead h1 {
   } 
 }
 
-.showcase .showcase-text {
-  padding: 3rem; }
+.invalid-feedback {
+  background-color: rgba(0,0,0,0.5);
+}
 
-.showcase .showcase-img {
-  min-height: 30rem;
-  background-size: cover; }
-
-@media (min-width: 768px) {
-  .showcase .showcase-text {
-    padding: 7rem; 
-  } 
+footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 1.5rem;
+  text-align: center;
+  color: white;
+  font-size: x-small;
 }

@@ -1,41 +1,46 @@
 package com.kelstar.ihne.service
 
 import com.kelstar.ihne.model.Question
-import com.kelstar.ihne.model.dto.QuestionDto
+import com.kelstar.ihne.model.QuestionDto
 import com.kelstar.ihne.repository.QuestionRepository
 import org.springframework.data.domain.Example
 import org.springframework.data.domain.ExampleMatcher
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class QuestionService(
     private val questionRepository: QuestionRepository
 ) {
 
+    @Transactional
     fun switchRead(id: Long) {
-        val question = questionRepository.getOne(id)
-        questionRepository.save(question.run {
-            copy(wasShown = !wasShown)
-        })
+        questionRepository.findByIdOrNull(id)?.let { 
+            it.wasShown = !it.wasShown
+            questionRepository.save(it)
+        }
     }
     
+    @Transactional
     fun refreshAll(): List<Question> {
         return questionRepository.saveAll(
-            questionRepository.findAll().map { it.copy(wasShown = false) }
+            questionRepository.findAll().onEach { it.wasShown = false }
         )
     }
     
-    fun getRandomNotShown() : Question? {
-        val randomNotShownList = questionRepository.findRandomNotShown()
-        return if (randomNotShownList.isNotEmpty()) {
-            with(randomNotShownList[0]) {
-                questionRepository.save(copy(wasShown = true))
+    @Transactional
+    fun getRandomNotShown(code: Int): Question? {
+        return questionRepository.findRandomNotShown(code)
+            .firstOrNull()
+            ?.let { 
+                it.wasShown = true
+                questionRepository.save(it)
             }
-        } else { null }
     }
     
-    fun addQuestion(questionDto: QuestionDto): Boolean {
-        val questionToAdd = Question(questionDto.question ?: "")
+    fun addQuestion(questionDto: QuestionDto, roomCode: Int): Boolean {
+        val questionToAdd = Question(questionDto.question, roomCode)
         return try {
             if (!questionRepository.exists(Example.of(questionToAdd, ExampleMatcher.matching()
                     .withIgnorePaths("id", "dateAdded", "wasShown")
@@ -48,7 +53,13 @@ class QuestionService(
         }
     }
     
-    fun findAllByAdded(): List<Question> {
+    fun addAll(questions: List<Question>) = questionRepository.saveAll(questions) 
+    
+    fun findAllByRoomOrderByAdded(roomCode: Int): List<Question> {
+        return questionRepository.findAllByRoomCodeOrderByDateAdded(roomCode)
+    }
+    
+    fun findAllOrderByAdded(): List<Question> {
         return questionRepository.findAllByOrderByDateAdded()
     }
 

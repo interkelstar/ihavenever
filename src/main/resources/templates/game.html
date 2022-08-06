@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="layout :: layout(~{::title}, ~{::.container})">
+  <head>
+    <title>Я никогда не!..</title>
+  </head>
+  
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-xl-9 mx-auto">
+          <h1 class="mb-5" th:if="${question}">Я никогда не...</h1>
+          <h1 class="mb-5" th:if="${question}" th:utext="${question.question}">...</h1>
+          <h1 class="mb-5" th:unless="${question}">Кончились вопросы!</h1>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-10 col-lg-8 col-xl-7 mx-auto">
+          <div class="col-12 col-md-3 mx-auto">
+            <div class="d-grid">
+              <a class="btn btn-lg btn-primary" th:href="${#httpServletRequest.requestURI}" th:utext="${question} ? 'Ещё!' : 'Точно?'">Точно?</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+
+</html>

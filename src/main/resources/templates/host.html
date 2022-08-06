@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="layout :: layout(~{::title}, ~{::.container})">
+  <head>
+    <title>Я никогда не!..</title>
+  </head>
+  
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-xl-9 mx-auto">
+          <h1 class="mb-5">Комната номер</h1>
+          <h1 class="mb-5" th:utext="${room.code}">...</h1>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xl-5 mx-auto">
+          <h2 class="mb-5">Сообщи всем код этой комнаты чтоб они подключились и задавали вопросы</h2>
+          <h2 class="mb-5">Когда почувствуете что вопросов достаточно, кликни внизу чтобы начать играть (вопросы можно продолжать задавать в процессе)</h2>
+        </div>
+      </div>      
+      <div class="row">
+        <div class="col-xl-9 mx-auto">
+          <a class="btn btn-primary" th:href="@{/room/{code}/game(code=${room.code})}" target="_blank">Начать игру</a>
+        </div>
+      </div>
+    </div>
+  </body>
+
+</html>

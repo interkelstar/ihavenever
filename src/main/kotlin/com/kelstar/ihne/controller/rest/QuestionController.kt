@@ -1,7 +1,7 @@
 package com.kelstar.ihne.controller.rest
 
 import com.kelstar.ihne.model.Question
-import com.kelstar.ihne.model.dto.QuestionDto
+import com.kelstar.ihne.model.QuestionDto
 import com.kelstar.ihne.service.QuestionService
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Flux
@@ -11,16 +11,16 @@ import reactor.kotlin.core.publisher.toFlux
 import reactor.kotlin.core.publisher.toMono
 
 @RestController
-@RequestMapping("/questions")
+@RequestMapping("/api/{code}/questions")
 class QuestionController(
     private val questionService: QuestionService
 ) {
     @GetMapping
-    fun getAll() = questionService.findAllByAdded().toFlux()
+    fun getAll() = questionService.findAllOrderByAdded().toFlux()
 
     @GetMapping("/random")
-    fun getRandom(): Mono<Question> {
-        val randomQuestion = questionService.getRandomNotShown()
+    fun getRandom(@PathVariable code: Int): Mono<Question> {
+        val randomQuestion = questionService.getRandomNotShown(code)
         return if (randomQuestion != null) {
             randomQuestion
                 .toMono()
@@ -31,8 +31,8 @@ class QuestionController(
     }
 
     @PostMapping
-    fun add(@RequestBody question: QuestionDto) {
-        questionService.addQuestion(question)
+    fun add(@RequestBody question: QuestionDto, @PathVariable code: Int) {
+        questionService.addQuestion(question, code)
     }
 
     @GetMapping("/secretLink/refresh")

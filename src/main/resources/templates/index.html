@@ -1,58 +1,55 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-
+  <html lang="en" xmlns:th="http://www.thymeleaf.org"
+        th:replace="layout :: layout(~{::title}, ~{::.container})">
   <head>
-
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-
-    <title>Я никогда не..!</title>
-
-    <!-- Bootstrap core CSS -->
-    <link href="../static/vendor/bootstrap/css/bootstrap.min.css" th:href="@{/vendor/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
-
-    <!-- Custom fonts for this template -->
-    <link href="../static/vendor/font-awesome/css/font-awesome.min.css" th:href="@{/vendor/font-awesome/css/font-awesome.min.css}" rel="stylesheet" type="text/css">
-    <link href="../static/vendor/simple-line-icons/css/simple-line-icons.css" th:href="@{/vendor/simple-line-icons/css/simple-line-icons.css}" rel="stylesheet" type="text/css">
-    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
-
-    <!-- Custom styles for this template -->
-    <link href="../static/css/landing-page.css" th:href="@{/css/landing-page.css}" rel="stylesheet">
-
+    <title>Я никогда не!..</title>
   </head>
 
   <body>
 
-    <!-- Masthead -->
-    <main class="masthead text-white text-center">
-      <div class="container">
-        <div class="row">
-          <div class="col-xl-9 mx-auto">
-            <h1 class="mb-5">Задавай свой каверзный вопрос!</h1>
+    <div class="container">
+      <div class="row">
+        <div class="col mx-auto mb-5">
+          <h1>Я никогда не...</h1>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col mx-auto mb-3">
+          <h2>Чтобы начать играть ты можешь</h2>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="col-lg-2 m-auto">
+          <div class="form-group">
+            <form id="form-create" th:action="@{/create}" method="POST">
+              <div class="d-grid">
+                <button type="submit" class="btn btn-lg btn-primary" id="create">Создать новую игру</button>
+              </div>
+            </form>
           </div>
         </div>
-        <div class="row">
-          <div class="col-md-10 col-lg-8 col-xl-7 mx-auto">
-            <form id="form" th:action="@{/}" th:object="${questionDto}" method="POST">
+      </div>
+      <div class="row">
+        <div class="col-lg-6 mx-auto mt-5 mb-5">
+          <h2>Либо</h2>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="col">
+          <div class="form-group">
+            <form id="form-join" th:action="@{/join}" method="GET" class="needs-validation" novalidate>
               <div class="row">
-                <div class="col-12 col-md-9 mb-2">
-                  <input id="question" type="text" th:field="*{question}" class="form-control form-control-lg" maxlength="255" placeholder="Я никогда не...">
-                </div>
-                <div class="col-12 col-md-3">
-                  <div class="d-grid">
-                    <button type="submit" class="btn btn-block btn-lg btn-primary" id="send">Отправить!</button>
+                <div class="col-lg-4 mx-auto mb-2">
+                  <input id="code" type="number" name="code" class="form-control" min="100000" max="999999" required placeholder="Ввести тут 6 цифр кода уже созданной игры и">
+                  <div class="invalid-feedback">
+                    Введите номер комнаты, 6 цифр от 100000 до 999999
                   </div>
                 </div>
               </div>
               <div class="row">
-                <div class="col-12 col-md-9 mt-2">
-                  <div class="alert alert-success" role="alert" th:if="${okMessage}" th:utext="${okMessage}">
-                    ...
-                  </div>
-                  <div class="alert alert-danger" role="alert" th:if="${errorMessage}" th:utext="${errorMessage}">
-                    ...
+                <div class="col-lg-2 m-auto">
+                  <div class="d-grid">
+                    <button type="submit" class="btn btn-lg btn-primary" id="join">Присоедениться</button>
                   </div>
                 </div>
               </div>
@@ -60,12 +57,9 @@
           </div>
         </div>
       </div>
-    </main>
-
-    <!-- Bootstrap core JavaScript -->
-    <script src="../static/vendor/jquery/jquery.min.js" th:src="@{/vendor/jquery/jquery.min.js}"></script>
-    <script src="../static/vendor/bootstrap/js/bootstrap.bundle.min.js" th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
-
+      
+    </div>
+  
   </body>
 
 </html>

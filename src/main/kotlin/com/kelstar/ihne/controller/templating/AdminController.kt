@@ -1,10 +1,12 @@
 package com.kelstar.ihne.controller.templating
 
-import com.kelstar.ihne.model.dto.QuestionDto
+import com.kelstar.ihne.model.Question
+import com.kelstar.ihne.model.QuestionDto
 import com.kelstar.ihne.service.QuestionService
 import com.opencsv.bean.CsvToBeanBuilder
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
+import org.springframework.ui.set
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import java.io.BufferedReader
@@ -18,7 +20,7 @@ class AdminController(
 ) {
     @GetMapping
     fun showAdminPage(model: Model): String {
-        model.addAttribute("questions", questionService.findAllByAdded())
+        model["questions"] = questionService.findAllOrderByAdded()
         return "admin"
     }
 
@@ -41,34 +43,33 @@ class AdminController(
     }
 
     @PostMapping("/import-csv")
-    fun uploadCSVFile(@RequestParam("file") file: MultipartFile, model: Model): String {
+    fun uploadCSVFile(@RequestParam("file") file: MultipartFile, @RequestParam("code") code: Int, model: Model): String {
         // validate file
         if (file.isEmpty) {
-            model.addAttribute("message", "Please select a CSV file to upload.")
-            model.addAttribute("hasError", true)
+            model.let {
+                it["message"] = "Please select a CSV file to upload."
+                it["hasError"] = true
+            }
         } else {
             try {
                 BufferedReader(InputStreamReader(file.inputStream)).use { reader ->
-                    CsvToBeanBuilder<QuestionDto>(reader)
+                    val questions = CsvToBeanBuilder<QuestionDto>(reader)
                         .withType(QuestionDto::class.java)
                         .withIgnoreLeadingWhiteSpace(true)
                         .build()
                         .parse()
-                        .forEach {
-                            try {
-                                questionService.addQuestion(it)
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                            }
-                        }
-                    model.addAttribute("hasError", false)
+                        .map { Question(it.question, roomCode = code) }
+                    questionService.addAll(questions)
+                    model["hasError"] = false
                 }
             } catch (ex: Exception) {
-                model.addAttribute("message", "An error occurred while processing the CSV file.")
-                model.addAttribute("hasError", false)
+                model.let {
+                    it["message"] = "An error occurred while processing the CSV file."
+                    it["hasError"] = false
+                }
             }
         }
-        model.addAttribute("questions", questionService.findAllByAdded())
+        model["questions"] = questionService.findAllOrderByAdded()
         return "admin"
     }
 }
