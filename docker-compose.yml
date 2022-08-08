@@ -1,0 +1,45 @@
+version: '3.9'
+services:
+  ihne_mysql:
+    container_name: $DB_URL
+    environment:
+      - MYSQL_ROOT_PASSWORD=$DB_ROOT_PASS
+      - MYSQL_DATABASE=$DB_NAME
+      - MYSQL_USER=$DB_USER
+      - MYSQL_PASSWORD=$DB_PASS
+    ports:
+      - '$DB_PORT:3306'
+    restart: always
+    volumes:
+      - '~/mysql-data:/var/lib/mysql'
+    networks:
+      - ihne_net
+    deploy:
+      resources:
+        limits:
+          memory: 580M
+    oom_kill_disable: true
+    cap_add:
+      - sys_nice
+    image: mysql
+  ihne_java:
+    container_name: ihne_java
+    environment:
+      - DB_URL=$DB_URL
+      - DB_USER=$DB_USER
+      - DB_PASS=$DB_PASS
+      - DB_NAME=$DB_NAME
+    ports:
+      - '8080:8080'
+    restart: always
+    networks:
+      - ihne_net
+    deploy:
+      resources:
+        limits:
+          memory: 400M
+    oom_kill_disable: true
+    image: kelstar/kelstar-repo:ihne_java
+networks:
+  ihne_net:
+    driver: bridge
