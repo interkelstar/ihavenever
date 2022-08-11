@@ -21,15 +21,13 @@ class GameController(
         return if (roomService.roomExists(code)) {
             model.addAttribute(QuestionDto())
             "asking"
-        } else {
-            "error" //TODO change for room doesn't exist
-        }
+        } else { "roomNotFound" }
     }
 
     @PostMapping
     fun saveQuestion(model: Model, @ModelAttribute("questionForm") questionDto: QuestionDto, @PathVariable code: Int): String {
         if (!roomService.roomExists(code)) {
-            return "error" //TODO change for room doesn't exist
+            return "roomNotFound"
         }
         try {
             if (questionService.addQuestion(questionDto, code)) {
@@ -47,13 +45,10 @@ class GameController(
 
     @GetMapping("/host")
     fun showHostPage(model: Model, @PathVariable code: Int): String {
-        val room = roomService.getRoom(code)
-        return if (room != null) {
-            model.addAttribute(room)
+        return roomService.getRoom(code)?.let {
+            model.addAttribute(it)
             "host"
-        } else {
-            "error"
-        }
+        } ?: "roomNotFound"
     }
 
     @GetMapping("/game")

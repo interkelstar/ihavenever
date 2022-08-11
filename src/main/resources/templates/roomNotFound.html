@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="layout :: layout(~{::title}, ~{::.container})">
+  <head>
+    <title>Я никогда не!..</title>
+  </head>
+  
+  <body>
+    <div class="container">
+      <div class="row mb-5">
+        <div class="col-xl-9 mx-auto">
+          <h1>Такой комнаты <i>ещё</i> нет ...</h1>
+        </div>
+      </div>
+      <div class="row mb-5">
+        <div class="col-xl-5 mx-auto">
+          <h2>... или <i>уже</i></h2>
+          <h2 class="mb-5">Ведь комната автоматически удалится если за последние сутки не было задано ни одного вопроса.</h2>
+          <h2>Но ты всегда можешь создать новую просто перейдя</h2>
+        </div>
+      </div>      
+      <div class="row">
+        <div class="col-xl-9 mx-auto">
+          <a class="btn btn-primary" th:href="@{/}">На главную страницу</a>
+        </div>
+      </div>
+    </div>
+  </body>
+
+</html>
