@@ -39,7 +39,7 @@ services:
         limits:
           memory: 400M
     oom_kill_disable: true
-    image: kelstar/kelstar-repo:ihne_java
+    image: kelstar/ihavenever
 networks:
   ihne_net:
     driver: bridge
