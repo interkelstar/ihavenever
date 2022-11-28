@@ -17,7 +17,7 @@
           <form id="form" th:action="${#httpServletRequest.requestURI}" th:object="${questionDto}" method="POST">
             <div class="row">
               <div class="col-12 col-md-9 mb-2">
-                <input id="question" type="text" th:field="*{question}" class="form-control form-control-lg" maxlength="255" placeholder="Я никогда не...">
+                <input id="question" type="text" th:field="*{question}" class="form-control form-control-lg" maxlength="255" placeholder="Я никогда не..." autocomplete="off">
               </div>
               <div class="col-12 col-md-3">
                 <div class="d-grid">

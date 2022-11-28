@@ -2,7 +2,14 @@ body,html {
   height: 100%;
 }
 body {
-  font-family: 'Lato', 'Helvetica Neue', Helvetica, Arial, sans-serif; 
+  font-family: 'Lato', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --bs-body-text-align: center !important;
+  --bs-text-opacity: 1;
+  --bs-body-color: rgba(var(--bs-white-rgb), var(--bs-text-opacity)) !important;
+  background: linear-gradient(
+          rgba(0, 0, 0, 0.3),
+          rgba(0, 0, 0, 0.6)
+  ), url("../img/bg.png") repeat center center;
 }
 
 h1,
@@ -17,12 +24,8 @@ h6 {
 
 main.masthead {
   position: relative;
-  background: linear-gradient(
-      rgba(0, 0, 0, 0.3),
-      rgba(0, 0, 0, 0.6)
-    ), url("../img/bg.png") repeat center center;
-  padding-top: 8rem;
-  padding-bottom: 8rem; 
+  padding-top: 2rem;
+  padding-bottom: 2rem;
   height: 100%;
 }
 main.masthead h1 {
@@ -37,13 +40,19 @@ main.masthead h1 {
     font-size: 3rem; 
   } 
 }
+@media (min-height: 768px) {
+  main.masthead {
+    padding-top: 7rem;
+    padding-bottom: 5rem;
+  }
+}
 
 .invalid-feedback {
   background-color: rgba(0,0,0,0.5);
 }
 
 footer {
-  position: absolute;
+  position: fixed;
   bottom: 0;
   width: 100%;
   height: 1.5rem;
