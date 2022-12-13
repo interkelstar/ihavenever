@@ -9,19 +9,69 @@
     <div class="container">
       <div class="row mb-5">
         <div class="col-xl-9 mx-auto">
-          <h1 class="mb-5">Комната номер</h1>
-          <h1 th:utext="${room.code}">...</h1>
+          <h1 class="mb-4">Комната номер</h1>
+          <h1 th:utext="${code}">...</h1>
         </div>
       </div>
-      <div class="row mb-5">
-        <div class="col-xl-5 mx-auto">
-          <h2 class="mb-5">Сообщи всем код этой комнаты чтоб они подключились и задавали вопросы</h2>
-          <h2>Когда почувствуете что вопросов достаточно, кликни внизу чтобы начать играть (вопросы можно продолжать задавать в процессе)</h2>
+      <div class="row mb-4">
+        <div class="col-md-11 mx-auto">
+          <p class="fs-4">Сообщи всем код этой комнаты чтоб они подключились и задавали вопросы</p>
         </div>
-      </div>      
+      </div>
+      <div class="row mb-4">
+        <div class="col-md-11 mx-auto">
+          <form id="form" th:action="${#httpServletRequest.requestURI}" th:object="${importParametersDto}" method="POST">
+            <div class="mb-2 fs-5">
+              <div class="col-11 col-sm-8 col-md-12 col-lg-9 col-xl-8 col-xxl-7 mx-auto text-start">
+                <div class="row mx-auto">
+                  <div class="col-12 col-md-6 g-md-0 w-auto">
+                    <p class="d-inline">Можно сразу загрузить</p>
+                    <select id="number" class="form-select form-select-sm d-inline py-0 w-auto" th:field="*{size}">
+                      <option th:value="10" selected>10</option>
+                      <option th:value="20">20</option>
+                      <option th:value="30">30</option>
+                      <option th:value="40">40</option>
+                      <option th:value="50">50</option>
+                    </select>
+                  </div>
+                  <div class="col-12 col-md-6 g-md-0 ps-md-1">
+                    <p class="d-inline">вопросов из: </p>
+                    <select id="setName" class="form-select form-select-sm d-inline py-0 w-auto" th:field="*{setName}">
+                      <option th:value="common" selected>Стандартного набора</option>
+                      <option th:value="horny">Пошлого набора</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row mt-2">
+              <div class="col-6 col-md-3 mx-auto">
+                <div class="d-grid">
+                  <button type="submit" class="btn btn-block btn-sm btn-primary" id="send">Загрузить</button>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-12 col-md-9 mt-2 mx-auto">
+                <div class="alert alert-success" role="alert" th:if="${okMessage}" th:utext="${okMessage}">
+                  ...
+                </div>
+                <div class="alert alert-danger" role="alert" th:if="${errorMessage}" th:utext="${errorMessage}">
+                  ...
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="row mb-4">
+        <div class="col-md-11 mx-auto">
+          <p class="fs-4">Когда почувствуете что вопросов достаточно, кликни внизу чтобы начать играть (вопросы можно продолжать задавать в процессе)</p>
+        </div>
+      </div>
       <div class="row">
-        <div class="col-xl-9 mx-auto">
-          <a class="btn btn-primary" th:href="@{/room/{code}/game(code=${room.code})}" target="_blank">Начать игру</a>
+        <div class="col-xl-5 mx-auto">
+          <a class="btn btn-primary" th:href="@{/room/{code}/game(code=${code})}" target="_blank">Начать игру</a>
         </div>
       </div>
     </div>

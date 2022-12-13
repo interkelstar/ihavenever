@@ -1,5 +1,6 @@
 package com.kelstar.ihne.controller.templating
 
+import com.kelstar.ihne.model.ImportParametersDto
 import com.kelstar.ihne.model.QuestionDto
 import com.kelstar.ihne.service.QuestionService
 import com.kelstar.ihne.service.RoomService
@@ -51,9 +52,31 @@ class GameController(
     @GetMapping("/host")
     fun showHostPage(model: Model, @PathVariable code: Int): String {
         return roomService.getRoom(code)?.let {
-            model.addAttribute(it)
+            model.addAttribute(it.code)
+            model.addAttribute(ImportParametersDto())
             "host"
         } ?: "roomNotFound"
+    }
+    
+    @PostMapping("/host")
+    fun importQuestionsFromHostPage(model: Model, @ModelAttribute importParametersDto: ImportParametersDto, @PathVariable code: Int): String {
+        if (!roomService.roomExists(code)) {
+            return "roomNotFound"
+        }
+        try {
+            val count = questionService.importQuestionsByParameters(importParametersDto, code)
+            if (count == 0) {
+                model["okMessage"] = "Все доступные в этом наборе вопросы уже были загружены"
+            } else {
+                model["okMessage"] = "$count вопросов было загружено в комнату!"
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            model["errorMessage"] = "Произошла ошибка!"
+        }
+        model.addAttribute(code)
+        model.addAttribute(importParametersDto)
+        return "host"
     }
 
     @GetMapping("/game")
