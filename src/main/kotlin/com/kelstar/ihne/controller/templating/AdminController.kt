@@ -1,22 +1,20 @@
 package com.kelstar.ihne.controller.templating
 
 import com.kelstar.ihne.model.Question
-import com.kelstar.ihne.model.QuestionDto
+import com.kelstar.ihne.service.ImportService
 import com.kelstar.ihne.service.QuestionService
-import com.opencsv.bean.CsvToBeanBuilder
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.ui.set
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
-import java.io.BufferedReader
-import java.io.InputStreamReader
 
 
 @Controller
 @RequestMapping("/admin")
 class AdminController(
-    private val questionService: QuestionService
+    private val questionService: QuestionService,
+    private val importService: ImportService
 ) {
     @GetMapping
     fun showAdminPage(model: Model): String {
@@ -52,20 +50,14 @@ class AdminController(
             }
         } else {
             try {
-                BufferedReader(InputStreamReader(file.inputStream)).use { reader ->
-                    val questions = CsvToBeanBuilder<QuestionDto>(reader)
-                        .withType(QuestionDto::class.java)
-                        .withIgnoreLeadingWhiteSpace(true)
-                        .build()
-                        .parse()
+                val questions = importService.parseQuestionsFromStream(file.inputStream)
                         .map { Question(it.question, roomCode = code) }
-                    questionService.addAll(questions)
-                    model["hasError"] = false
-                }
+                questionService.addAll(questions)
+                model["hasError"] = false
             } catch (ex: Exception) {
                 model.let {
                     it["message"] = "An error occurred while processing the CSV file."
-                    it["hasError"] = false
+                    it["hasError"] = true
                 }
             }
         }
