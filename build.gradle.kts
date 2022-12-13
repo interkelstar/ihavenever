@@ -8,8 +8,8 @@ plugins {
     kotlin("plugin.spring") version kotlinVersion
     kotlin("plugin.jpa") version kotlinVersion
 
-    id("org.springframework.boot") version "2.3.1.RELEASE"
-    id("io.spring.dependency-management") version "1.0.9.RELEASE"
+    id("org.springframework.boot") version "2.7.0"
+    id("io.spring.dependency-management") version "1.1.0"
     id("com.google.cloud.tools.appengine") version "2.4.1"
 }
 
