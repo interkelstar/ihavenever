@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
+    <meta name="description" content="I have never ever Game">
+    <meta name="author" content="kelstar">
   
     <title th:replace="${title}">Title</title>
   
@@ -41,34 +41,36 @@
             data-y_margin="18"></script>
     <script>
         // Example starter JavaScript for disabling form submissions if there are invalid fields
-        (function () {
-            'use strict';
-            window.addEventListener('load', function () {
-                // Fetch all the forms we want to apply custom Bootstrap validation styles to
-                const forms = document.getElementsByClassName('needs-validation');
-                // Loop over them and prevent submission
-                const validation = Array.prototype.filter.call(forms, function (form) {
-                    form.addEventListener('submit', function (event) {
-                        if (form.checkValidity() === false) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                        }
-                        form.classList.add('was-validated');
-                    }, false);
-                });
-            }, false);
-        })();
+        (function ()
+            {
+                'use strict';
+                window.addEventListener('load', function () {
+                    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                    const forms = document.getElementsByClassName('needs-validation');
+                    // Loop over them and prevent submission
+                    Array.prototype.filter.call(forms, function (form) {
+                        form.addEventListener('submit', function (event) {
+                            if (form.checkValidity() === false) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                            }
+                            form.classList.add('was-validated');
+                        }, false);
+                    });
+                }, false);
+            }
+)();
     </script>
   </head>
   <body>
     <!-- Masthead -->
-    <main class="masthead ">
+    <main class="masthead">
       <div th:replace="${content}">
     
       </div>
     </main>
     <footer>
-      <p>by kelstar</p>
+      <p>by kelstar (<a href="https://github.com/kelstar95" target="_blank">git</a>, <a href="https://twitter.com/kelstar_" target="_blank">twi</a>, <a href="https://instagram.com/interkelstar" target="_blank">inst</a>, <a href="https://t.me/kelstar" target="_blank">tg</a>, <a href="https://paypal.me/interkelstar" target="_blank">paypal</a>)</p>
     </footer>
   </body>
   
