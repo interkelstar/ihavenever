@@ -3,8 +3,11 @@ package com.kelstar.ihne.service
 import com.kelstar.ihne.model.Room
 import com.kelstar.ihne.repository.RoomRepository
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Duration
+import java.time.Instant
 
 @Service
 class RoomService(
@@ -23,5 +26,17 @@ class RoomService(
     fun roomExists(code: Int) = roomRepository.existsById(code)
     
     fun getRoom(code: Int): Room? = roomRepository.findByIdOrNull(code)
+
+    @Scheduled(cron = "0 0 7 * * *")
+    @Transactional
+    fun deleteOldRooms() {
+        val roomsToDelete = roomRepository.findAll()
+            .filter { room ->
+                room.questions.all {
+                    Instant.now().epochSecond - it.dateAdded.epochSecond > Duration.ofDays(1).toSeconds()
+                }
+            }
+        roomRepository.deleteAll(roomsToDelete)
+    }
 
 }
