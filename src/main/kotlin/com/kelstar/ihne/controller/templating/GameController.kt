@@ -30,7 +30,7 @@ class GameController(
     }
 
     @PostMapping
-    fun saveQuestion(model: Model, @ModelAttribute("questionForm") questionDto: QuestionDto, @PathVariable code: Int): String {
+    fun saveQuestion(model: Model, @ModelAttribute questionDto: QuestionDto, @PathVariable code: Int): String {
         if (!roomService.roomExists(code)) {
             return "roomNotFound"
         }
