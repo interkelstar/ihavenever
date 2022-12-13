@@ -3,10 +3,14 @@ package com.kelstar.ihne.controller.templating
 import com.kelstar.ihne.model.QuestionDto
 import com.kelstar.ihne.service.QuestionService
 import com.kelstar.ihne.service.RoomService
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.ui.set
 import org.springframework.web.bind.annotation.*
+import java.time.LocalDate
 
 
 @Controller
@@ -58,5 +62,23 @@ class GameController(
             model["question"] = QuestionDto(it.question)
         }
         return "game"
+    }
+    
+    @PostMapping("/game")
+    fun downloadRoomQuestions(@PathVariable code: Int): ResponseEntity<ByteArray> {
+        if (roomService.roomExists(code)) {
+            val contents = questionService.exportQuestions(code)
+
+            val filename = "questions-$code-${LocalDate.now()}.txt";
+            val headers = HttpHeaders()
+            headers.contentType = MediaType.TEXT_PLAIN
+            headers.cacheControl = "must-revalidate, post-check=0, pre-check=0"
+            headers.setContentDispositionFormData(filename, filename);
+            
+            return ResponseEntity.ok()
+                .headers(headers)
+                .body(contents)
+        }
+        return ResponseEntity.notFound().build()
     }
 }
