@@ -20,6 +20,7 @@ class GameController(
     fun showAskPage(model: Model, @PathVariable code: Int): String {
         return if (roomService.roomExists(code)) {
             model.addAttribute(QuestionDto())
+            model.addAttribute(code)
             "asking"
         } else { "roomNotFound" }
     }
