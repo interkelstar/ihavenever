@@ -59,7 +59,11 @@ footer {
   position: absolute;
   bottom: 0;
   width: 100%;
-  height: 1.5rem;
-  line-height: 1.5rem;
-  font-size: x-small;
+  height: 1.75rem;
+  line-height: 1.75rem;
+  font-size: smaller;
+}
+
+footer a, a:hover {
+  color: white;
 }
