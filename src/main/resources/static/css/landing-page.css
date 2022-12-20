@@ -13,7 +13,7 @@ body {
   background: linear-gradient(
           rgba(0, 0, 0, 0.3),
           rgba(0, 0, 0, 0.6)
-  ), url("../img/bg.png") repeat center center;
+  ), url("../img/bg.png") repeat top left;
 }
 
 h1,
