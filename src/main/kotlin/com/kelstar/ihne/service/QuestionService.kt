@@ -9,6 +9,7 @@ import org.springframework.data.domain.ExampleMatcher
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.io.InputStream
 
 
 @Service
@@ -71,24 +72,26 @@ class QuestionService(
     }
 
     fun importQuestionsByParameters(importParametersDto: ImportParametersDto, roomCode: Int): Int {
+        val iStream = this.javaClass
+            .classLoader
+            .getResourceAsStream("questions/${importParametersDto.setName}")
+            ?: throw IllegalArgumentException("questions/${importParametersDto.setName} is not found")
+        
+        return importQuestionsFromStream(iStream, roomCode, importParametersDto.size)
+    }
+    
+    fun importQuestionsFromStream(inputStream: InputStream, roomCode: Int, limit: Int = Int.MAX_VALUE): Int {
         try {
             val questionsInRoom = questionRepository.findAllByRoomCode(roomCode)
-            
-            val ioStream = this.javaClass
-                .classLoader
-                .getResourceAsStream("questions/${importParametersDto.setName}")
-                ?: throw IllegalArgumentException("questions/${importParametersDto.setName} is not found")
 
-            var questionsToAdd = importService.parseQuestionsFromStream(ioStream)
+            var questionsToAdd = importService.parseQuestionsFromStream(inputStream)
                 .map { Question(it.question, roomCode = roomCode) }
                 .minus(questionsInRoom)
                 .shuffled()
-            if (questionsToAdd.size > importParametersDto.size) {
-                questionsToAdd = questionsToAdd.subList(0, importParametersDto.size)
+            if (questionsToAdd.size > limit) {
+                questionsToAdd = questionsToAdd.subList(0, limit)
             }
-            addAll(questionsToAdd)
-            return questionsToAdd.size
-            
+            return addAll(questionsToAdd).size
         } catch (ex: Exception) {
             throw QuestionDaoException(ex)
         }

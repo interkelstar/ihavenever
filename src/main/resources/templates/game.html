@@ -24,11 +24,11 @@
         </div>
       </div>
       <div class="row mt-5" th:if="!${question}">
-        <div class="col-xl-6 mx-auto mb-5">
+        <div class="col-xl-6 mx-auto mb-3">
           <h2>Поздравляю, вы прочли все вопросы, заданные в этой комнате</h2>
-          <h2>Теперь их можно скачать одним файлом по кнопке ниже, на память!</h2>
+          <h2>Теперь их можно скачать одним файлом, на память!</h2>
         </div>
-        <div class="col-md-10 col-lg-8 col-xl-7 mx-auto">
+        <div class="col-md-10 col-lg-8 col-xl-7 mb-3 mx-auto">
           <form id="form" th:action="${#httpServletRequest.requestURI}" method="POST">
             <div class="row">
               <div class="col-12 col-md-3 mb-2 mx-auto">
@@ -38,6 +38,9 @@
               </div>
             </div>
           </form>
+        </div>
+        <div class="col-xl-6 mx-auto mb-3">
+          <h2>И если игра вам понравилась, можете кинуть мне $5 на кофе по кнопке в правом нижнем углу или на <a href="https://paypal.me/interkelstar" target="_blank">PayPal</a></h2>
         </div>
       </div>
     </div>

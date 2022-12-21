@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.ui.set
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDate
 
 
@@ -74,8 +75,28 @@ class GameController(
             e.printStackTrace()
             model["errorMessage"] = "Произошла ошибка!"
         }
-        model.addAttribute(code)
         model.addAttribute(importParametersDto)
+        return "host"
+    }
+
+    @PostMapping("/host/upload")
+    fun uploadFile(@RequestParam file: MultipartFile, @PathVariable code: Int, model: Model): String {
+        // validate file
+        if (file.isEmpty) {
+            model.let {
+                it["uploadError"] = "Please select a file to upload."
+            }
+        } else {
+            try {
+                val count = questionService.importQuestionsFromStream(file.inputStream, code)
+                model["uploadOk"] = "$count вопросов загружено"
+            } catch (ex: Exception) {
+                model.let {
+                    it["uploadError"] = "An error occurred while processing the file."
+                }
+            }
+        }
+        model.addAttribute(ImportParametersDto())
         return "host"
     }
 
