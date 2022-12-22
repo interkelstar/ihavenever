@@ -1,5 +1,3 @@
-spring:
-  profiles:
-    include: ${DB_PROFILE:mysql}
+spring.config.activate.on-profile: "prod"
 server:
   port: 8080
