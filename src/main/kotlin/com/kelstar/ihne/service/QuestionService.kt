@@ -1,5 +1,6 @@
 package com.kelstar.ihne.service
 
+import com.kelstar.ihne.model.ImportParametersDto
 import com.kelstar.ihne.model.Question
 import com.kelstar.ihne.model.QuestionDto
 import com.kelstar.ihne.repository.QuestionRepository
@@ -8,10 +9,13 @@ import org.springframework.data.domain.ExampleMatcher
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.io.InputStream
+
 
 @Service
 class QuestionService(
-    private val questionRepository: QuestionRepository
+    private val questionRepository: QuestionRepository,
+    private val importService: ImportService
 ) {
 
     @Transactional
@@ -65,6 +69,42 @@ class QuestionService(
 
     fun deleteById(id: Long) {
         questionRepository.deleteById(id)
+    }
+
+    fun importQuestionsByParameters(importParametersDto: ImportParametersDto, roomCode: Int): Int {
+        val iStream = this.javaClass
+            .classLoader
+            .getResourceAsStream("questions/${importParametersDto.setName}")
+            ?: throw IllegalArgumentException("questions/${importParametersDto.setName} is not found")
+        
+        return importQuestionsFromStream(iStream, roomCode, importParametersDto.size)
+    }
+    
+    fun importQuestionsFromStream(inputStream: InputStream, roomCode: Int, limit: Int = Int.MAX_VALUE): Int {
+        try {
+            val questionsInRoom = questionRepository.findAllByRoomCode(roomCode)
+
+            var questionsToAdd = importService.parseQuestionsFromStream(inputStream)
+                .map { Question(it.question, roomCode = roomCode) }
+                .minus(questionsInRoom)
+                .shuffled()
+            if (questionsToAdd.size > limit) {
+                questionsToAdd = questionsToAdd.subList(0, limit)
+            }
+            return addAll(questionsToAdd).size
+        } catch (ex: Exception) {
+            throw QuestionDaoException(ex)
+        }
+    }
+
+    fun exportQuestions(roomCode: Int): ByteArray {
+        try {
+            val questionsInRoom = questionRepository.findAllByRoomCode(roomCode)
+                .map(::QuestionDto)
+            return importService.writeQuestions(questionsInRoom)
+        } catch (ex: Exception) {
+            throw QuestionDaoException(ex)
+        }
     }
 
     class QuestionDaoException(cause: Throwable?) : RuntimeException(cause)

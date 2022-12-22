@@ -19,8 +19,6 @@ class IndexController(
     fun joinGame(@RequestParam code: Int) = "redirect:/room/$code"
 
     @PostMapping("/create")
-    fun createNewGame(): String {
-        val (code) = roomService.createNewRoom()
-        return "redirect:/room/$code/host"
-    }
+    fun createNewGame() = "redirect:/room/${roomService.createNewRoom().code}/host"
+    
 }

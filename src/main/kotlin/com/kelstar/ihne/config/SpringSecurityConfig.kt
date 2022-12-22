@@ -1,17 +1,23 @@
-package com.kelstar.ihne.config;
+package com.kelstar.ihne.config
 
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.web.servlet.invoke
+import org.springframework.security.core.userdetails.User
+import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.factory.PasswordEncoderFactories
+import org.springframework.security.provisioning.InMemoryUserDetailsManager
+import org.springframework.security.web.SecurityFilterChain
 
 
 @Configuration
-class SpringSecurityConfig : WebSecurityConfigurerAdapter() {
+@EnableWebSecurity
+class SpringSecurityConfig {
 
-    override fun configure(http: HttpSecurity) {
+    @Bean
+    fun configure(http: HttpSecurity): SecurityFilterChain {
         http { 
             httpBasic {}
             authorizeRequests {
@@ -19,13 +25,16 @@ class SpringSecurityConfig : WebSecurityConfigurerAdapter() {
                 authorize("/**", permitAll)
             }
         }
+        return http.build()
     }
 
-    override fun configure(auth: AuthenticationManagerBuilder) {
-        val encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder()
-        auth.inMemoryAuthentication()
-            .withUser("admin")
-                .password(encoder.encode("nimda"))
-                .roles("ADMIN")
+    @Bean
+    fun users(): UserDetailsService {
+        val admin = User.builder()
+            .username("admin")
+            .password(PasswordEncoderFactories.createDelegatingPasswordEncoder().encode(System.getenv("ADMIN_PASSWORD") ?: "admin"))
+            .roles("ADMIN")
+            .build()
+        return InMemoryUserDetailsManager(admin)
     }
 }

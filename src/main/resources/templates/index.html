@@ -19,7 +19,7 @@
         </div>
       </div>
       <div class="form-row">
-        <div class="col-lg-2 m-auto">
+        <div class="col-lg-5 col-xxl-4 m-auto">
           <div class="form-group">
             <form id="form-create" th:action="@{/create}" method="POST">
               <div class="d-grid">
@@ -39,15 +39,15 @@
           <div class="form-group">
             <form id="form-join" th:action="@{/join}" method="GET" class="needs-validation" novalidate>
               <div class="row">
-                <div class="col-lg-4 mx-auto mb-2">
-                  <input id="code" type="number" name="code" class="form-control" min="100000" max="999999" required placeholder="Ввести тут 6 цифр кода уже созданной игры и">
+                <div class="col-lg-5 col-xxl-4 mx-auto mb-2">
+                  <input id="code" type="number" name="code" class="form-control" min="100000" max="999999" required placeholder="Ввести тут 6 цифр кода уже созданной игры и" autocomplete="off">
                   <div class="invalid-feedback">
                     Введите номер комнаты, 6 цифр от 100000 до 999999
                   </div>
                 </div>
               </div>
               <div class="row">
-                <div class="col-lg-2 m-auto">
+                <div class="col-lg-5 col-xxl-4 m-auto">
                   <div class="d-grid">
                     <button type="submit" class="btn btn-lg btn-primary" id="join">Присоедениться</button>
                   </div>

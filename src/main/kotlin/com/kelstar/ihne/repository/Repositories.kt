@@ -15,6 +15,8 @@ interface QuestionRepository : JpaRepository<Question, Long> {
 
     fun findAllByOrderByDateAdded(): List<Question>
 
+    fun findAllByRoomCode(roomCode: Int): List<Question>
+    
     fun findAllByRoomCodeOrderByDateAdded(roomCode: Int): List<Question>
 
 }

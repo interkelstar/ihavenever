@@ -16,11 +16,14 @@
         <div class="col-md-10 col-lg-8 col-xl-7 mx-auto">
           <form id="form" th:action="${#httpServletRequest.requestURI}" th:object="${questionDto}" method="POST">
             <div class="row">
-              <div class="col-12 col-md-9 mb-2">
-                <input id="question" type="text" th:field="*{question}" class="form-control form-control-lg" maxlength="255" placeholder="Я никогда не...">
+              <div class="col-12 col-md-9">
+                <div class="form-floating">
+                  <input id="question" type="text" th:field="*{question}" class="form-control form-control-lg" maxlength="255" placeholder="Я никогда не..." autocomplete="off">
+                  <label for="question" class="text-start text-secondary " >Я никогда не...</label>
+                </div>
               </div>
-              <div class="col-12 col-md-3">
-                <div class="d-grid">
+              <div class="col-12 col-md-3 gy-3 gy-md-0">
+                <div class="d-grid h-100">
                   <button type="submit" class="btn btn-block btn-lg btn-primary" id="send">Отправить!</button>
                 </div>
               </div>
@@ -33,6 +36,11 @@
                 <div class="alert alert-danger" role="alert" th:if="${errorMessage}" th:utext="${errorMessage}">
                   ...
                 </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-12 col-md-9 mt-2 mx-auto">
+                <p>Код комнаты: <span th:text="${code}"></span></p>
               </div>
             </div>
           </form>
