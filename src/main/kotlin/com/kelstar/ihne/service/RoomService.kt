@@ -37,6 +37,7 @@ class RoomService(
                 }
             }
         roomRepository.deleteAll(roomsToDelete)
+        print("${roomsToDelete.size} rooms were deleted")
     }
 
 }
