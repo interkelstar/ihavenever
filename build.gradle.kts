@@ -66,7 +66,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.7")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("com.opencsv:opencsv:5.3")
 
