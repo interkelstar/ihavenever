@@ -24,6 +24,7 @@ class SpringSecurityConfig {
                 authorize("/admin/**", hasRole("ADMIN"))
                 authorize("/**", permitAll)
             }
+            csrf { disable() }
         }
         return http.build()
     }
