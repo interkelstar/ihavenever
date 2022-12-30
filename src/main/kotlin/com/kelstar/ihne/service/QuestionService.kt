@@ -74,8 +74,8 @@ class QuestionService(
     fun importQuestionsByParameters(importParametersDto: ImportParametersDto, roomCode: Int): Int {
         val iStream = this.javaClass
             .classLoader
-            .getResourceAsStream("questions/${importParametersDto.setName}")
-            ?: throw IllegalArgumentException("questions/${importParametersDto.setName} is not found")
+            .getResourceAsStream("questions/${importParametersDto.datasetName}")
+            ?: throw IllegalArgumentException("questions/${importParametersDto.datasetName} is not found")
         
         return importQuestionsFromStream(iStream, roomCode, importParametersDto.size)
     }
