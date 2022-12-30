@@ -11,12 +11,7 @@ To use this application you have to have Java installed on your local machine
 If you want just to run the application, simply download `ihne.jar` from `release` folder. 
 Then open terminal in the folder with this jar and type:
 
-For Linux and MacOS (for MacOS you have to run it with sudo)
-
-```
-$ ./ihne.jar
-```
-For Windows
+For Windows, Linux and MacOS (for MacOS you have to run it with sudo)
 
 ```
 $ java -jar ihne.jar
@@ -27,29 +22,11 @@ $ java -jar ihne.jar
 To use application you should run it in some local network, and give IP address or host name of the host machine to people you're playing with.
 In this example I will use `localhost` instead of it.
 
-Give link to this page to all the people, they can ask their questions here
+Give link to this page to all the people, one of them can create room and others will connect to it by the code, then they can ask questions until the host (who created the room) hits "Start play" and questions are shown in random order to him.
 
 ```
 http://localhost/
 ```
-
-After decent amount of questions sent, open this link on any device. It will bring random never shown before question
-
-```
-http://localhost/ihne
-```
-
-Well, in fact that's it! Some people send their questions and one person reads them out loud.
-And if you want to mark all the questions as not shown again (refresh their status) open this link
-
-```
-http://localhost/questions/secretLink/refresh
-```
-
-### Questions  database
-There is a database with already prefilled questions. It's located in the `db` folder. 
-If you want to use it, move `set.mv.db` file to the `db` folder near `ihne.jar` (file that you are running) and rename it to `database.mv.db`
-
 
 ## Building
 
@@ -70,64 +47,99 @@ Also you can build and run using IntelliJ IDEA  Spring Boot plugin.
 
 This project uses `kotlin-spring` plugin to avoid requiring `open` modifier on proxified
 classes and methods, see [this blog post](https://blog.jetbrains.com/kotlin/2016/12/kotlin-1-0-6-is-here/) for more details.
-
-Make sure you have at least IntelliJ IDEA 2017.1 and Kotlin plugin 1.1.x.
 This project uses a [Kotlin based Gradle](https://github.com/gradle/kotlin-dsl) configuration.
 
 ## API
 
-#### To get list of all questions:
+#### To create a room:
 ```
-GET http://localhost/questions/
-```
-**Response**
-```
-{
-    "questions": [
-        {
-            "question": String,
-            "wasShown": boolean,
-            "id": int
-        }
-    ]
-}
-```
-
-#### To get random not shown question
-```
-GET http://localhost/questions/random
+POST http://localhost/api/v1/room
 ```
 **Response**
 ```
 {
-    "question": String,
-    "wasShown": boolean,
-    "id": int
+    "code": Int
 }
 ```
 
-#### To add new question:
+#### To get the room (check if it exists since rooms are auto-deleted 24h since last asked question):
 ```
-POST http://localhost/questions/
+GET http://localhost/api/v1/room/{code}
 ```
-**Request**
+**Response**
+```
+200 OK - room exists
+404 Not Found - there is no such room
+```
+
+#### To load a number of questions from predefined dataset into the room:
+```
+POST http://localhost/api/v1/room/{code}/load
+{
+    "size": Int,
+    "datasetName": String /* values: common, horny */
+}
+```
+**Response**
+```
+Int /* count of questions added to the room. Identical wuestions are not added so 0 means you already have all questions from this dataset in the room */
+```
+
+#### To upload your own dataset of questions into the room:
+```
+POST http://localhost/api/v1/room/{code}/ypload
+
+form-data
+file: yourFile.txt
+
+/* every question from new line */
+```
+**Response**
+```
+Int /* count of questions added to the room. Identical wuestions are not added so 0 means you already have all questions from this dataset in the room */
+```
+
+#### To add question into the room:
+```
+POST http://localhost/api/v1/room/{code}/questions
+{
+    "question": String
+}
+```
+**Response**
+```
+200 OK - question added
+400 Conflict - such exact question already exist in this room
+```
+
+#### To get random question from the room:
+```
+GET http://localhost/api/v1/room/{code}/questions/random
+```
+**Response**
 ```
 {
     "question": String
 }
 ```
 
-#### To mark all questions as not shown:
+#### To download all questions from the room (only when all the questions in the room were shown):
 ```
-GET http://localhost/secretLink/refresh
+GET http://localhost/api/v1/room/{code}/questions/download
 ```
+**Response**
+```
+200 OK - You receive file (ByteArray to download)
+405 Method Not Allowed - not all questions were shown in this room. Play a game first.
+```
+
 
 ## Built With
  - Kotlin 1.4
- - Spring Boot 2.2
+ - Spring Boot 2.7
  - Spring WebFlux Reactive web server and client
  - [Spring Kotlin support](https://spring.io/blog/2017/01/04/introducing-kotlin-support-in-spring-framework-5-0)
  - Reactor Kotlin
  - [Gradle Kotlin DSL](https://github.com/gradle/kotlin-dsl)
- - h2
+ - h2(local), PostgreSQL/MySQL(prod, selectable)
  - Thymeleaf
