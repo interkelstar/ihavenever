@@ -43,6 +43,7 @@ class QuestionService(
             }
     }
     
+    @Transactional(readOnly = true)
     fun allWereShown(code: Int): Boolean {
         return !questionRepository.exists(
             Example.of(Question("", code), ExampleMatcher.matching()
@@ -51,6 +52,7 @@ class QuestionService(
         )
     }
     
+    @Transactional
     fun addQuestion(questionDto: QuestionDto, roomCode: Int): Boolean {
         val questionToAdd = Question(questionDto.question, roomCode)
         return try {
@@ -63,9 +65,19 @@ class QuestionService(
         } catch (e: Exception) {
             throw QuestionDaoException(e)
         }
+    }    
+    
+    @Transactional(readOnly = true)
+    fun countNotShown(roomCode: Int): Long {
+        return questionRepository.count(
+            Example.of(Question("", roomCode), ExampleMatcher.matching()
+                .withIgnorePaths("id", "dateAdded", "question")
+            )
+        )
     }
     
-    fun addAll(questions: List<Question>) = questionRepository.saveAll(questions) 
+    @Transactional
+    fun addAll(questions: List<Question>): List<Question> = questionRepository.saveAll(questions) 
     
     fun findAllByRoomOrderByAdded(roomCode: Int): List<Question> {
         return questionRepository.findAllByRoomCodeOrderByDateAdded(roomCode)
@@ -79,16 +91,16 @@ class QuestionService(
         questionRepository.deleteById(id)
     }
 
-    fun importQuestionsByParameters(importParametersDto: ImportParametersDto, roomCode: Int): Int {
+    fun importQuestionsByParameters(importParametersDto: ImportParametersDto, roomCode: Int): Long {
         val iStream = this.javaClass
             .classLoader
-            .getResourceAsStream("questions/${importParametersDto.datasetName}")
-            ?: throw IllegalArgumentException("questions/${importParametersDto.datasetName} is not found")
+            .getResourceAsStream("questions/${importParametersDto.datasetName}.txt")
+            ?: throw IllegalArgumentException("questions/${importParametersDto.datasetName}.txt is not found")
         
         return importQuestionsFromStream(iStream, roomCode, importParametersDto.size)
     }
     
-    fun importQuestionsFromStream(inputStream: InputStream, roomCode: Int, limit: Int = Int.MAX_VALUE): Int {
+    fun importQuestionsFromStream(inputStream: InputStream, roomCode: Int, limit: Int = Int.MAX_VALUE): Long {
         try {
             val questionsInRoom = questionRepository.findAllByRoomCode(roomCode)
 
@@ -99,7 +111,7 @@ class QuestionService(
             if (questionsToAdd.size > limit) {
                 questionsToAdd = questionsToAdd.subList(0, limit)
             }
-            return addAll(questionsToAdd).size
+            return addAll(questionsToAdd).size.toLong()
         } catch (ex: Exception) {
             throw QuestionDaoException(ex)
         }

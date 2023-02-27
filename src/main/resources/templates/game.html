@@ -18,9 +18,14 @@
         <div class="col-md-10 col-lg-8 col-xl-7 mx-auto">
           <div class="col-12 col-md-3 mx-auto">
             <div class="d-grid">
-              <a class="btn btn-lg btn-primary" th:href="${#httpServletRequest.requestURI}" th:utext="${question} ? 'Ещё!' : 'Точно?'">Точно?</a>
+              <a class="btn btn-lg btn-primary" th:href="@{/room/__${code}__/game/}" th:utext="${question} ? 'Ещё!' : 'Точно?'">Точно?</a>
             </div>
           </div>
+        </div>
+      </div>
+      <div class="row" th:if="${question}">
+        <div class="col-12 col-md-9 mt-2 mx-auto">
+          <p>Осталость вопросов: <span th:text="${count}"></span></p>
         </div>
       </div>
       <div class="row mt-5" th:if="!${question}">

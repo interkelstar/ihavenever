@@ -30,8 +30,18 @@ class RoomRestController(
         }
     }    
     
+    @GetMapping("/{code}/notShownCount")
+    fun getNotShownCount(@PathVariable code: Int): ResponseEntity<Long> {
+        return if (roomService.roomExists(code)) {
+            val count = questionService.countNotShown(code)
+            ResponseEntity.ok(count)
+        } else {
+            ResponseEntity.notFound().build()
+        }
+    }    
+    
     @PostMapping("/{code}/load")
-    fun loadPredefinedQuestionsToRoom(@RequestBody importParametersDto: ImportParametersDto, @PathVariable code: Int): ResponseEntity<Int> {
+    fun loadPredefinedQuestionsToRoom(@RequestBody importParametersDto: ImportParametersDto, @PathVariable code: Int): ResponseEntity<Long> {
         return if (roomService.roomExists(code)) {
             val count = questionService.importQuestionsByParameters(importParametersDto, code)
             ResponseEntity.ok(count)
@@ -41,7 +51,7 @@ class RoomRestController(
     }
     
     @PostMapping("/{code}/upload")
-    fun postQuestion(@RequestParam("file") file: MultipartFile, @PathVariable code: Int): ResponseEntity<Int> {
+    fun postQuestion(@RequestParam("file") file: MultipartFile, @PathVariable code: Int): ResponseEntity<Long> {
         return if (roomService.roomExists(code)) {
             val count = questionService.importQuestionsFromStream(file.inputStream, code)
             ResponseEntity.ok(count)
