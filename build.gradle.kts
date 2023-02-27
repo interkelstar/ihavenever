@@ -69,6 +69,8 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.7")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("com.opencsv:opencsv:5.3")
+    implementation("net.javacrumbs.shedlock:shedlock-spring:4.44.0")
+    implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:4.44.0")
 
     runtimeOnly("com.h2database:h2")
     runtimeOnly("mysql:mysql-connector-java")

@@ -43,6 +43,7 @@ class QuestionService(
             }
     }
     
+    @Transactional(readOnly = true)
     fun allWereShown(code: Int): Boolean {
         return !questionRepository.exists(
             Example.of(Question("", code), ExampleMatcher.matching()
@@ -51,6 +52,7 @@ class QuestionService(
         )
     }
     
+    @Transactional
     fun addQuestion(questionDto: QuestionDto, roomCode: Int): Boolean {
         val questionToAdd = Question(questionDto.question, roomCode)
         return try {

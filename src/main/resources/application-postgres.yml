@@ -13,3 +13,5 @@ spring:
       minimum-idle: 2
       maximum-pool-size: 5
       max-lifetime: 600000 #10 mins
+      connection-init-sql: "CREATE TABLE IF NOT EXISTS shedlock(name VARCHAR(64) NOT NULL, lock_until TIMESTAMP NOT NULL,
+        locked_at TIMESTAMP NOT NULL, locked_by VARCHAR(255) NOT NULL, PRIMARY KEY (name));"
