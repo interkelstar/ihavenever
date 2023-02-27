@@ -44,7 +44,7 @@ class HostController(
         }
         try {
             val count = questionService.importQuestionsByParameters(importParametersDto, code)
-            if (count == 0) {
+            if (count == 0L) {
                 model["okMessage"] = "Все доступные в этом наборе вопросы уже были загружены"
             } else {
                 model["okMessage"] = "$count вопросов было загружено в комнату!"
