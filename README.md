@@ -72,6 +72,19 @@ GET http://localhost/api/v1/room/{code}
 404 Not Found - there is no such room
 ```
 
+#### To get the number of not shown questions in the room:
+```
+GET http://localhost/api/v1/room/{code}/notShownCount
+```
+**Response**
+```
+Long /* count of questions not shown in the room. */
+```
+```
+200 OK - room exists
+404 Not Found - there is no such room
+```
+
 #### To load a number of questions from predefined dataset into the room:
 ```
 POST http://localhost/api/v1/room/{code}/load
@@ -82,7 +95,7 @@ POST http://localhost/api/v1/room/{code}/load
 ```
 **Response**
 ```
-Int /* count of questions added to the room. Identical wuestions are not added so 0 means you already have all questions from this dataset in the room */
+Long /* count of questions added to the room. Identical wuestions are not added so 0 means you already have all questions from this dataset in the room */
 ```
 
 #### To upload your own dataset of questions into the room:
@@ -96,7 +109,7 @@ file: yourFile.txt
 ```
 **Response**
 ```
-Int /* count of questions added to the room. Identical wuestions are not added so 0 means you already have all questions from this dataset in the room */
+Long /* count of questions added to the room. Identical questions are not added so 0 means you already have all questions from this dataset in the room */
 ```
 
 #### To add question into the room:
