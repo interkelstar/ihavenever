@@ -104,6 +104,7 @@ class GameController(
     fun showGamePage(model: Model, @PathVariable code: Int): String {
         questionService.getRandomNotShown(code)?.let {
             model["question"] = QuestionDto(it.question)
+            model["count"] = questionService.countNotShown(code)
         }
         return "game"
     }

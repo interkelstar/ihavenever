@@ -33,7 +33,10 @@ class SpringSecurityConfig {
     fun users(): UserDetailsService {
         val admin = User.builder()
             .username("admin")
-            .password(PasswordEncoderFactories.createDelegatingPasswordEncoder().encode(System.getenv("ADMIN_PASSWORD") ?: "admin"))
+            .password(
+                PasswordEncoderFactories.createDelegatingPasswordEncoder()
+                    .encode(System.getenv("ADMIN_PASSWORD") ?: "admin")
+            )
             .roles("ADMIN")
             .build()
         return InMemoryUserDetailsManager(admin)
