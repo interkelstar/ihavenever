@@ -1,6 +1,5 @@
 package com.kelstar.ihne.controller.templating
 
-import com.kelstar.ihne.model.ImportParametersDto
 import com.kelstar.ihne.model.QuestionDto
 import com.kelstar.ihne.service.QuestionService
 import com.kelstar.ihne.service.RoomService
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.ui.set
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDate
 
 
@@ -48,58 +46,7 @@ class GameController(
         model.addAttribute(QuestionDto())
         return "asking"
     }
-
-
-    @GetMapping("/host")
-    fun showHostPage(model: Model, @PathVariable code: Int): String {
-        return roomService.getRoom(code)?.let {
-            model.addAttribute(it.code)
-            model.addAttribute(ImportParametersDto())
-            "host"
-        } ?: "roomNotFound"
-    }
     
-    @PostMapping("/host")
-    fun importQuestionsFromHostPage(model: Model, @ModelAttribute importParametersDto: ImportParametersDto, @PathVariable code: Int): String {
-        if (!roomService.roomExists(code)) {
-            return "roomNotFound"
-        }
-        try {
-            val count = questionService.importQuestionsByParameters(importParametersDto, code)
-            if (count == 0) {
-                model["okMessage"] = "Все доступные в этом наборе вопросы уже были загружены"
-            } else {
-                model["okMessage"] = "$count вопросов было загружено в комнату!"
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            model["errorMessage"] = "Произошла ошибка!"
-        }
-        model.addAttribute(importParametersDto)
-        return "host"
-    }
-
-    @PostMapping("/host/upload")
-    fun uploadFile(@RequestParam file: MultipartFile, @PathVariable code: Int, model: Model): String {
-        // validate file
-        if (file.isEmpty) {
-            model.let {
-                it["uploadError"] = "Please select a file to upload."
-            }
-        } else {
-            try {
-                val count = questionService.importQuestionsFromStream(file.inputStream, code)
-                model["uploadOk"] = "$count вопросов загружено"
-            } catch (ex: Exception) {
-                model.let {
-                    it["uploadError"] = "An error occurred while processing the file."
-                }
-            }
-        }
-        model.addAttribute(ImportParametersDto())
-        return "host"
-    }
-
     @GetMapping("/game")
     fun showGamePage(model: Model, @PathVariable code: Int): String {
         questionService.getRandomNotShown(code)?.let {
