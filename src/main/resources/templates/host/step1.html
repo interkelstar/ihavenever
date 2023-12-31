@@ -16,7 +16,14 @@
       <div class="row mb-2">
         <div class="col-md-11 mx-auto">
           <div class="col-11 col-sm-8 col-md-12 col-lg-9 col-xl-8 col-xxl-7 mx-auto">
-            <p class="fs-4"><b>Шаг 1:</b> Комната создана, теперь сообщи всем код этой комнаты чтоб они подключились и задавали вопросы</p>
+            <p class="fs-4"><b>Шаг 1:</b> Комната создана, остальные могут ввести код выше (или открыть QR-код) чтобы подключиться и задавать вопросы</p>
+          </div>
+        </div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-md-11 mx-auto">
+          <div class="mx-auto" style="width: max-content;">
+            <div id="qrcode"></div>
           </div>
         </div>
       </div>
@@ -25,6 +32,9 @@
           <a class="btn btn-primary" th:href="@{/room/__${code}__/host/step2}">Они уже задают!</a>
         </div>
       </div>
+      <script type="text/javascript">
+          new QRCode(document.getElementById("qrcode"), window.location.href.replace("/host/step1", ""));
+      </script>
     </div>
   </body>
 
