@@ -29,6 +29,7 @@ data class Room(
     @Max(999_999)
     val code: Int
 ) {
+    val dateCreated: Instant = Instant.now()
     @OneToMany(mappedBy = "roomCode", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     var questions: Set<Question> = emptySet()
 }
