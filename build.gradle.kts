@@ -1,5 +1,5 @@
 plugins {
-    val kotlinVersion = "1.4.10"
+    val kotlinVersion = "1.9.0"
 
     java
     idea
@@ -24,7 +24,7 @@ tasks {
     compileKotlin {
         kotlinOptions {
             jvmTarget = "11"
-            languageVersion = "1.4"
+            languageVersion = "1.9"
         }
     }
     bootJar {

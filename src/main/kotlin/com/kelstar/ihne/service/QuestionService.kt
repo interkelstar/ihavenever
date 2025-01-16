@@ -106,7 +106,7 @@ class QuestionService(
 
             var questionsToAdd = importService.parseQuestionsFromStream(inputStream)
                 .map { Question(it.question, roomCode = roomCode) }
-                .minus(questionsInRoom)
+                .minus(questionsInRoom.toSet())
                 .shuffled()
             if (questionsToAdd.size > limit) {
                 questionsToAdd = questionsToAdd.subList(0, limit)
