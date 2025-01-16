@@ -44,7 +44,7 @@ class RoomService(
         roomsToDelete.forEach { room ->
             if (room.questions.isNotEmpty()) {
                 statisticsRepository.save(Statistics(
-                    room.questions.minOf { it.dateAdded }, 
+                    room.dateCreated, 
                     room.questions.size, 
                     room.questions.count { it.wasShown })
                 )
