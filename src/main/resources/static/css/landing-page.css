@@ -34,20 +34,24 @@ main.masthead {
 main.masthead h1 {
   font-size: 2rem; 
 }
+
+
+
 @media (min-device-height: 768px) {
   main.masthead {
     padding-top: 5rem;
     padding-bottom: 3rem;
   }
-}
-@media (min-width: 768px) {
-  main.masthead {
-    padding-top: 12rem;
-    padding-bottom: 12rem; 
-  }
   main.masthead h1 {
     font-size: 3rem; 
   } 
+}
+
+@media (min-device-height: 871px) {
+  main.masthead {
+    padding-top: 12rem;
+    padding-bottom: 12rem;
+  }
 }
 
 .invalid-feedback {
