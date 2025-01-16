@@ -46,8 +46,9 @@ class RoomService(
                 statisticsRepository.save(Statistics(
                     room.dateCreated, 
                     room.questions.size, 
-                    room.questions.count { it.wasShown })
-                )
+                    room.questions.count { it.wasShown }, 
+                    room.questions.count { it.isPredefined }
+                ))
             }
         }
         roomRepository.deleteAll(roomsToDelete)
