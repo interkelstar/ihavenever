@@ -1,7 +1,9 @@
 package com.kelstar.ihne.service
 
 import com.kelstar.ihne.model.Room
+import com.kelstar.ihne.model.Statistics
 import com.kelstar.ihne.repository.RoomRepository
+import com.kelstar.ihne.repository.StatisticsRepository
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.scheduling.annotation.Scheduled
@@ -12,7 +14,8 @@ import java.time.Instant
 
 @Service
 class RoomService(
-    private val roomRepository: RoomRepository
+    private val roomRepository: RoomRepository,
+    private val statisticsRepository: StatisticsRepository
 ) {
 
     @Transactional
@@ -28,7 +31,7 @@ class RoomService(
     
     fun getRoom(code: Int): Room? = roomRepository.findByIdOrNull(code)
 
-    @Scheduled(cron = "0 0 */6 * * *")
+    @Scheduled(cron = "0 0 0 * * 5")
     @SchedulerLock(name = "deleteOldRooms")
     @Transactional
     fun deleteOldRooms() {
@@ -38,6 +41,15 @@ class RoomService(
                     Instant.now().epochSecond - it.dateAdded.epochSecond > Duration.ofDays(1).toSeconds()
                 }
             }
+        roomsToDelete.forEach { room ->
+            if (room.questions.isNotEmpty()) {
+                statisticsRepository.save(Statistics(
+                    room.questions.minOf { it.dateAdded }, 
+                    room.questions.size, 
+                    room.questions.count { it.wasShown })
+                )
+            }
+        }
         roomRepository.deleteAll(roomsToDelete)
         println("${roomsToDelete.size} rooms were deleted")
     }

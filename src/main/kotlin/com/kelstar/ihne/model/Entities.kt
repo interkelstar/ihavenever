@@ -32,3 +32,14 @@ data class Room(
     @OneToMany(mappedBy = "roomCode", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     var questions: Set<Question> = emptySet()
 }
+
+@Entity
+data class Statistics(
+    val creationDate: Instant,
+    val questionsTotal: Int,
+    val questionsShown: Int,
+) {
+    @Id
+    @GeneratedValue
+    var id: Long? = null
+}
