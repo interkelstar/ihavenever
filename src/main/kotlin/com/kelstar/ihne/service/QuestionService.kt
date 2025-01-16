@@ -47,7 +47,7 @@ class QuestionService(
     fun allWereShown(code: Int): Boolean {
         return !questionRepository.exists(
             Example.of(Question("", code), ExampleMatcher.matching()
-                .withIgnorePaths("id", "dateAdded", "question")
+                .withIgnorePaths("id", "dateAdded", "question", "isPredefined")
             )
         )
     }
@@ -57,7 +57,7 @@ class QuestionService(
         val questionToAdd = Question(questionDto.question, roomCode)
         return try {
             if (!questionRepository.exists(Example.of(questionToAdd, ExampleMatcher.matching()
-                    .withIgnorePaths("id", "dateAdded", "wasShown")
+                    .withIgnorePaths("id", "dateAdded", "wasShown", "isPredefined")
                     .withIgnoreCase()))) {
                 questionRepository.save(questionToAdd)
                 true
@@ -71,7 +71,7 @@ class QuestionService(
     fun countNotShown(roomCode: Int): Long {
         return questionRepository.count(
             Example.of(Question("", roomCode), ExampleMatcher.matching()
-                .withIgnorePaths("id", "dateAdded", "question")
+                .withIgnorePaths("id", "dateAdded", "question", "isPredefined")
             )
         )
     }
@@ -105,7 +105,7 @@ class QuestionService(
             val questionsInRoom = questionRepository.findAllByRoomCode(roomCode)
 
             var questionsToAdd = importService.parseQuestionsFromStream(inputStream)
-                .map { Question(it.question, roomCode = roomCode) }
+                .map { Question(it.question, roomCode = roomCode, isPredefined = true) }
                 .minus(questionsInRoom)
                 .shuffled()
             if (questionsToAdd.size > limit) {

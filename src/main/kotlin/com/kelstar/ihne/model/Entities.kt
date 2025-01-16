@@ -14,8 +14,9 @@ import javax.validation.constraints.Min
 data class Question(
     val question: String,
     val roomCode: Int,
+    var isPredefined: Boolean = false,
 ) {
-    var wasShown: Boolean = false
+    var wasShown = false
     var dateAdded: Instant = Instant.now()
     @Id
     @GeneratedValue
@@ -39,6 +40,7 @@ data class Statistics(
     val creationDate: Instant,
     val questionsTotal: Int,
     val questionsShown: Int,
+    val questionsPredefined: Int,
 ) {
     @Id
     @GeneratedValue
