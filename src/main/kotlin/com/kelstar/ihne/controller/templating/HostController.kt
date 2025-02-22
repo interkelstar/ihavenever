@@ -22,8 +22,10 @@ class HostController(
     @GetMapping("step1")
     fun showHostPageStep1(model: Model, @PathVariable code: Int): String {
         return roomService.getRoom(code)?.let {
-            model.addAttribute(it.code)
-            model.addAttribute(ImportParametersDto())
+            model.apply {
+                addAttribute(it.code)
+                addAttribute(ImportParametersDto())
+            }
             "host/step1"
         } ?: "roomNotFound"
     }
@@ -31,8 +33,10 @@ class HostController(
     @GetMapping("step2")
     fun showHostPageStep2(model: Model, @PathVariable code: Int): String {
         return roomService.getRoom(code)?.let {
-            model.addAttribute(it.code)
-            model.addAttribute(ImportParametersDto())
+            model.apply { 
+                addAttribute(it.code)
+                addAttribute(ImportParametersDto())
+            }
             "host/step2"
         } ?: "roomNotFound"
     }
@@ -61,17 +65,13 @@ class HostController(
     fun uploadFile(@RequestParam file: MultipartFile, @PathVariable code: Int, model: Model): String {
         // validate file
         if (file.isEmpty) {
-            model.let {
-                it["uploadError"] = "Please select a file to upload."
-            }
+            model["uploadError"] = "Please select a file to upload."
         } else {
             try {
                 val count = questionService.importQuestionsFromStream(file.inputStream, code)
                 model["uploadOk"] = "$count вопросов загружено"
             } catch (ex: Exception) {
-                model.let {
-                    it["uploadError"] = "An error occurred while processing the file."
-                }
+                model["uploadError"] = "An error occurred while processing the file."
             }
         }
         model.addAttribute(ImportParametersDto())

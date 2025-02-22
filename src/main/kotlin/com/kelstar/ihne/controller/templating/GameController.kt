@@ -23,8 +23,10 @@ class GameController(
     @GetMapping
     fun showAskPage(model: Model, @PathVariable code: Int): String {
         return if (roomService.roomExists(code)) {
-            model.addAttribute(QuestionDto())
-            model.addAttribute(code)
+            model.apply { 
+                addAttribute(QuestionDto())
+                addAttribute(code)
+            }
             "asking"
         } else { "roomNotFound" }
     }
@@ -62,11 +64,11 @@ class GameController(
             val contents = questionService.exportQuestions(code)
 
             val filename = "questions-$code-${LocalDate.now()}.txt";
-            val headers = HttpHeaders()
-            headers.contentType = MediaType.TEXT_PLAIN
-            headers.cacheControl = "must-revalidate, post-check=0, pre-check=0"
-            headers.setContentDispositionFormData(filename, filename);
-            
+            val headers = HttpHeaders().apply { 
+                contentType = MediaType.TEXT_PLAIN
+                cacheControl = "must-revalidate, post-check=0, pre-check=0"
+                setContentDispositionFormData(filename, filename);
+            }
             return ResponseEntity.ok()
                 .headers(headers)
                 .body(contents)
