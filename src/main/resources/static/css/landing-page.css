@@ -47,7 +47,7 @@ main.masthead h1 {
   } 
 }
 
-@media (min-device-height: 871px) {
+@media (min-device-height: 940px) {
   main.masthead {
     padding-top: 12rem;
     padding-bottom: 12rem;

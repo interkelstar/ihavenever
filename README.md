@@ -95,12 +95,12 @@ POST http://localhost/api/v1/room/{code}/load
 ```
 **Response**
 ```
-Long /* count of questions added to the room. Identical wuestions are not added so 0 means you already have all questions from this dataset in the room */
+Long /* count of questions added to the room. Identical questions are not added so 0 means you already have all questions from this dataset in the room */
 ```
 
 #### To upload your own dataset of questions into the room:
 ```
-POST http://localhost/api/v1/room/{code}/ypload
+POST http://localhost/api/v1/room/{code}/upload
 
 form-data
 file: yourFile.txt
