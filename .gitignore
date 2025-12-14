@@ -29,4 +29,9 @@ nbdist/
 
 ### h2 local db ###
 db/
-/bin/
+
+### Build artefacts ###
+bin/
+frontend/node_modules/
+/src/main/resources/static/v2-static/
+/.ai/

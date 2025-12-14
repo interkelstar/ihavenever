@@ -11,6 +11,24 @@ plugins {
     id("org.springframework.boot") version "4.0.0"
     id("io.spring.dependency-management") version "1.1.7"
     id("com.google.cloud.tools.appengine") version "2.8.0"
+    id("com.github.node-gradle.node") version "7.1.0"
+}
+
+node {
+    version.set("20.10.0")
+    download.set(true)
+    nodeProjectDir.set(file("frontend"))
+}
+
+val nodeDev by tasks.registering(com.github.gradle.node.npm.task.NpmTask::class) {
+    group = "application"
+    description = "Runs the frontend dev server"
+    args.set(listOf("run", "dev"))
+    dependsOn("npmInstall")
+}
+
+tasks.named("processResources") {
+    dependsOn("npm_run_build")
 }
 
 group = "com.kelstar"
