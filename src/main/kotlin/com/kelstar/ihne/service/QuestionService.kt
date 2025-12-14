@@ -54,7 +54,12 @@ class QuestionService(
     
     @Transactional
     fun addQuestion(questionDto: QuestionDto, roomCode: Int): Boolean {
-        val questionToAdd = Question(questionDto.question, roomCode)
+        val questionText = sanitizeQuestion(questionDto.question)
+
+        val questionToAdd = Question(questionText, roomCode)
+        if (questionToAdd.question.isEmpty()) {
+            return false
+        }
         return try {
             if (!questionRepository.exists(Example.of(questionToAdd, ExampleMatcher.matching()
                     .withIgnorePaths("id", "dateAdded", "wasShown", "isPredefined")
@@ -125,6 +130,16 @@ class QuestionService(
         } catch (ex: Exception) {
             throw QuestionDaoException(ex)
         }
+    }
+
+    private fun sanitizeQuestion(rawQuestion: String): String {
+        var questionText = rawQuestion.trim()
+        if (questionText.startsWith("я никогда не ", ignoreCase = true)) {
+            questionText = questionText.substring(13).trim()
+        } else if (questionText.startsWith("не ", ignoreCase = true)) {
+            questionText = questionText.substring(3).trim()
+        }
+        return questionText
     }
 
     class QuestionDaoException(cause: Throwable?) : RuntimeException(cause)
