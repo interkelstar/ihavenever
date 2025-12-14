@@ -28,4 +28,5 @@ nbdist/
 .vscode/
 
 ### h2 local db ###
-db/!/bin/
+db/
+/bin/
