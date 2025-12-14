@@ -2,9 +2,9 @@ package com.kelstar.ihne.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.security.config.Customizer.withDefaults
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
-import org.springframework.security.config.web.servlet.invoke
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.factory.PasswordEncoderFactories
@@ -18,14 +18,14 @@ class SpringSecurityConfig {
 
     @Bean
     fun configure(http: HttpSecurity): SecurityFilterChain {
-        http { 
-            httpBasic {}
-            authorizeRequests {
-                authorize("/admin/**", hasRole("ADMIN"))
-                authorize("/**", permitAll)
+        http
+            .authorizeHttpRequests { auth ->
+                 auth.requestMatchers("/admin/**").hasRole("ADMIN")
+                 auth.requestMatchers("/**").permitAll()
             }
-            csrf { disable() }
-        }
+            .httpBasic(withDefaults())
+            .csrf { it.disable() }
+        
         return http.build()
     }
 

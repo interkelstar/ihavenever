@@ -1,71 +1,75 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" 
-      th:replace="layout :: layout(~{::title}, ~{::.container})">
-  <head>
-    <title>Я никогда не!..</title>
-  </head>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::.container})}">
 
-  <body>
-    <div class="container">
-      <div class="row mb-1">
-        <div class="col text-left">
-          <form th:action="@{/admin/refreshAll}" method="post">
-            <button type="submit" class="btn btn-sm btn-secondary" onClick="return confirm('sure?')">Refresh all</button>
+<head>
+  <title>Я никогда не!..</title>
+</head>
+
+<body>
+  <div class="container">
+    <div class="row mb-1">
+      <div class="col text-left">
+        <form th:action="@{/admin/refreshAll}" method="post">
+          <button type="submit" class="btn btn-sm btn-secondary" onClick="return confirm('sure?')">Refresh all</button>
+        </form>
+      </div>
+      <div class="col">
+        <div class="alert alert-danger m-0 p-1" role="alert" th:if="${hasError}">
+          <strong>Error:</strong>
+          <span th:text="${message}"></span>
+        </div>
+      </div>
+      <div class="col-auto text-right">
+        <div class="form-row">
+          <form method="POST" th:action="@{/admin/import-csv}" enctype="multipart/form-data">
+            <div class="form-group mb-0">
+              <div class="col-3">
+                <input type="number" name="code" class="form-control" min="100000" max="999999" required
+                  placeholder="Code">
+              </div>
+              <div class="col">
+                <label for="file" class="float-left m-1">Select a CSV file</label>
+                <input type="file" name="file" class="form-control-file float-left w-25" id="file" accept=".csv">
+                <button type="submit" class="btn btn-sm btn-primary">Import</button>
+              </div>
+            </div>
           </form>
         </div>
-        <div class="col">
-          <div class="alert alert-danger m-0 p-1" role="alert" th:if="${hasError}">
-            <strong>Error:</strong>
-            <span th:text="${message}"></span>
-          </div>
-        </div>
-        <div class="col-auto text-right">
-          <div class="form-row">
-            <form method="POST" th:action="@{/admin/import-csv}" enctype="multipart/form-data">
-              <div class="form-group mb-0">
-                <div class="col-3">
-                  <input type="number" name="code" class="form-control" min="100000" max="999999" required placeholder="Code">
-                </div>
-                <div class="col">
-                  <label for="file" class="float-left m-1">Select a CSV file</label>
-                  <input type="file" name="file" class="form-control-file float-left w-25" id="file" accept=".csv">
-                  <button type="submit" class="btn btn-sm btn-primary">Import</button>
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <table id="allQuestions" class="table table-hover table-striped table-dark table table-hover table-striped table-dark table-lg-responsive">
-          <thead>
-            <tr class="d-flex">
-              <th scope="col" class="col-1">#</th>
-              <th scope="col" class="col-1">Id</th>
-              <th scope="col" class="col-6">Question</th>
-              <th scope="col" class="col-2">Shown</th>
-              <th scope="col" class="col-2"></th> 
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="result d-flex" th:each="question, i : ${questions}">
-              <td class="col-1" scope="row" th:text="${i.index + 1}"></td>
-              <td class="col-1">[[${question.id}]]</td>
-              <td class="col-6">[[${question.question}]]</td>
-              <td class="col-2">[[${question.wasShown}]]</td>
-              <td class="col-2">
-                <form th:action="@{/admin/switchRead/{id}(id=${question.id})}" th:object="${question}" method="post">
-                  <button type="submit" class="btn btn-secondary btn-sm mr-1" onClick="return confirm('sure?')">Switch read</button>
-                </form>
-                <form th:action="@{/admin/delete/{id}(id=${question.id})}" th:object="${question}" method="post">
-                  <!--                    <input type="hidden" th:field="${question}">Delete</input>-->
-                  <button type="submit" class="btn btn-danger btn-sm" onClick="return confirm('sure?')">Delete</button>
-                </form>
-              </td>
-            </tr>
-          </tbody>
-        </table>
       </div>
     </div>
-  </body>
+    <div class="row">
+      <table id="allQuestions"
+        class="table table-hover table-striped table-dark table table-hover table-striped table-dark table-lg-responsive">
+        <thead>
+          <tr class="d-flex">
+            <th scope="col" class="col-1">#</th>
+            <th scope="col" class="col-1">Id</th>
+            <th scope="col" class="col-6">Question</th>
+            <th scope="col" class="col-2">Shown</th>
+            <th scope="col" class="col-2"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="result d-flex" th:each="question, i : ${questions}">
+            <td class="col-1" scope="row" th:text="${i.index + 1}"></td>
+            <td class="col-1">[[${question.id}]]</td>
+            <td class="col-6">[[${question.question}]]</td>
+            <td class="col-2">[[${question.wasShown}]]</td>
+            <td class="col-2">
+              <form th:action="@{/admin/switchRead/{id}(id=${question.id})}" th:object="${question}" method="post">
+                <button type="submit" class="btn btn-secondary btn-sm mr-1" onClick="return confirm('sure?')">Switch
+                  read</button>
+              </form>
+              <form th:action="@{/admin/delete/{id}(id=${question.id})}" th:object="${question}" method="post">
+                <!--                    <input type="hidden" th:field="${question}">Delete</input>-->
+                <button type="submit" class="btn btn-danger btn-sm" onClick="return confirm('sure?')">Delete</button>
+              </form>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+
 </html>

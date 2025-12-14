@@ -4,7 +4,7 @@ This project is a simple 'Never Have I Ever' anonymous game that you can play wi
 
 ## Getting Started
 
-To use this application you have to have Java installed on your local machine
+To use this application you have to have Java 25 installed on your local machine
 
 ### Run it
 
@@ -148,8 +148,8 @@ GET http://localhost/api/v1/room/{code}/questions/download
 
 
 ## Built With
- - Kotlin 1.4
- - Spring Boot 2.7
+ - Kotlin 2.2.10
+ - Spring Boot 4.0.0
  - Spring WebFlux Reactive web server and client
  - [Spring Kotlin support](https://spring.io/blog/2017/01/04/introducing-kotlin-support-in-spring-framework-5-0)
  - Reactor Kotlin

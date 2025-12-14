@@ -25,7 +25,7 @@ class GameController(
         return if (roomService.roomExists(code)) {
             model.apply { 
                 addAttribute(QuestionDto())
-                addAttribute(code)
+                addAttribute("code", code)
             }
             "asking"
         } else { "roomNotFound" }
