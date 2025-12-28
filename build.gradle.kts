@@ -1,5 +1,5 @@
 plugins {
-    val kotlinVersion = "2.2.10"
+    val kotlinVersion = "2.3.0"
 
     java
     idea
@@ -21,7 +21,7 @@ kotlin {
 }
 
 tasks.withType<JavaCompile>().configureEach {
-    options.release.set(24)
+    options.release.set(25)
 }
 
 tasks {
