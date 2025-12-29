@@ -1,54 +1,45 @@
-:root {
-  --primary-bg: #1a1a2e;
-  --secondary-bg: #16213e;
-  --accent-color: #007bff;
-  --text-main: #ffffff;
-  --text-secondary: #a0a0a0;
-  --glass-bg: rgba(255, 255, 255, 0.05);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
-  --input-bg: rgba(0, 0, 0, 0.3);
-  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+@import "tailwindcss";
+
+/* Custom Theme Colors */
+@theme {
+  --color-primary-bg: #1a1a2e;
+  --color-secondary-bg: #16213e;
+  --color-accent: #007bff;
+  --color-text-main: #ffffff;
+  --color-text-secondary: #a0a0a0;
+  --color-glass-bg: rgba(255, 255, 255, 0.05);
+  --color-glass-border: rgba(255, 255, 255, 0.1);
+  --color-input-bg: rgba(0, 0, 0, 0.3);
 }
 
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
+/* Base Styles */
 body {
-  font-family: var(--font-family);
-  background: var(--primary-bg);
-  background: linear-gradient(rgba(0, 0, 0, 0.3),
-      rgba(0, 0, 0, 0.6)), url('./bg.png') repeat top left;
-  color: var(--text-main);
-  min-height: 100vh;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6)), url('./bg.png') repeat top left;
+  color: var(--color-text-main);
+  min-height: 100dvh;
+  margin: 0;
   display: flex;
   justify-content: center;
-  align-items: center;
   overflow-x: hidden;
   line-height: 1.6;
 }
 
 #root {
   width: 100%;
-  max-width: 600px;
-  /* Mobile-first container limit */
-  padding: 20px;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
 }
 
-/* Glassmorphism Utilities */
+/* Glassmorphism Card - exact original look */
 .glass-card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
+  background: var(--color-glass-bg);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--color-glass-border);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
   border-radius: 20px;
   padding: 30px;
   margin-bottom: 20px;
@@ -61,55 +52,42 @@ h1 {
   font-weight: 700;
   margin-bottom: 1.5rem;
   text-align: center;
-  background: linear-gradient(to right, #fff, #a5a5a5);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: white;
   line-height: 1.2;
 }
 
 h2 {
   font-size: 1.25rem;
   font-weight: 500;
-  color: var(--text-secondary);
-  margin-bottom: 2rem;
+  color: var(--color-text-main);
+  margin-bottom: 1.5rem;
   text-align: center;
 }
 
-p,
-span,
-label {
-  color: var(--text-main);
-}
-
-/* Inputs */
+/* Inputs - keeping custom style with your glassmorphism look */
 .modern-input {
   width: 100%;
-  padding: 15px 20px;
-  border-radius: 12px;
-  border: 1px solid var(--glass-border);
-  background: var(--input-bg);
+  padding: 0.875rem 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-glass-border);
+  background: var(--color-input-bg);
   color: white;
   font-size: 1rem;
   transition: all 0.3s ease;
   outline: none;
-  margin-bottom: 15px;
+  margin-bottom: 1rem;
 }
 
 .modern-input:focus {
-  border-color: var(--accent-color);
+  border-color: var(--color-accent);
   box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
 }
 
-.form-group {
-  margin-bottom: 1rem;
-  position: relative;
-}
-
-/* Buttons */
+/* Buttons - keeping your branded style */
 .modern-btn {
   width: 100%;
-  padding: 16px;
-  border-radius: 12px;
+  padding: 1rem;
+  border-radius: 0.75rem;
   border: none;
   font-size: 1.1rem;
   font-weight: 600;
@@ -120,7 +98,7 @@ label {
 }
 
 .btn-primary {
-  background: var(--accent-color);
+  background: var(--color-accent);
   color: white;
   box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
 }
@@ -131,15 +109,15 @@ label {
 
 .btn-secondary {
   background: transparent;
-  border: 2px solid var(--accent-color);
-  color: var(--accent-color);
+  border: 2px solid var(--color-accent);
+  color: var(--color-accent);
 }
 
 /* Alerts */
 .modern-alert {
-  padding: 15px;
-  border-radius: 10px;
-  margin-top: 15px;
+  padding: 1rem;
+  border-radius: 0.625rem;
+  margin-top: 1rem;
   font-size: 0.9rem;
   text-align: center;
 }
@@ -156,47 +134,51 @@ label {
   color: #81ef98;
 }
 
-/* Utilities */
-.text-center {
-  text-align: center;
-}
-
-.mb-2 {
-  margin-bottom: 0.5rem;
-}
-
-.mb-4 {
-  margin-bottom: 1.5rem;
-}
-
-.mt-2 {
-  margin-top: 0.5rem;
-}
-
-.mt-4 {
-  margin-top: 1.5rem;
-}
-
-.w-full {
-  width: 100%;
-}
-
-.flex-column {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.hidden {
-  display: none;
-}
-
 /* QR Code Container */
 .qr-container {
   background: white;
-  /* QR needs contrast */
-  padding: 15px;
-  border-radius: 10px;
+  padding: 1rem;
+  border-radius: 0.625rem;
   width: fit-content;
-  margin: 0 auto 20px auto;
+  margin: 0 auto 1.25rem auto;
+}
+
+/* Custom text colors for labels */
+.text-secondary {
+  color: var(--color-text-secondary);
+}
+
+/* Footer Styles */
+.main-footer {
+  margin-top: auto;
+  padding: 5px 0 0 0;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  width: 100%;
+}
+
+.main-footer span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.main-footer a {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.2s;
+}
+
+.main-footer a:hover {
+  color: white;
+}
+
+.main-footer svg {
+  opacity: 0.8;
 }

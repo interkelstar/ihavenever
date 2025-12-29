@@ -81,26 +81,19 @@ const GameSettingsPopup: React.FC<GameSettingsPopupProps> = ({ roomCode, isOpen,
                         right: '0px',
                         width: '320px',
                         zIndex: 1000,
-                        backgroundColor: 'rgba(30, 30, 30, 0.95)',
-                        backdropFilter: 'blur(10px)',
-                        padding: '20px',
-                        borderRadius: '16px',
-                        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
-                        border: '1px solid rgba(255, 255, 255, 0.3)',
-                        color: 'white'
                     }}
+                    className="bg-zinc-900/95 backdrop-blur-lg p-5 rounded-2xl shadow-lg border border-white/20 text-white"
                 >
-                    <h3 style={{ marginTop: 0, fontSize: '1.2rem', marginBottom: '15px' }}>Настройки игры</h3>
+                    <h3 className="mt-0 text-lg mb-4 font-semibold">Настройки игры</h3>
 
                     <form onSubmit={handleLoadQuestions}>
-                        <div className="form-group" style={{ marginBottom: '15px' }}>
-                            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem', color: '#eee' }}>Добавить вопросы</label>
-                            <div style={{ display: 'flex', gap: '8px' }}>
+                        <div className="mb-4">
+                            <label className="block mb-1.5 text-sm text-gray-200">Добавить вопросы</label>
+                            <div className="flex gap-2">
                                 <select
                                     value={size}
                                     onChange={(e) => setSize(parseInt(e.target.value))}
-                                    className="modern-input"
-                                    style={{ flex: 1, padding: '8px', fontSize: '0.9rem' }}
+                                    className="modern-input flex-1 p-2 text-sm"
                                 >
                                     {[10, 20, 30, 40, 50, 100, 200].map(n => (
                                         <option key={n} value={n}>{n}</option>
@@ -109,8 +102,7 @@ const GameSettingsPopup: React.FC<GameSettingsPopupProps> = ({ roomCode, isOpen,
                                 <select
                                     value={datasetName}
                                     onChange={(e) => setDatasetName(e.target.value)}
-                                    className="modern-input"
-                                    style={{ flex: 2, padding: '8px', fontSize: '0.9rem' }}
+                                    className="modern-input flex-2 p-2 text-sm"
                                 >
                                     <option value="common">Стандартных</option>
                                     <option value="horny">Пошлых</option>
@@ -122,14 +114,7 @@ const GameSettingsPopup: React.FC<GameSettingsPopupProps> = ({ roomCode, isOpen,
                             <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
-                                className={`modern-alert alert-${loadStatus.type}`}
-                                style={{
-                                    padding: '10px',
-                                    marginTop: '10px',
-                                    marginBottom: '10px',
-                                    fontSize: '0.85rem',
-                                    borderRadius: '8px'
-                                }}
+                                className={`modern-alert alert-${loadStatus.type} text-sm rounded-lg p-2.5 my-2.5`}
                             >
                                 {loadStatus.text}
                             </motion.div>
@@ -137,9 +122,8 @@ const GameSettingsPopup: React.FC<GameSettingsPopupProps> = ({ roomCode, isOpen,
 
                         <button
                             type="submit"
-                            className="modern-btn btn-secondary"
+                            className="modern-btn btn-secondary w-full p-2 text-sm"
                             disabled={isLoading}
-                            style={{ width: '100%', padding: '8px', fontSize: '0.9rem' }}
                         >
                             {isLoading ? "Загрузка..." : "Загрузить"}
                         </button>

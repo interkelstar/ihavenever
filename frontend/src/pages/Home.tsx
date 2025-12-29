@@ -53,7 +53,7 @@ const Home: React.FC = () => {
             <div className="glass-card">
                 <h1>Я никогда не...</h1>
 
-                <div className="mb-4">
+                <div className="mb-6">
                     <h2>Чтобы начать играть ты можешь</h2>
                     <button
                         onClick={handleCreateGame}
@@ -64,12 +64,12 @@ const Home: React.FC = () => {
                     </button>
                 </div>
 
-                <div className="mt-4 mb-4">
+                <div className="my-6">
                     <h2>Либо</h2>
                 </div>
 
                 <form onSubmit={handleJoinGame}>
-                    <div className="form-group">
+                    <div className="mb-4">
                         <input
                             type="number"
                             className="modern-input"
@@ -83,7 +83,7 @@ const Home: React.FC = () => {
                         />
                     </div>
                     {error && (
-                        <div className="modern-alert alert-error mb-4">
+                        <div className="modern-alert alert-error mb-6">
                             {error}
                         </div>
                     )}

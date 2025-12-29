@@ -67,11 +67,11 @@ const Host: React.FC = () => {
         >
             <div className="glass-card text-center">
                 <h1 className="mb-2">Комната номер</h1>
-                <h1 style={{ fontSize: '4rem', marginTop: '-1rem' }}>{code}</h1>
+                <h1 className="text-6xl -mt-4">{code}</h1>
             </div>
 
-            <div className="glass-card mb-4">
-                <p className="fs-4 text-center" style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>
+            <div className="glass-card mb-5">
+                <p className="text-center text-lg mb-4">
                     Комната создана! Остальные могут ввести код или сканировать QR-код, чтобы подключиться.
                 </p>
 
@@ -81,19 +81,18 @@ const Host: React.FC = () => {
             </div>
 
             <div className="glass-card">
-                <p className="fs-4 text-center" style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>
+                <p className="text-center text-lg mb-4">
                     По желанию загрузи вопросы из набора.
                 </p>
 
-                <form onSubmit={handleLoadQuestions} className="mb-4">
-                    <div className="form-group">
-                        <label style={{ display: 'block', marginBottom: '5px' }}>Хочу сразу загрузить</label>
-                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <form onSubmit={handleLoadQuestions} className="mb-6">
+                    <div className="mb-4">
+                        <label className="block mb-2">Хочу сразу загрузить</label>
+                        <div className="flex gap-2.5 items-center">
                             <select
                                 value={size}
                                 onChange={(e) => setSize(parseInt(e.target.value))}
-                                className="modern-input"
-                                style={{ flex: 1, marginBottom: 0 }}
+                                className="modern-input flex-1 !mb-0"
                             >
                                 {[10, 20, 30, 40, 50, 100, 200].map(n => (
                                     <option key={n} value={n}>{n}</option>
@@ -105,8 +104,7 @@ const Host: React.FC = () => {
                             <select
                                 value={datasetName}
                                 onChange={(e) => setDatasetName(e.target.value)}
-                                className="modern-input"
-                                style={{ flex: 2, marginBottom: 0 }}
+                                className="modern-input flex-2 !mb-0"
                             >
                                 <option value="common">Стандартного набора</option>
                                 <option value="horny">Пошлого набора</option>
@@ -124,20 +122,19 @@ const Host: React.FC = () => {
                         </motion.div>
                     )}
 
-                    <button type="submit" className="modern-btn btn-secondary" disabled={isLoading} style={{ marginTop: '15px' }}>
+                    <button type="submit" className="modern-btn btn-secondary mt-4" disabled={isLoading}>
                         Загрузить
                     </button>
                 </form>
 
-                <div className="text-center mt-4 mb-4" style={{ borderTop: '1px solid var(--glass-border)', paddingTop: '20px' }}>
+                <div className="text-center my-6 pt-5 border-t border-white/10">
                     <p className="mb-2">А можно загрузить свой файл с вопросами</p>
                     <form onSubmit={handleFileUpload}>
                         <div className="form-group">
                             <input
                                 type="file"
                                 onChange={(e) => setCustomFile(e.target.files ? e.target.files[0] : null)}
-                                className="modern-input"
-                                style={{ padding: '10px' }}
+                                className="modern-input p-2.5"
                             />
                         </div>
 
@@ -157,7 +154,7 @@ const Host: React.FC = () => {
                     </form>
                 </div>
 
-                <div className="text-center mt-4" style={{ borderTop: '1px solid var(--glass-border)', paddingTop: '20px' }}>
+                <div className="text-center mt-6 pt-5 border-t border-white/10">
                     <Link to={`/room/${code}/game`} target="_blank" style={{ textDecoration: 'none' }}>
                         <button className="modern-btn btn-primary">
                             К вопросам!

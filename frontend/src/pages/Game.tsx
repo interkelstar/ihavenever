@@ -19,7 +19,7 @@ const Game: React.FC = () => {
     const [showSettings, setShowSettings] = useState(false);
     const [wereQuestionsLoaded, setWereQuestionsLoaded] = useState(false);
 
-    const loadNextQuestion = async () => {
+    const loadNextQuestion = React.useCallback(async () => {
         if (!code) return;
         setIsLoading(true);
         try {
@@ -45,7 +45,7 @@ const Game: React.FC = () => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [code, navigate]);
 
     const initialLoadDone = React.useRef(false);
 
@@ -55,7 +55,15 @@ const Game: React.FC = () => {
             loadNextQuestion();
             initialLoadDone.current = true;
         }
-    }, [code]);
+    }, [loadNextQuestion]);
+
+    // Refresh if questions were loaded when closing settings (only if game was finished)
+    useEffect(() => {
+        if (!showSettings && wereQuestionsLoaded && isFinished) {
+            loadNextQuestion();
+            setWereQuestionsLoaded(false);
+        }
+    }, [showSettings, wereQuestionsLoaded, isFinished, loadNextQuestion]);
 
     const handleDownload = async () => {
         if (!code) return;
@@ -75,25 +83,12 @@ const Game: React.FC = () => {
     };
 
     return (
-        <div style={{ width: '100%', maxWidth: '800px', margin: '0 auto' }}>
-            <div style={{ position: 'fixed', top: '20px', right: '20px', zIndex: 2000 }}>
+        <div className="w-full max-w-3xl mx-auto">
+            <div className="fixed top-5 right-5 z-50">
                 <button
                     id="settings-toggle-btn"
                     onClick={() => setShowSettings(!showSettings)}
-                    className="icon-btn"
-                    style={{
-                        background: 'rgba(255, 255, 255, 0.1)',
-                        backdropFilter: 'blur(5px)',
-                        border: '1px solid rgba(255,255,255,0.2)',
-                        borderRadius: '50%',
-                        width: '40px',
-                        height: '40px',
-                        color: 'white',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}
+                    className="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer bg-white/10 backdrop-blur border border-white/20 text-white"
                 >
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
@@ -104,13 +99,7 @@ const Game: React.FC = () => {
                     <GameSettingsPopup
                         roomCode={parseInt(code)}
                         isOpen={showSettings}
-                        onClose={() => {
-                            setShowSettings(false);
-                            if (wereQuestionsLoaded) {
-                                loadNextQuestion();
-                                setWereQuestionsLoaded(false);
-                            }
-                        }}
+                        onClose={() => setShowSettings(false)}
                         onQuestionsLoaded={() => setWereQuestionsLoaded(true)}
                         resetStatusTrigger={currentQuestion?.question}
                     />
@@ -123,28 +112,27 @@ const Game: React.FC = () => {
                         initial={{ opacity: 0, x: 50 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -50 }}
-                        className="glass-card text-center"
-                        style={{ minHeight: '400px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
+                        className="glass-card text-center min-h-96 flex flex-col justify-center"
                     >
-                        <h1 className="mb-4">Я никогда не...</h1>
+                        <h1 className="mb-6">Я никогда не...</h1>
 
-                        <div style={{ minHeight: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div className="min-h-36 flex items-center justify-center">
                             {isLoading && !currentQuestion ? (
                                 <h2>Загрузка...</h2>
                             ) : (
-                                <h2 style={{ color: 'white', fontSize: '2rem' }}>
+                                <h2 className="text-white text-3xl">
                                     {currentQuestion ? currentQuestion.question : "..."}
                                 </h2>
                             )}
                         </div>
 
-                        <div className="mt-4">
-                            <button onClick={loadNextQuestion} className="modern-btn btn-primary" style={{ maxWidth: '300px' }}>
+                        <div className="mt-6">
+                            <button onClick={loadNextQuestion} className="modern-btn btn-primary max-w-xs">
                                 Следующий!
                             </button>
                         </div>
 
-                        <div className="mt-4 text-secondary">
+                        <div className="mt-6 text-secondary">
                             <p>Осталось вопросов: {remainingCount !== null ? remainingCount : '...'}</p>
                         </div>
                     </motion.div>
@@ -157,28 +145,28 @@ const Game: React.FC = () => {
                     >
                         <h1>Кончились вопросы!</h1>
 
-                        <div className="mb-4">
-                            <button onClick={loadNextQuestion} className="modern-btn btn-primary" style={{ maxWidth: '300px' }}>
+                        <div className="mb-6">
+                            <button onClick={loadNextQuestion} className="modern-btn btn-primary max-w-xs">
                                 Точно?
                             </button>
                         </div>
 
-                        <div className="mb-4">
+                        <div className="mb-6">
                             <h2>Поздравляю, это были все вопросы, заданные в этой комнате</h2>
-                            <button onClick={() => setShowSettings(true)} className="modern-btn btn-secondary" style={{ maxWidth: '300px' }}>
+                            <button onClick={() => setShowSettings(true)} className="modern-btn btn-secondary max-w-xs">
                                 Загрузить ещё!
                             </button>
                         </div>
 
-                        <div className="mb-4" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
+                        <div className="mb-6 flex flex-col gap-4 items-center">
                             <h2>Теперь их можно скачать на память!</h2>
-                            <button onClick={handleDownload} className="modern-btn btn-secondary" style={{ maxWidth: '300px' }}>
+                            <button onClick={handleDownload} className="modern-btn btn-secondary max-w-xs">
                                 Скачать все вопросы
                             </button>
                         </div>
 
-                        <div className="mt-5">
-                            <h2 style={{ fontSize: '1rem' }}>И если игра вам понравилась, можете кинуть мне $5 на <a href="https://revolut.me/kelstar" target="_blank" style={{ color: '#007bff' }}>Revolut</a></h2>
+                        <div className="mt-8">
+                            <h2 className="text-base">И если игра вам понравилась, можете кинуть мне $5 на <a href="https://revolut.me/kelstar" target="_blank" className="text-accent">Revolut</a></h2>
                         </div>
                     </motion.div>
                 )}

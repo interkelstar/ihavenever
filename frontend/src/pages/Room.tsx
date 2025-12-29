@@ -60,8 +60,8 @@ const Room: React.FC = () => {
             <h1>Задавай свой каверзный вопрос!</h1>
 
             <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label className="text-secondary text-start" style={{ display: 'block', marginBottom: '8px' }}>Я никогда не...</label>
+                <div className="mb-4">
+                    <label className="block mb-2 text-secondary">Я никогда не...</label>
                     <input
                         type="text"
                         value={question}
@@ -98,8 +98,8 @@ const Room: React.FC = () => {
                     </motion.div>
                 )}
 
-                <div className="mt-4 text-center">
-                    <p className="text-secondary">Код комнаты: <span style={{ color: 'white', fontWeight: 'bold' }}>{code}</span></p>
+                <div className="mt-6 text-center">
+                    <p className="text-secondary">Код комнаты: <span className="text-white font-bold">{code}</span></p>
                 </div>
             </form>
         </motion.div>
