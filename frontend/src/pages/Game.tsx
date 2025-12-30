@@ -133,7 +133,9 @@ const Game: React.FC = () => {
                         </div>
 
                         <div className="mt-6 text-secondary">
-                            <p>Осталось вопросов: {remainingCount !== null ? remainingCount : '...'}</p>
+                            {remainingCount !== 0 && (
+                                <p>Осталось вопросов: {remainingCount !== null ? remainingCount : '...'}</p>
+                            )}
                         </div>
                     </motion.div>
                 ) : (
@@ -143,7 +145,7 @@ const Game: React.FC = () => {
                         animate={{ opacity: 1, scale: 1 }}
                         className="glass-card text-center"
                     >
-                        <h1>Кончились вопросы!</h1>
+                        <h1 className="mb-6">Кончились вопросы!</h1>
 
                         <div className="mb-6">
                             <button onClick={loadNextQuestion} className="modern-btn btn-primary max-w-xs">
@@ -166,7 +168,7 @@ const Game: React.FC = () => {
                         </div>
 
                         <div className="mt-8">
-                            <h2 className="text-base">И если игра вам понравилась, можете кинуть мне $5 на <a href="https://revolut.me/kelstar" target="_blank" className="text-accent">Revolut</a></h2>
+                            <h2 className="text-base">И если игра вам понравилась, на кофе кидать сюда <a href="https://revolut.me/kelstar" target="_blank" className="text-accent">Revolut</a></h2>
                         </div>
                     </motion.div>
                 )}

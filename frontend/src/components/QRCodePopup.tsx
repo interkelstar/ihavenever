@@ -11,8 +11,8 @@ interface QRCodePopupProps {
 const QRCodePopup: React.FC<QRCodePopupProps> = ({ roomCode, isOpen, onClose }) => {
     const popupRef = useRef<HTMLDivElement>(null);
 
-    // The full URL for joining the room - matching Host.tsx logic for consistency
-    const joinUrl = `${window.location.origin}${import.meta.env.BASE_URL}room/${roomCode}`;
+    // The full URL for joining the room
+    const joinUrl = `${window.location.origin}/v2/room/${roomCode}`;
 
     // Close on click outside
     useEffect(() => {

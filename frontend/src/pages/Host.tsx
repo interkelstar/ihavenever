@@ -66,8 +66,8 @@ const Host: React.FC = () => {
             style={{ width: '100%' }}
         >
             <div className="glass-card text-center">
-                <h1 className="mb-2">Комната номер</h1>
-                <h1 className="text-6xl -mt-4">{code}</h1>
+                <h1 className="mb-6">Комната номер</h1>
+                <h1 className="text-6xl -mt-4 ">{code}</h1>
             </div>
 
             <div className="glass-card mb-5">
@@ -87,7 +87,6 @@ const Host: React.FC = () => {
 
                 <form onSubmit={handleLoadQuestions} className="mb-6">
                     <div className="mb-4">
-                        <label className="block mb-2">Хочу сразу загрузить</label>
                         <div className="flex gap-2.5 items-center">
                             <select
                                 value={size}
@@ -98,16 +97,13 @@ const Host: React.FC = () => {
                                     <option key={n} value={n}>{n}</option>
                                 ))}
                             </select>
-
-                            <span style={{ color: 'white' }}>вопросов из:</span>
-
                             <select
                                 value={datasetName}
                                 onChange={(e) => setDatasetName(e.target.value)}
                                 className="modern-input flex-2 !mb-0"
                             >
-                                <option value="common">Стандартного набора</option>
-                                <option value="horny">Пошлого набора</option>
+                                <option value="common">Стандартных</option>
+                                <option value="horny">Пошлых</option>
                             </select>
                         </div>
                     </div>
@@ -116,7 +112,7 @@ const Host: React.FC = () => {
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            className={`modern-alert alert-${loadStatus.type} mb-4`}
+                            className={`modern-alert alert-${loadStatus.type}`}
                         >
                             {loadStatus.text}
                         </motion.div>
