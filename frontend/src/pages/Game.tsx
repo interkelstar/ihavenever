@@ -114,7 +114,7 @@ const Game: React.FC = () => {
                         exit={{ opacity: 0, x: -50 }}
                         className="glass-card text-center min-h-96 flex flex-col justify-center"
                     >
-                        <h1 className="mb-6">Я никогда не...</h1>
+                        <h1>Я никогда не...</h1>
 
                         <div className="min-h-36 flex items-center justify-center">
                             {isLoading && !currentQuestion ? (
@@ -145,22 +145,22 @@ const Game: React.FC = () => {
                         animate={{ opacity: 1, scale: 1 }}
                         className="glass-card text-center"
                     >
-                        <h1 className="mb-6">Кончились вопросы!</h1>
+                        <h1>Кончились вопросы!</h1>
 
-                        <div className="mb-6">
+                        <div className="mb-4 mt-2">
                             <button onClick={loadNextQuestion} className="modern-btn btn-primary max-w-xs">
                                 Точно?
                             </button>
                         </div>
 
-                        <div className="mb-6">
+                        <div className="mb-4 mt-2">
                             <h2>Поздравляю, это были все вопросы, заданные в этой комнате</h2>
                             <button onClick={() => setShowSettings(true)} className="modern-btn btn-secondary max-w-xs">
                                 Загрузить ещё!
                             </button>
                         </div>
 
-                        <div className="mb-6 flex flex-col gap-4 items-center">
+                        <div className="mb-4 mt-2 flex flex-col items-center">
                             <h2>Теперь их можно скачать на память!</h2>
                             <button onClick={handleDownload} className="modern-btn btn-secondary max-w-xs">
                                 Скачать все вопросы

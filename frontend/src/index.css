@@ -19,7 +19,7 @@
 /* Base Styles */
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6)), url('./bg.png') repeat top left;
+  background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6)), url('./bg.png') repeat top left fixed;
   color: var(--color-text-main);
   min-height: 100dvh;
   margin: 0;
@@ -51,7 +51,7 @@ body {
 h1 {
   font-size: 2.5rem;
   font-weight: 700;
-/*  margin-bottom: 1.5rem;*/
+  margin-bottom: 1.5rem;
   text-align: center;
   color: white;
   line-height: 1.2;
@@ -61,7 +61,7 @@ h2 {
   font-size: 1.25rem;
   font-weight: 500;
   color: var(--color-text-main);
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   text-align: center;
 }
 

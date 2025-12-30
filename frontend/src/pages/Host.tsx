@@ -66,8 +66,8 @@ const Host: React.FC = () => {
             style={{ width: '100%' }}
         >
             <div className="glass-card text-center">
-                <h1 className="mb-6">Комната номер</h1>
-                <h1 className="text-6xl -mt-4 ">{code}</h1>
+                <h1>Комната номер</h1>
+                <h1 className="text-6xl -mt-4 !mb-0">{code}</h1>
             </div>
 
             <div className="glass-card mb-5">

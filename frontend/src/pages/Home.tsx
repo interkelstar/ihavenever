@@ -51,7 +51,7 @@ const Home: React.FC = () => {
             transition={{ duration: 0.5 }}
         >
             <div className="glass-card">
-                <h1 className="mb-6">Я никогда не...</h1>
+                <h1>Я никогда не...</h1>
 
                 <div className="mb-6">
                     <h2>Чтобы начать играть ты можешь</h2>
