@@ -16,10 +16,14 @@
   box-sizing: border-box;
 }
 
+html {
+  background-color: var(--color-primary-bg);
+}
+
 /* Base Styles */
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6)), url('./bg.png') repeat top left fixed;
+  background: transparent;
   color: var(--color-text-main);
   min-height: 100dvh;
   margin: 0;
@@ -27,6 +31,18 @@ body {
   justify-content: center;
   overflow-x: hidden;
   line-height: 1.6;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  bottom: -100px;
+  /* Buffer for mobile address bar resize */
+  z-index: -1;
+  background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6)), url('./bg.png') repeat top left;
+  transform: translate3d(0, 0, 0);
+  pointer-events: none;
 }
 
 #root {
