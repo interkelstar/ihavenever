@@ -27,6 +27,15 @@ val nodeDev by tasks.registering(com.github.gradle.node.npm.task.NpmTask::class)
     dependsOn("npmInstall")
 }
 
+val copyCommonQuestions by tasks.registering(Copy::class) {
+    from("src/main/resources/questions/common.txt")
+    into("frontend/public")
+}
+
+tasks.named("npmInstall") {
+    dependsOn(copyCommonQuestions)
+}
+
 tasks.named("processResources") {
     dependsOn("npm_run_build")
 }

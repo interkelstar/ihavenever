@@ -76,11 +76,56 @@ h2 {
   transition: all 0.3s ease;
   outline: none;
   margin-bottom: 1rem;
+  resize: none;
+  display: block;
+  overflow: hidden;
+  min-height: 3rem;
 }
 
 .modern-input:focus {
   border-color: var(--color-accent);
   box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
+}
+
+/* Floating Label Styles */
+.floating-group {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.floating-group .modern-input {
+  margin-bottom: 0;
+  padding-top: 1.6rem;
+  padding-bottom: 0.4rem;
+}
+
+.floating-group label {
+  position: absolute;
+  left: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-secondary);
+  font-size: 1rem;
+  pointer-events: none;
+  transition: all 0.2s ease;
+  background: transparent;
+}
+
+.floating-group .modern-input:focus~label,
+.floating-group .modern-input:not(:placeholder-shown)~label {
+  top: 0.4rem;
+  transform: translateY(0);
+  font-size: 0.75rem;
+  color: var(--color-accent);
+}
+
+.floating-group .modern-input::placeholder {
+  color: transparent;
+  transition: color 0.2s ease;
+}
+
+.floating-group .modern-input:focus::placeholder {
+  color: var(--color-text-secondary);
 }
 
 /* Buttons - keeping your branded style */

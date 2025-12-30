@@ -35,3 +35,4 @@ bin/
 frontend/node_modules/
 /src/main/resources/static/v2-static/
 /.ai/
+/frontend/public/
