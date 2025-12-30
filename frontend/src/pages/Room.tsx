@@ -122,6 +122,12 @@ const Room: React.FC = () => {
         e.preventDefault();
         setOkMessage(null);
         setErrorMessage(null);
+
+        if (!question.trim()) {
+            setErrorMessage("Пожалуйста, введите вопрос!");
+            return;
+        }
+
         setIsLoading(true);
 
         if (!code) return;
@@ -185,7 +191,6 @@ const Room: React.FC = () => {
                             onKeyDown={handleKeyDown}
                             placeholder={placeholder}
                             className="modern-input"
-                            required
                             maxLength={255}
                             autoComplete="off"
                             rows={1}

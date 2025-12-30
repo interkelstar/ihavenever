@@ -25,22 +25,31 @@ const Home: React.FC = () => {
 
     const handleJoinGame = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (code.length === 6) {
-            setLoading(true);
-            setError(null);
-            try {
-                const exists = await checkRoomExists(parseInt(code));
-                if (exists) {
-                    navigate(`/room/${code}`);
-                } else {
-                    setError(`Комната ${code} не найдена.`);
-                }
-            } catch (error) {
-                console.error("Failed to check room existence", error);
-                setError("Произошла ошибка при проверке комнаты.");
-            } finally {
-                setLoading(false);
+
+        if (!code) {
+            setError("Пожалуйста, введите код комнаты.");
+            return;
+        }
+
+        if (code.length !== 6) {
+            setError("Код должен состоять из 6 цифр.");
+            return;
+        }
+
+        setLoading(true);
+        setError(null);
+        try {
+            const exists = await checkRoomExists(parseInt(code));
+            if (exists) {
+                navigate(`/room/${code}`);
+            } else {
+                setError(`Комната ${code} не найдена.`);
             }
+        } catch (error) {
+            console.error("Failed to check room existence", error);
+            setError("Произошла ошибка при проверке комнаты.");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -76,21 +85,18 @@ const Home: React.FC = () => {
                             value={code}
                             onChange={(e) => setCode(e.target.value)}
                             placeholder="Ввести тут 6 цифр кода"
-                            min="100000"
-                            max="999999"
-                            required
                             disabled={loading}
                         />
                     </div>
                     {error && (
-                        <div className="modern-alert alert-error mb-6">
+                        <div className="modern-alert alert-error mb-4">
                             {error}
                         </div>
                     )}
                     <button
                         type="submit"
                         className="modern-btn btn-primary"
-                        disabled={loading || code.length !== 6}
+                        disabled={loading}
                     >
                         {loading ? 'Проверка...' : 'Присоединиться'}
                     </button>
