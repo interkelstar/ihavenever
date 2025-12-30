@@ -65,7 +65,6 @@ dependencies {
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
-    implementation("com.opencsv:opencsv:5.9")
     implementation("net.javacrumbs.shedlock:shedlock-spring:7.2.2")
     implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:7.2.2")
 
