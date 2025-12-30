@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { postQuestion, checkRoomExists } from '../api/client';
 import { motion } from 'framer-motion';
 import QRCodePopup from '../components/QRCodePopup';
+import BecomeHostPopup from '../components/BecomeHostPopup';
+import BecomeHostWarningPopup from '../components/BecomeHostWarningPopup';
 
 const Room: React.FC = () => {
     const { code } = useParams<{ code: string }>();
@@ -16,6 +18,8 @@ const Room: React.FC = () => {
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const [isFocused, setIsFocused] = useState(false);
     const [showQR, setShowQR] = useState(false);
+    const [showSettings, setShowSettings] = useState(false);
+    const [showWarning, setShowWarning] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const isPointerActive = useRef(false);
 
@@ -139,7 +143,27 @@ const Room: React.FC = () => {
     };
 
     return (
-        <>
+        <div className="w-full max-w-3xl mx-auto">
+            <div className="fixed top-5 right-5 z-50">
+                <button
+                    id="settings-toggle-btn"
+                    onClick={() => setShowSettings(!showSettings)}
+                    className="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer bg-white/10 backdrop-blur border border-white/20 text-white"
+                >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                </button>
+                <BecomeHostPopup
+                    isOpen={showSettings}
+                    onClose={() => setShowSettings(false)}
+                    onBecomeHostClick={() => {
+                        setShowSettings(false);
+                        setShowWarning(true);
+                    }}
+                />
+            </div>
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -227,7 +251,15 @@ const Room: React.FC = () => {
                     onClose={() => setShowQR(false)}
                 />
             )}
-        </>
+
+            {code && (
+                <BecomeHostWarningPopup
+                    roomCode={code}
+                    isOpen={showWarning}
+                    onClose={() => setShowWarning(false)}
+                />
+            )}
+        </div>
     );
 };
 
