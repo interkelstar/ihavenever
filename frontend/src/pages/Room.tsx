@@ -50,7 +50,7 @@ const Room: React.FC = () => {
 
         const loadSuggestions = async () => {
             try {
-                const response = await fetch('/v2-static/common.txt');
+                const response = await fetch('/common.txt');
                 if (response.ok) {
                     const text = await response.text();
                     const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);

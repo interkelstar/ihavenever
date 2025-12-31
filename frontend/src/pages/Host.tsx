@@ -14,7 +14,7 @@ const Host: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     // Construct the joining URL for the QR code
-    const joinUrl = `${window.location.origin}/v2/room/${code}`;
+    const joinUrl = `${window.location.origin}/room/${code}`;
 
     const handleLoadQuestions = async (e: React.FormEvent) => {
         e.preventDefault();

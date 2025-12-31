@@ -102,6 +102,17 @@ const Home: React.FC = () => {
                     </button>
                 </form>
             </div>
+
+            <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+                className="mt-2 text-center"
+            >
+                <div className="inline-block max-w-[345px] px-8 py-3 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 text-white/80 text-sm leading-relaxed">
+                    Новый год, новые вопросы, новая версия! Старая доступна <a href="/old" className="text-accent hover:underline font-medium">тут</a>
+                </div>
+            </motion.div>
         </motion.div>
     );
 };

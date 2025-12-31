@@ -87,7 +87,7 @@ const GameSettingsPopup: React.FC<GameSettingsPopupProps> = ({ roomCode, isOpen,
                     <h3 className="mt-0 text-lg mb-4 font-semibold">Настройки игры</h3>
 
                     <form onSubmit={handleLoadQuestions}>
-                        <div className="mb-4">
+                        <div className="mb-0">
                             <label className="block mb-1.5 text-sm text-gray-200">Добавить вопросы</label>
                             <div className="flex gap-2">
                                 <select
@@ -114,7 +114,7 @@ const GameSettingsPopup: React.FC<GameSettingsPopupProps> = ({ roomCode, isOpen,
                             <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
-                                className={`modern-alert alert-${loadStatus.type} text-sm rounded-lg p-2.5 my-2.5`}
+                                className={`modern-alert alert-${loadStatus.type} text-sm rounded-lg p-2.5 my-2.5 !mt-0 mb-4`}
                             >
                                 {loadStatus.text}
                             </motion.div>

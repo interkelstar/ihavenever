@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::.container})}">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{old/layout :: layout(~{::title}, ~{::.container})}">
 
 <head>
   <title>Я никогда не!..</title>
@@ -23,7 +23,8 @@
     </div>
     <div class="row mb-2">
       <div class="col-md-11 mx-auto">
-        <form id="form" th:action="@{/room/__${code}__/host/step2}" th:object="${importParametersDto}" method="POST">
+        <form id="form" th:action="@{/old/room/__${code}__/host/step2}" th:object="${importParametersDto}"
+          method="POST">
           <div class="row">
             <div class="col-1 d-md-none d-lg-block"></div>
             <div
@@ -86,7 +87,7 @@
             </a>
           </p>
           <div id="uploadFile" th:class="${uploadOk == null}? 'collapse' : 'collapse show'">
-            <form method="POST" th:action="@{/room/__${code}__/host/step2/upload}" enctype="multipart/form-data">
+            <form method="POST" th:action="@{/old/room/__${code}__/host/step2/upload}" enctype="multipart/form-data">
               <div class="form-group mb-0">
                 <div class="col-11 col-md-6 mx-auto">
                   <div class="mb-3">
@@ -120,7 +121,7 @@
     </div>
     <div class="row">
       <div class="col-xl-5 mx-auto">
-        <a class="btn btn-primary" th:href="@{/room/__${code}__/game}" target="_blank">К вопросам!</a>
+        <a class="btn btn-primary" th:href="@{/old/room/__${code}__/game}" target="_blank">К вопросам!</a>
       </div>
     </div>
   </div>

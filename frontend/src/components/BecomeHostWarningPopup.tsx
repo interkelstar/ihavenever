@@ -28,7 +28,7 @@ const BecomeHostWarningPopup: React.FC<BecomeHostWarningPopupProps> = ({ roomCod
     }, [isOpen, onClose]);
 
     const handleConfirm = () => {
-        const basename = window.location.pathname.startsWith('/v2-static') ? '/v2-static' : '/v2';
+        const basename = window.location.origin;
         window.open(`${basename}/room/${roomCode}/host`, '_blank');
         onClose();
     };

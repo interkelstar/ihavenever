@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::.container})}">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{old/layout :: layout(~{::title}, ~{::.container})}">
 
 <head>
   <title>Я никогда не!..</title>
@@ -30,7 +30,7 @@
     </div>
     <div class="row mb-2">
       <div class="col-xl-5 mx-auto">
-        <a class="btn btn-primary" th:href="@{/room/__${code}__/host/step2}">Они уже задают!</a>
+        <a class="btn btn-primary" th:href="@{/old/room/__${code}__/host/step2}">Они уже задают!</a>
       </div>
     </div>
     <script type="text/javascript">

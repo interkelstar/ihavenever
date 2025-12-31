@@ -12,13 +12,13 @@ class IndexController(
     private val roomService: RoomService
 ) {
 
-    @GetMapping
-    fun showIndexPage() = "index"
+    @GetMapping("/old")
+    fun showIndexPage() = "old/index"
     
-    @GetMapping("/join")
-    fun joinGame(@RequestParam code: Int) = "redirect:/room/$code"
+    @GetMapping("/old/join")
+    fun joinGame(@RequestParam code: Int) = "redirect:/old/room/$code"
 
-    @PostMapping("/create")
-    fun createNewGame() = "redirect:/room/${roomService.createNewRoom().code}/host"
+    @PostMapping("/old/create")
+    fun createNewGame() = "redirect:/old/room/${roomService.createNewRoom().code}/host"
     
 }

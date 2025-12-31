@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::.container})}">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{old/layout :: layout(~{::title}, ~{::.container})}">
 
 <head>
   <title>Я никогда не!..</title>
@@ -18,7 +18,7 @@
       <div class="col-md-10 col-lg-8 col-xl-7 mx-auto">
         <div class="col-12 col-md-3 mx-auto">
           <div class="d-grid">
-            <a class="btn btn-lg btn-primary" th:href="@{/room/__${code}__/game}"
+            <a class="btn btn-lg btn-primary" th:href="@{/old/room/__${code}__/game}"
               th:utext="${question} ? 'Ещё!' : 'Точно?'">Точно?</a>
           </div>
         </div>

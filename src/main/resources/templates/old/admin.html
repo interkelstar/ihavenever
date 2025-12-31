@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::title}, ~{::.container})}">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{old/layout :: layout(~{::title}, ~{::.container})}">
 
 <head>
   <title>Я никогда не!..</title>
@@ -9,7 +9,7 @@
   <div class="container">
     <div class="row mb-1">
       <div class="col text-left">
-        <form th:action="@{/admin/refreshAll}" method="post">
+        <form th:action="@{/old/admin/refreshAll}" method="post">
           <button type="submit" class="btn btn-sm btn-secondary" onClick="return confirm('sure?')">Refresh all</button>
         </form>
       </div>
@@ -21,7 +21,7 @@
       </div>
       <div class="col-auto text-right">
         <div class="form-row">
-          <form method="POST" th:action="@{/admin/import-csv}" enctype="multipart/form-data">
+          <form method="POST" th:action="@{/old/admin/import-csv}" enctype="multipart/form-data">
             <div class="form-group mb-0">
               <div class="col-3">
                 <input type="number" name="code" class="form-control" min="100000" max="999999" required
@@ -56,11 +56,11 @@
             <td class="col-6">[[${question.question}]]</td>
             <td class="col-2">[[${question.wasShown}]]</td>
             <td class="col-2">
-              <form th:action="@{/admin/switchRead/{id}(id=${question.id})}" th:object="${question}" method="post">
+              <form th:action="@{/old/admin/switchRead/{id}(id=${question.id})}" th:object="${question}" method="post">
                 <button type="submit" class="btn btn-secondary btn-sm mr-1" onClick="return confirm('sure?')">Switch
                   read</button>
               </form>
-              <form th:action="@{/admin/delete/{id}(id=${question.id})}" th:object="${question}" method="post">
+              <form th:action="@{/old/admin/delete/{id}(id=${question.id})}" th:object="${question}" method="post">
                 <!--                    <input type="hidden" th:field="${question}">Delete</input>-->
                 <button type="submit" class="btn btn-danger btn-sm" onClick="return confirm('sure?')">Delete</button>
               </form>

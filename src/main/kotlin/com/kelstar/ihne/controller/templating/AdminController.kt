@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile
 
 
 @Controller
-@RequestMapping("/admin")
+@RequestMapping("/old/admin")
 class AdminController(
     private val questionService: QuestionService,
     private val importService: ImportService
@@ -19,25 +19,25 @@ class AdminController(
     @GetMapping
     fun showAdminPage(model: Model): String {
         model["questions"] = questionService.findAllOrderByAdded()
-        return "admin"
+        return "old/admin"
     }
 
     @PostMapping("/switchRead/{id}")
     fun switchQuestion(@PathVariable id: Long): String {
         questionService.switchRead(id)
-        return "redirect:/admin"
+        return "redirect:/old/admin"
     }
 
     @PostMapping("/delete/{id}")
     fun deleteQuestion(@PathVariable id: Long): String {
         questionService.deleteById(id)
-        return "redirect:/admin"
+        return "redirect:/old/admin"
     }
 
     @PostMapping("/refreshAll")
     fun refreshAll(): String {
         questionService.refreshAll()
-        return "redirect:/admin"
+        return "redirect:/old/admin"
     }
 
     @PostMapping("/import-csv")
@@ -62,6 +62,6 @@ class AdminController(
             }
         }
         model["questions"] = questionService.findAllOrderByAdded()
-        return "admin"
+        return "old/admin"
     }
 }
