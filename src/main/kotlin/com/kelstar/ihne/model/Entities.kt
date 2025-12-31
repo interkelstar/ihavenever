@@ -1,9 +1,9 @@
 package com.kelstar.ihne.model
 
 import java.time.Instant
-import javax.persistence.*
-import javax.validation.constraints.Max
-import javax.validation.constraints.Min
+import jakarta.persistence.*
+import jakarta.validation.constraints.Max
+import jakarta.validation.constraints.Min
 
 /*
     Despite all the recommendations not to use data classes for JPA, they are based on auto generating of eQ/hC functions

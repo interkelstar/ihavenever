@@ -1,11 +1,11 @@
-FROM gradle:6.8.0-jdk11 as builder
+FROM gradle:9.2.1-jdk25 as builder
 USER root
 WORKDIR /builder
-ADD . /builder
+COPY . /builder
 RUN gradle bootJar --stacktrace
 
-FROM openjdk:11-jre-slim
+FROM eclipse-temurin:25-jre-alpine
 EXPOSE 8080
 WORKDIR /app
-COPY --from=builder /builder/release/*.jar ihne.jar
+COPY --from=builder /builder/release/ihne.jar ihne.jar
 ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=prod", "ihne.jar"]

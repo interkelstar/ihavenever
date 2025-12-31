@@ -11,7 +11,7 @@ interface RoomRepository : JpaRepository<Room, Int>
 
 interface QuestionRepository : JpaRepository<Question, Long> {
 
-    @Query("select q from Question q where q.wasShown = false and q.roomCode = :code order by rand()")
+    @Query("select q from Question q where q.wasShown = false and q.roomCode = :code order by random()")
     fun findRandomNotShown(@Param("code") roomCode: Int): List<Question>
 
     fun findAllByOrderByDateAdded(): List<Question>

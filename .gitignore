@@ -29,3 +29,12 @@ nbdist/
 
 ### h2 local db ###
 db/
+
+### Build artefacts ###
+bin/
+frontend/node_modules/
+/src/main/resources/static/v2-static/
+/.ai/
+/frontend/public/
+release/ihne.jar
+/src/main/resources/static/assets/

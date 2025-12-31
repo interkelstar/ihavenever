@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{old/layout :: layout(~{::title}, ~{::.container})}">
+
+<head>
+  <title>Я никогда не!..</title>
+</head>
+
+<body>
+
+  <div class="container">
+    <div class="row">
+      <div class="col mx-auto mb-5">
+        <h1>Я никогда не...</h1>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col mx-auto mb-3">
+        <h2>Чтобы начать играть ты можешь</h2>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="col-lg-5 col-xxl-4 m-auto">
+        <div class="form-group">
+          <form id="form-create" th:action="@{/old/create}" method="POST">
+            <div class="d-grid">
+              <button type="submit" class="btn btn-lg btn-primary" id="create">Создать новую игру</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-6 mx-auto mt-5 mb-5">
+        <h2>Либо</h2>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="col">
+        <div class="form-group">
+          <form id="form-join" th:action="@{/old/join}" method="GET" class="needs-validation" novalidate>
+            <div class="row">
+              <div class="col-lg-5 col-xxl-4 mx-auto mb-2">
+                <input id="code" type="number" name="code" class="form-control" min="100000" max="999999" required
+                  placeholder="Ввести тут 6 цифр кода уже созданной игры и" autocomplete="off">
+                <div class="invalid-feedback">
+                  Введите номер комнаты, 6 цифр от 100000 до 999999
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-5 col-xxl-4 m-auto">
+                <div class="d-grid">
+                  <button type="submit" class="btn btn-lg btn-primary" id="join">Присоединиться</button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Legacy UI Warning Modal -->
+    <div class="modal fade" id="legacyWarningModal" tabindex="-1" role="dialog"
+      aria-labelledby="legacyWarningModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content text-dark">
+          <div class="modal-header border-bottom-0 pb-0">
+            <h5 class="modal-title w-100 text-center fw-bold" id="legacyWarningModalLabel">Старая версия?!</h5>
+          </div>
+          <div class="modal-body text-center py-4">
+            <p class="fs-5 mb-2">Это старая версия интерфейса.</p>
+            <p class="text-muted mb-0">Пожалуйста, используйте новую версию. Только если она у вас не работает, оставайтесь тут.</p>
+          </div>
+          <div class="modal-footer border-top-0 pt-0 justify-content-center flex-column gap-2 mb-3">
+            <a href="/" class="btn btn-lg btn-primary w-75 py-2">Перейти к новой</a>
+            <button type="button" class="btn btn-link text-secondary btn-sm" data-bs-dismiss="modal">Остаться на
+              старой</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      document.addEventListener('DOMContentLoaded', function () {
+        var modalEl = document.getElementById('legacyWarningModal');
+        if (modalEl) {
+          var myModal = new bootstrap.Modal(modalEl);
+          myModal.show();
+        }
+      });
+    </script>
+
+  </div>
+
+</body>
+
+</html>

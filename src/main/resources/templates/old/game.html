@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{old/layout :: layout(~{::title}, ~{::.container})}">
+
+<head>
+  <title>Я никогда не!..</title>
+</head>
+
+<body>
+  <div class="container">
+    <div class="row mb-5">
+      <div class="col-xl-9 mx-auto">
+        <h1 class="mb-5" th:if="${question}">Я никогда не...</h1>
+        <h1 th:if="${question}" th:utext="${question.question}">...</h1>
+        <h1 th:unless="${question}">Кончились вопросы!</h1>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-10 col-lg-8 col-xl-7 mx-auto">
+        <div class="col-12 col-md-3 mx-auto">
+          <div class="d-grid">
+            <a class="btn btn-lg btn-primary" th:href="@{/old/room/__${code}__/game}"
+              th:utext="${question} ? 'Ещё!' : 'Точно?'">Точно?</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row" th:if="${question}">
+      <div class="col-12 col-md-9 mt-2 mx-auto">
+        <p>Осталость вопросов: <span th:text="${count}"></span></p>
+      </div>
+    </div>
+    <div class="row mt-5" th:if="!${question}">
+      <div class="col-xl-6 mx-auto mb-3">
+        <h2>Поздравляю, вы прочли все вопросы, заданные в этой комнате</h2>
+        <h2>Теперь их можно скачать одним файлом, на память!</h2>
+      </div>
+      <div class="col-md-10 col-lg-8 col-xl-7 mb-3 mx-auto">
+        <form id="form" th:action="@{''}" method="POST">
+          <div class="row">
+            <div class="col-12 col-md-3 mb-2 mx-auto">
+              <div class="d-grid">
+                <button type="submit" class="btn btn-block btn-lg btn-primary py-3" id="send">Скачать</button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="col-xl-6 mx-auto mb-3">
+        <h2>И если игра вам понравилась, можете кинуть мне $5 на кофе по кнопке в правом нижнем углу или на <a
+            href="https://paypal.me/interkelstar" target="_blank">PayPal</a></h2>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

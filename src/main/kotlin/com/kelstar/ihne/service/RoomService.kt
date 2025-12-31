@@ -31,7 +31,7 @@ class RoomService(
     
     fun getRoom(code: Int): Room? = roomRepository.findByIdOrNull(code)
 
-    @Scheduled(cron = "0 0 0 * * 5")
+    @Scheduled(cron = "0 0 0 28 * *")
     @SchedulerLock(name = "deleteOldRooms")
     @Transactional
     fun deleteOldRooms() {

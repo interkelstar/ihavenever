@@ -1,0 +1,246 @@
+@import "tailwindcss";
+
+/* Custom Theme Colors */
+@theme {
+  --color-primary-bg: #1a1a2e;
+  --color-secondary-bg: #16213e;
+  --color-accent: #007bff;
+  --color-text-main: #ffffff;
+  --color-text-secondary: #a0a0a0;
+  --color-glass-bg: rgba(255, 255, 255, 0.05);
+  --color-glass-border: rgba(255, 255, 255, 0.1);
+  --color-input-bg: rgba(0, 0, 0, 0.3);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background-color: var(--color-primary-bg);
+}
+
+/* Base Styles */
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: transparent;
+  color: var(--color-text-main);
+  min-height: 100dvh;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  bottom: -100px;
+  /* Buffer for mobile address bar resize */
+  z-index: -1;
+  background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6)), url('./bg.png') repeat top left;
+  transform: translate3d(0, 0, 0);
+  pointer-events: none;
+}
+
+#root {
+  width: 100%;
+}
+
+/* Glassmorphism Card - exact original look */
+.glass-card {
+  background: var(--color-glass-bg);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--color-glass-border);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  border-radius: 20px;
+  padding: 30px;
+  margin-bottom: 20px;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Typography */
+h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: white;
+  line-height: 1.2;
+}
+
+h2 {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--color-text-main);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* Inputs - keeping custom style with your glassmorphism look */
+.modern-input {
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-glass-border);
+  background: var(--color-input-bg);
+  color: white;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  outline: none;
+  margin-bottom: 1rem;
+  resize: none;
+  display: block;
+  overflow: hidden;
+  min-height: 3rem;
+}
+
+.modern-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
+}
+
+/* Floating Label Styles */
+.floating-group {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.floating-group .modern-input {
+  margin-bottom: 0;
+  padding-top: 1.6rem;
+  padding-bottom: 0.4rem;
+}
+
+.floating-group label {
+  position: absolute;
+  left: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-secondary);
+  font-size: 1rem;
+  pointer-events: none;
+  transition: all 0.2s ease;
+  background: transparent;
+}
+
+.floating-group .modern-input:focus~label,
+.floating-group .modern-input:not(:placeholder-shown)~label {
+  top: 0.4rem;
+  transform: translateY(0);
+  font-size: 0.75rem;
+  color: var(--color-accent);
+}
+
+.floating-group .modern-input::placeholder {
+  color: transparent;
+  transition: color 0.2s ease;
+}
+
+.floating-group .modern-input:focus::placeholder {
+  color: var(--color-text-secondary);
+}
+
+/* Buttons - keeping your branded style */
+.modern-btn {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: none;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.btn-primary {
+  background: var(--color-accent);
+  color: white;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 2px solid var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* Alerts */
+.modern-alert {
+  padding: 1rem;
+  border-radius: 0.625rem;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.alert-error {
+  background: rgba(220, 53, 69, 0.2);
+  border: 1px solid rgba(220, 53, 69, 0.5);
+  color: #ff8b94;
+}
+
+.alert-success {
+  background: rgba(40, 167, 69, 0.2);
+  border: 1px solid rgba(40, 167, 69, 0.5);
+  color: #81ef98;
+}
+
+/* QR Code Container */
+.qr-container {
+  background: white;
+  padding: 1rem;
+  border-radius: 0.625rem;
+  width: fit-content;
+  margin: 0 auto 1.25rem auto;
+}
+
+/* Custom text colors for labels */
+.text-secondary {
+  color: var(--color-text-secondary);
+}
+
+/* Footer Styles */
+.main-footer {
+  margin-top: auto;
+  padding: 5px 0 0 0;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  width: 100%;
+}
+
+.main-footer span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.main-footer a {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.2s;
+}
+
+.main-footer a:hover {
+  color: white;
+}
+
+.main-footer svg {
+  opacity: 0.8;
+}

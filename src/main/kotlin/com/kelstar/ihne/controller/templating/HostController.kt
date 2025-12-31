@@ -11,13 +11,13 @@ import org.springframework.web.multipart.MultipartFile
 
 
 @Controller
-@RequestMapping("room/{code}/host")
+@RequestMapping("old/room/{code}/host")
 class HostController(
     private val questionService: QuestionService,
     private val roomService: RoomService
 ) {
     @GetMapping
-    fun showHostPage(@PathVariable code: Int) = "redirect:/room/$code/host/step1"
+    fun showHostPage(@PathVariable code: Int) = "redirect:/old/room/$code/host/step1"
 
     @GetMapping("step1")
     fun showHostPageStep1(model: Model, @PathVariable code: Int): String {
@@ -26,8 +26,8 @@ class HostController(
                 addAttribute(it.code)
                 addAttribute(ImportParametersDto())
             }
-            "host/step1"
-        } ?: "roomNotFound"
+            "old/host/step1"
+        } ?: "old/roomNotFound"
     }
     
     @GetMapping("step2")
@@ -37,14 +37,14 @@ class HostController(
                 addAttribute(it.code)
                 addAttribute(ImportParametersDto())
             }
-            "host/step2"
-        } ?: "roomNotFound"
+            "old/host/step2"
+        } ?: "old/roomNotFound"
     }
     
     @PostMapping("step2")
     fun importQuestionsFromHostPage(model: Model, @ModelAttribute importParametersDto: ImportParametersDto, @PathVariable code: Int): String {
         if (!roomService.roomExists(code)) {
-            return "roomNotFound"
+            return "old/roomNotFound"
         }
         try {
             val count = questionService.importQuestionsByParameters(importParametersDto, code)
@@ -58,7 +58,7 @@ class HostController(
             model["errorMessage"] = "Произошла ошибка!"
         }
         model.addAttribute(importParametersDto)
-        return "host/step2"
+        return "old/host/step2"
     }
 
     @PostMapping("/step2/upload")
@@ -75,6 +75,6 @@ class HostController(
             }
         }
         model.addAttribute(ImportParametersDto())
-        return "host/step2"
+        return "old/host/step2"
     }
 }

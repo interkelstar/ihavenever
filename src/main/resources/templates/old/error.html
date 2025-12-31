@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{old/layout :: layout(~{::title}, ~{::.container})}">
+
+<head>
+  <title>Я никогда не!..</title>
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-xl-9 mx-auto">
+        <h1 class="mb-5">Что-то пошло не так</h1>
+      </div>
+    </div>
+    <div class="row mb-5">
+      <div class="col-xl-5 mx-auto">
+        <h3>Или такой страницы еще нет.</h3>
+        <h3>Попробуй перейти</h3>
+      </div>
+    </div>
+    <div class="row mb-5">
+      <div class="col-xl-9 mx-auto">
+        <a class="btn btn-primary" th:href="@{/old}">На главную страницу</a>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xl-5 mx-auto">
+        <h4>Она то уж точно есть (надеюсь)</h4>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

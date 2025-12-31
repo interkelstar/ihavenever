@@ -14,7 +14,7 @@ import java.time.LocalDate
 
 
 @Controller
-@RequestMapping("room/{code}")
+@RequestMapping("old/room/{code}")
 class GameController(
     private val questionService: QuestionService,
     private val roomService: RoomService
@@ -25,16 +25,16 @@ class GameController(
         return if (roomService.roomExists(code)) {
             model.apply { 
                 addAttribute(QuestionDto())
-                addAttribute(code)
+                addAttribute("code", code)
             }
-            "asking"
-        } else { "roomNotFound" }
+            "old/asking"
+        } else { "old/roomNotFound" }
     }
 
     @PostMapping
     fun saveQuestion(model: Model, @ModelAttribute questionDto: QuestionDto, @PathVariable code: Int): String {
         if (!roomService.roomExists(code)) {
-            return "roomNotFound"
+            return "old/roomNotFound"
         }
         try {
             if (questionService.addQuestion(questionDto, code)) {
@@ -46,7 +46,7 @@ class GameController(
             model["errorMessage"] = "Error during saving!"
         }
         model.addAttribute(QuestionDto())
-        return "asking"
+        return "old/asking"
     }
     
     @GetMapping("/game")
@@ -55,7 +55,7 @@ class GameController(
             model["question"] = QuestionDto(it.question)
             model["count"] = questionService.countNotShown(code)
         }
-        return "game"
+        return "old/game"
     }
     
     @PostMapping("/game")

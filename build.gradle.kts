@@ -1,5 +1,5 @@
 plugins {
-    val kotlinVersion = "1.4.10"
+    val kotlinVersion = "2.3.0"
 
     java
     idea
@@ -8,25 +8,50 @@ plugins {
     kotlin("plugin.spring") version kotlinVersion
     kotlin("plugin.jpa") version kotlinVersion
 
-    id("org.springframework.boot") version "2.7.0"
-    id("io.spring.dependency-management") version "1.1.0"
-    id("com.google.cloud.tools.appengine") version "2.4.1"
+    id("org.springframework.boot") version "4.0.0"
+    id("io.spring.dependency-management") version "1.1.7"
+    id("com.google.cloud.tools.appengine") version "2.8.0"
+    id("com.github.node-gradle.node") version "7.1.0"
+}
+
+node {
+    version.set("20.10.0")
+    download.set(true)
+    nodeProjectDir.set(file("frontend"))
+}
+
+val nodeDev by tasks.registering(com.github.gradle.node.npm.task.NpmTask::class) {
+    group = "application"
+    description = "Runs the frontend dev server"
+    args.set(listOf("run", "dev"))
+    dependsOn("npmInstall")
+}
+
+val copyCommonQuestions by tasks.registering(Copy::class) {
+    from("src/main/resources/questions/common.txt")
+    into("frontend/public")
+}
+
+tasks.named("npmInstall") {
+    dependsOn(copyCommonQuestions)
+}
+
+tasks.named("processResources") {
+    dependsOn("npm_run_build")
 }
 
 group = "com.kelstar"
 version = "1.0"
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
+kotlin {
+    jvmToolchain(25)
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    options.release.set(25)
 }
 
 tasks {
-    compileKotlin {
-        kotlinOptions {
-            jvmTarget = "11"
-            languageVersion = "1.4"
-        }
-    }
     bootJar {
         destinationDirectory.set(File("./release"))
         archiveFileName.set("ihne.jar")
@@ -53,7 +78,6 @@ repositories {
 }
 
 dependencies {
-    implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
 
@@ -66,19 +90,17 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.7")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
-    implementation("com.opencsv:opencsv:5.3")
-    implementation("net.javacrumbs.shedlock:shedlock-spring:4.44.0")
-    implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:4.44.0")
+    implementation("net.javacrumbs.shedlock:shedlock-spring:7.2.2")
+    implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:7.2.2")
 
     runtimeOnly("com.h2database:h2")
-    runtimeOnly("mysql:mysql-connector-java")
+    runtimeOnly("com.mysql:mysql-connector-j")
     runtimeOnly("org.postgresql:postgresql")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test") {
-        exclude(module = "junit-vintage-engine")
-    }
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
 }
