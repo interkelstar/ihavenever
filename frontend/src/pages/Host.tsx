@@ -139,7 +139,7 @@ const Host: React.FC = () => {
                     )}
 
                     <button type="submit" className="modern-btn btn-secondary mt-4" disabled={isLoading}>
-                        Загрузить
+                        {isLoading ? "Загрузка..." : "Загрузить"}
                     </button>
                 </form>
 
@@ -165,7 +165,7 @@ const Host: React.FC = () => {
                         )}
 
                         <button type="submit" className="modern-btn btn-secondary" disabled={!customFile || isLoading}>
-                            Импорт
+                            {isLoading ? "Загрузка..." : "Импорт"}
                         </button>
                     </form>
                 </div>
