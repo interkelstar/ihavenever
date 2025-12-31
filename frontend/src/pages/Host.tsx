@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { loadQuestions, uploadQuestions } from '../api/client';
 import { motion } from 'framer-motion';
+import { posthog } from '../analytics';
 
 const Host: React.FC = () => {
     const { code } = useParams<{ code: string }>();
@@ -14,7 +15,16 @@ const Host: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     // Construct the joining URL for the QR code
-    const joinUrl = `${window.location.origin}/room/${code}`;
+    const constructJoinUrl = () => {
+        const url = new URL(`${window.location.origin}/room/${code}`);
+        const currentParams = new URLSearchParams(window.location.search);
+        currentParams.forEach((value, key) => {
+            url.searchParams.set(key, value);
+        });
+        url.searchParams.set('source', 'host_qr');
+        return url.toString();
+    };
+    const joinUrl = constructJoinUrl();
 
     const handleLoadQuestions = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -28,6 +38,12 @@ const Host: React.FC = () => {
                 setLoadStatus({ text: "Все вопросы из этого набора уже загружены", type: 'success' });
             } else {
                 setLoadStatus({ text: `Успешно загружено ${count} вопросов!`, type: 'success' });
+                posthog.capture('questions_imported', {
+                    source: 'host_page',
+                    count: count,
+                    dataset: datasetName,
+                    size: size
+                });
             }
         } catch (error) {
             console.error("Failed to load questions", error);
@@ -46,6 +62,10 @@ const Host: React.FC = () => {
         try {
             const count = await uploadQuestions(parseInt(code), customFile);
             setImportStatus({ text: `Файл успешно загружен! Добавлено ${count} вопросов.`, type: 'success' });
+            posthog.capture('own_file_uploaded', {
+                source: 'host_page',
+                count: count
+            });
             setCustomFile(null);
             // Reset file input manually if needed or just rely on state
         } catch (error) {

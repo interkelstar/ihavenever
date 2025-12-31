@@ -12,7 +12,16 @@ const QRCodePopup: React.FC<QRCodePopupProps> = ({ roomCode, isOpen, onClose }) 
     const popupRef = useRef<HTMLDivElement>(null);
 
     // The full URL for joining the room
-    const joinUrl = `${window.location.origin}/room/${roomCode}`;
+    // The full URL for joining the room
+    const joinUrl = (() => {
+        const url = new URL(`${window.location.origin}/room/${roomCode}`);
+        const currentParams = new URLSearchParams(window.location.search);
+        currentParams.forEach((value, key) => {
+            url.searchParams.set(key, value);
+        });
+        url.searchParams.set('source', 'room_qr');
+        return url.toString();
+    })();
 
     // Close on click outside
     useEffect(() => {

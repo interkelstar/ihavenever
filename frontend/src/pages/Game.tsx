@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getRandomQuestion, getNotShownCount, downloadQuestions } from '../api/client';
 import { motion, AnimatePresence } from 'framer-motion';
+import { posthog } from '../analytics';
 
 import GameSettingsPopup from '../components/GameSettingsPopup';
 
@@ -77,6 +78,10 @@ const Game: React.FC = () => {
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
+            posthog.capture('questions_downloaded', {
+                roomCode: code,
+                count: remainingCount // approximate or unkown
+            });
         } catch (error) {
             console.error("Download failed", error);
         }
@@ -102,6 +107,7 @@ const Game: React.FC = () => {
                         onClose={() => setShowSettings(false)}
                         onQuestionsLoaded={() => setWereQuestionsLoaded(true)}
                         resetStatusTrigger={currentQuestion?.question}
+                        analyticsSource={isFinished ? 'game_finished' : 'game_active'}
                     />
                 )}
             </div>

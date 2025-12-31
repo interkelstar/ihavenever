@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { loadQuestions } from '../api/client';
+import { posthog } from '../analytics';
 
 interface GameSettingsPopupProps {
     roomCode: number;
@@ -8,9 +9,10 @@ interface GameSettingsPopupProps {
     onClose: () => void;
     resetStatusTrigger?: any;
     onQuestionsLoaded?: () => void;
+    analyticsSource?: string;
 }
 
-const GameSettingsPopup: React.FC<GameSettingsPopupProps> = ({ roomCode, isOpen, onClose, resetStatusTrigger, onQuestionsLoaded }) => {
+const GameSettingsPopup: React.FC<GameSettingsPopupProps> = ({ roomCode, isOpen, onClose, resetStatusTrigger, onQuestionsLoaded, analyticsSource }) => {
     const [datasetName, setDatasetName] = useState('common');
     const [size, setSize] = useState(10);
     const [loadStatus, setLoadStatus] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
@@ -56,6 +58,12 @@ const GameSettingsPopup: React.FC<GameSettingsPopupProps> = ({ roomCode, isOpen,
                 if (onQuestionsLoaded) {
                     onQuestionsLoaded();
                 }
+                posthog.capture('questions_imported', {
+                    source: analyticsSource || 'game_unknown', // fallback
+                    count: count,
+                    dataset: datasetName,
+                    size: size
+                });
             }
         } catch (error) {
             console.error("Failed to load questions", error);
