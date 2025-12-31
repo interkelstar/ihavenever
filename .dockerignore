@@ -7,3 +7,8 @@ db
 ### IntelliJ IDEA ###
 .idea
 *.iml
+
+### Frontend ###
+frontend/node_modules
+frontend/dist
+.npm
