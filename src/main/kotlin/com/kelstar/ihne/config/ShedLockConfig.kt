@@ -6,6 +6,7 @@ import net.javacrumbs.shedlock.spring.annotation.EnableSchedulerLock
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
+import org.springframework.jdbc.core.JdbcTemplate
 import javax.sql.DataSource
 
 
@@ -15,6 +16,10 @@ import javax.sql.DataSource
 class ShedLockConfig {
     @Bean
     fun lockProvider(dataSource: DataSource): LockProvider {
+        JdbcTemplate(dataSource).execute(
+            "CREATE TABLE IF NOT EXISTS shedlock(name VARCHAR(64) NOT NULL, lock_until TIMESTAMP NOT NULL, " +
+                    "locked_at TIMESTAMP NOT NULL, locked_by VARCHAR(255) NOT NULL, PRIMARY KEY (name))"
+        )
         return JdbcTemplateLockProvider(dataSource)
     }
 }
