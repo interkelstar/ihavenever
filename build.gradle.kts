@@ -1,5 +1,5 @@
 plugins {
-    val kotlinVersion = "2.3.0"
+    val kotlinVersion = "2.4.0"
 
     java
     idea
@@ -43,15 +43,27 @@ tasks.named("processResources") {
 group = "com.kelstar"
 version = "1.0"
 
-kotlin {
-    jvmToolchain(25)
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+    }
 }
 
 tasks.withType<JavaCompile>().configureEach {
-    options.release.set(25)
+    options.release.set(21)
 }
 
 tasks {
+    bootBuildImage {
+        builder.set("bellsoft/buildpacks.builder:glibc")
+        environment.put("BP_JVM_VERSION", "21")
+        environment.put("BP_JVM_TYPE", "JDK")
+    }
     bootJar {
         destinationDirectory.set(File("./release"))
         archiveFileName.set("ihne.jar")
@@ -80,6 +92,7 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
+    implementation("org.crac:crac")
 
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")

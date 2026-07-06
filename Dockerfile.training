@@ -1,0 +1,13 @@
+FROM gradle:9.2.1-jdk21 as builder
+USER root
+WORKDIR /builder
+COPY . /builder
+RUN gradle bootJar --stacktrace
+
+FROM bellsoft/liberica-runtime-container:jdk-21-crac-slim-glibc
+WORKDIR /app
+COPY --from=builder /builder/release/ihne.jar app.jar
+RUN mkdir -p /opt/crac-files
+# We run java in background and wait for it to run with PID not equal to 1,
+# which is needed for CRIU/CRaC dump.
+ENTRYPOINT ["sh", "-c", "java -jar app.jar & PID=$!; wait $PID"]

@@ -3,10 +3,16 @@ spring:
     active: local
     group:
       "prod": "${DB_PROFILE:mysql},shedlock"
+  data:
+    jpa:
+      repositories:
+        bootstrap-mode: deferred
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+  main:
+    lazy-initialization: true
   thymeleaf:
     reactive:
       max-chunk-size: 8192
