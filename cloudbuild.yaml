@@ -21,13 +21,23 @@ steps:
     entrypoint: 'gcloud'
     args:
       - 'run'
-      - 'services'
-      - 'update'
+      - 'deploy'
       - '$_SERVICE_NAME'
       - '--platform=managed'
       - '--image=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
       - '--labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID'
       - '--region=$_DEPLOY_REGION'
+      - '--allow-unauthenticated'
+      - '--execution-environment=gen2'
+      - '--startup-cpu-boost'
+      - '--max-scale=3'
+      - '--cpu=1'
+      - '--memory=2Gi'
+      - '--concurrency=80'
+      - '--port=8080'
+      - '--timeout=300s'
+      - '--service-account=64757629823-compute@developer.gserviceaccount.com'
+      - '--set-env-vars=SPRING_PROFILES_ACTIVE=prod,DB_PROFILE=postgres,DB_URL=aws-1-eu-central-1.pooler.supabase.com,DB_PORT=6543,DB_NAME=postgres,DB_USER=postgres.tgdpageqzutxrgupyawq,DB_PASS=xObsQT8zpZmKnsYo,SPRING_JPA_PROPERTIES_HIBERNATE_TEMP_USE_JDBC_METADATA_DEFAULTS=false,SPRING_JPA_PROPERTIES_HIBERNATE_JDBC_LOB_NON_CONTEXTUAL_CREATION=true,SPRING_DATASOURCE_HIKARI_INITIALIZATION_FAIL_TIMEOUT=0,SPRING_MAIN_LAZY_INITIALIZATION=true,DB_PARAMS=$_DB_PARAMS,DB_INIT_SQL=$_DB_INIT_SQL'
       - '--quiet'
 
 substitutions:
@@ -36,6 +46,8 @@ substitutions:
   _AR_REPOSITORY: 'cloud-run-source-deploy'
   _DEPLOY_REGION: 'europe-west1'
   _SERVICE_NAME: 'ihavenever'
+  _DB_PARAMS: ''
+  _DB_INIT_SQL: ''
 
 options:
   logging: CLOUD_LOGGING_ONLY
