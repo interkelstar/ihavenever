@@ -39,3 +39,8 @@ frontend/node_modules/
 release/ihne.jar
 /src/main/resources/static/assets/
 /src/main/resources/static/index.html
+
+### CRaC checkpoint artifacts ###
+crac-check/
+dump*.log
+*.img

@@ -6,6 +6,7 @@ spring:
     username: ${DB_USER:root}
     password: ${DB_PASS:pw}
     hikari:
+      allow-pool-suspension: true
       connection-test-query: SELECT 1
       connection-timeout: 60000 #1 min
       validation-timeout: 1000 #1 sec
