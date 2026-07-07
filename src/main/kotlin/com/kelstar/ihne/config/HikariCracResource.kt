@@ -5,10 +5,12 @@ import org.crac.Context
 import org.crac.Core
 import org.crac.Resource
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import javax.sql.DataSource
 
 @Component
+@Lazy(false)
 class HikariCracResource(private val dataSource: DataSource) : Resource {
     private val logger = LoggerFactory.getLogger(javaClass)
 
