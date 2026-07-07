@@ -64,7 +64,7 @@ echo "Checkpoint files verified successfully!"
 # We set the ENTRYPOINT to restore from the /opt/crac-files directory with CPU features ignored since they can differ in production,
 # and we clear training-specific environment variables so that production is not overridden by dummy config.
 docker commit \
-  --change='ENTRYPOINT ["java", "-XX:+UnlockExperimentalVMOptions", "-XX:+IgnoreCPUFeatures", "-XX:CRaCRestoreFrom=/opt/crac-files"]' \
+  --change='ENTRYPOINT ["/app/run-app.sh"]' \
   --change='ENV JAVA_TOOL_OPTIONS=""' \
   --change='ENV SPRING_DATASOURCE_URL=""' \
   --change='ENV SPRING_DATASOURCE_DRIVER_CLASS_NAME=""' \

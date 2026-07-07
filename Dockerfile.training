@@ -7,6 +7,8 @@ RUN gradle bootJar --stacktrace
 FROM bellsoft/liberica-runtime-container:jdk-21-crac-slim-glibc
 WORKDIR /app
 COPY --from=builder /builder/release/ihne.jar app.jar
+COPY run-app.sh /app/run-app.sh
+RUN chmod +x /app/run-app.sh
 RUN mkdir -p /opt/crac-files
 # We run java in background and wait for it to run with PID not equal to 1,
 # which is needed for CRIU/CRaC dump.
