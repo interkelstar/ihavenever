@@ -6,6 +6,29 @@ import QRCodePopup from '../components/QRCodePopup';
 import BecomeHostPopup from '../components/BecomeHostPopup';
 import BecomeHostWarningPopup from '../components/BecomeHostWarningPopup';
 
+const SUGGESTIONS = [
+    'покупал вещь, которую надел всего один раз',
+    'заваривал чайный пакетик второй или третий раз подряд',
+    'смотрел целый сезон сериала за один день',
+    'отправлял сообщение не тому человеку',
+    'случайно надевал разные носки и замечал это только на улице',
+    'засыпал на работе или важной лекции',
+    'пользовался студенческим или льготным билетом после того, как закончил учебу',
+    'купался в бассейне или море прямо в одежде',
+    'ел пиццу с ананасами и искренне радовался',
+    'притворялся спящим в транспорте, чтобы не уступать место',
+    'сбегал с неудачного свидания через 15 минут',
+    'забывал поливать комнатное растение так долго, что оно засыхало',
+    'разбивал экран нового телефона в первую неделю после покупки',
+    'разговаривал с умной колонкой или голосовым помощником на эмоциях',
+    'верил в привидений после просмотра фильма ужасов',
+    'репетировал речь или важный разговор перед зеркалом',
+    'готовил блюдо по рецепту, которое в итоге пришлось выбросить',
+    'пытался открыть дверь квартиры чужими ключами',
+    'подключался к чужому Wi-Fi без разрешения',
+    'прятался в шкафу во время игры в прятки во взрослом возрасте'
+];
+
 const Room: React.FC = () => {
     const { code } = useParams<{ code: string }>();
     const navigate = useNavigate();
@@ -13,9 +36,8 @@ const Room: React.FC = () => {
     const [okMessage, setOkMessage] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [placeholder, setPlaceholder] = useState('...прыгал с парашютом');
-    const [rawSuggestion, setRawSuggestion] = useState('');
-    const [suggestions, setSuggestions] = useState<string[]>([]);
+    const [placeholder, setPlaceholder] = useState(`...${SUGGESTIONS[0]}`);
+    const [rawSuggestion, setRawSuggestion] = useState(SUGGESTIONS[0]);
     const [isFocused, setIsFocused] = useState(false);
     const [showQR, setShowQR] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
@@ -47,20 +69,6 @@ const Room: React.FC = () => {
             }
         };
         validateRoom();
-
-        const loadSuggestions = async () => {
-            try {
-                const response = await fetch('/common.txt');
-                if (response.ok) {
-                    const text = await response.text();
-                    const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
-                    setSuggestions(lines);
-                }
-            } catch (error) {
-                console.error("Error loading suggestions", error);
-            }
-        };
-        loadSuggestions();
     }, [code, navigate]);
 
     useEffect(() => {
@@ -68,15 +76,10 @@ const Room: React.FC = () => {
     }, [placeholder, question, isFocused]);
 
     const refreshPlaceholder = () => {
-        if (suggestions.length > 0) {
-            const randomIndex = Math.floor(Math.random() * suggestions.length);
-            const sug = suggestions[randomIndex];
-            setRawSuggestion(sug);
-            setPlaceholder('...' + sug);
-        } else {
-            setRawSuggestion('прыгал с парашютом');
-            setPlaceholder('...прыгал с парашютом');
-        }
+        const randomIndex = Math.floor(Math.random() * SUGGESTIONS.length);
+        const sug = SUGGESTIONS[randomIndex];
+        setRawSuggestion(sug);
+        setPlaceholder('...' + sug);
     };
 
     const handlePointerDown = () => {
