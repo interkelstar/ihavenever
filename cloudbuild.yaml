@@ -48,6 +48,7 @@ substitutions:
   _SERVICE_NAME: 'ihavenever'
   _DB_PARAMS: ''
   _DB_INIT_SQL: ''
+  _TRIGGER_ID: ''
 
 options:
   logging: CLOUD_LOGGING_ONLY
