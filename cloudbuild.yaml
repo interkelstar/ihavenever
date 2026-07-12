@@ -13,9 +13,9 @@ steps:
           DB_PARAMS="?currentSchema=pr_$_PR_NUMBER"
           DB_INIT_SQL="CREATE SCHEMA IF NOT EXISTS pr_$_PR_NUMBER;"
         fi
-        echo "export SERVICE_NAME=\"$SERVICE_NAME\"" > /workspace/build_env.sh
-        echo "export DB_PARAMS=\"$DB_PARAMS\"" >> /workspace/build_env.sh
-        echo "export DB_INIT_SQL=\"$DB_INIT_SQL\"" >> /workspace/build_env.sh
+        echo "export SERVICE_NAME=\"$$SERVICE_NAME\"" > /workspace/build_env.sh
+        echo "export DB_PARAMS=\"$$DB_PARAMS\"" >> /workspace/build_env.sh
+        echo "export DB_INIT_SQL=\"$$DB_INIT_SQL\"" >> /workspace/build_env.sh
         cat /workspace/build_env.sh
 
   # Step 1: Run the build-crac.sh script to compile components, pre-warm JVM, and take a snapshot
