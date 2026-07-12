@@ -1,12 +1,32 @@
 steps:
+  # Step 0: Set dynamic environment variables for Pull Request previews
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        SERVICE_NAME="$_SERVICE_NAME"
+        DB_PARAMS="$_DB_PARAMS"
+        DB_INIT_SQL="$_DB_INIT_SQL"
+        if [ -n "$_PR_NUMBER" ]; then
+          SERVICE_NAME="ihavenever-pr-$_PR_NUMBER"
+          DB_PARAMS="?currentSchema=pr_$_PR_NUMBER"
+          DB_INIT_SQL="CREATE SCHEMA IF NOT EXISTS pr_$_PR_NUMBER;"
+        fi
+        echo "export SERVICE_NAME=\"$SERVICE_NAME\"" > /workspace/build_env.sh
+        echo "export DB_PARAMS=\"$DB_PARAMS\"" >> /workspace/build_env.sh
+        echo "export DB_INIT_SQL=\"$DB_INIT_SQL\"" >> /workspace/build_env.sh
+        cat /workspace/build_env.sh
+
   # Step 1: Run the build-crac.sh script to compile components, pre-warm JVM, and take a snapshot
   - name: 'gcr.io/cloud-builders/docker'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
+        source /workspace/build_env.sh
         chmod +x build-crac.sh
-        ./build-crac.sh "$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
+        ./build-crac.sh "$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$$SERVICE_NAME:$COMMIT_SHA"
 
   # Step 2: Push the finished CRaC-restore image to Google Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
@@ -14,31 +34,33 @@ steps:
     args:
       - '-c'
       - |
-        docker push "$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
+        source /workspace/build_env.sh
+        docker push "$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$$SERVICE_NAME:$COMMIT_SHA"
 
   # Step 3: Deploy the image of the checkpointed app to Google Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
-    entrypoint: 'gcloud'
+    entrypoint: 'bash'
     args:
-      - 'run'
-      - 'deploy'
-      - '$_SERVICE_NAME'
-      - '--platform=managed'
-      - '--image=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
-      - '--labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID'
-      - '--region=$_DEPLOY_REGION'
-      - '--allow-unauthenticated'
-      - '--execution-environment=gen2'
-      - '--cpu-boost'
-      - '--max-instances=3'
-      - '--cpu=1'
-      - '--memory=2Gi'
-      - '--concurrency=80'
-      - '--port=8080'
-      - '--timeout=300s'
-      - '--service-account=64757629823-compute@developer.gserviceaccount.com'
-      - '--set-env-vars=SPRING_PROFILES_ACTIVE=prod,DB_PROFILE=postgres,DB_URL=aws-1-eu-central-1.pooler.supabase.com,DB_PORT=6543,DB_NAME=postgres,DB_USER=postgres.tgdpageqzutxrgupyawq,DB_PASS=xObsQT8zpZmKnsYo,SPRING_JPA_PROPERTIES_HIBERNATE_TEMP_USE_JDBC_METADATA_DEFAULTS=false,SPRING_JPA_PROPERTIES_HIBERNATE_JDBC_LOB_NON_CONTEXTUAL_CREATION=true,SPRING_DATASOURCE_HIKARI_INITIALIZATION_FAIL_TIMEOUT=0,SPRING_MAIN_LAZY_INITIALIZATION=true,DB_PARAMS=$_DB_PARAMS,DB_INIT_SQL=$_DB_INIT_SQL'
-      - '--quiet'
+      - '-c'
+      - |
+        source /workspace/build_env.sh
+        gcloud run deploy "$$SERVICE_NAME" \
+          --platform=managed \
+          --image="$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$$SERVICE_NAME:$COMMIT_SHA" \
+          --labels="managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID" \
+          --region="$_DEPLOY_REGION" \
+          --allow-unauthenticated \
+          --execution-environment=gen2 \
+          --cpu-boost \
+          --max-instances=3 \
+          --cpu=1 \
+          --memory=2Gi \
+          --concurrency=80 \
+          --port=8080 \
+          --timeout=300s \
+          --service-account="64757629823-compute@developer.gserviceaccount.com" \
+          --set-env-vars="SPRING_PROFILES_ACTIVE=prod,DB_PROFILE=postgres,DB_URL=aws-1-eu-central-1.pooler.supabase.com,DB_PORT=6543,DB_NAME=postgres,DB_USER=postgres.tgdpageqzutxrgupyawq,DB_PASS=xObsQT8zpZmKnsYo,SPRING_JPA_PROPERTIES_HIBERNATE_TEMP_USE_JDBC_METADATA_DEFAULTS=false,SPRING_JPA_PROPERTIES_HIBERNATE_JDBC_LOB_NON_CONTEXTUAL_CREATION=true,SPRING_DATASOURCE_HIKARI_INITIALIZATION_FAIL_TIMEOUT=0,SPRING_MAIN_LAZY_INITIALIZATION=true,DB_PARAMS=$$DB_PARAMS,DB_INIT_SQL=$$DB_INIT_SQL" \
+          --quiet
 
 substitutions:
   _AR_HOSTNAME: 'europe-west1-docker.pkg.dev'
@@ -49,10 +71,8 @@ substitutions:
   _DB_PARAMS: ''
   _DB_INIT_SQL: ''
   _TRIGGER_ID: ''
+  _PR_NUMBER: ''
 
 options:
   logging: CLOUD_LOGGING_ONLY
   substitutionOption: ALLOW_LOOSE
-
-images:
-  - '$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
