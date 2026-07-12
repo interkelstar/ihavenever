@@ -49,7 +49,6 @@ substitutions:
   _DB_PARAMS: ''
   _DB_INIT_SQL: ''
   _TRIGGER_ID: ''
-  _PR_NUMBER: ''
 
 options:
   logging: CLOUD_LOGGING_ONLY
