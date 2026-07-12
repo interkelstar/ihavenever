@@ -8,10 +8,14 @@ steps:
         SERVICE_NAME="$_SERVICE_NAME"
         DB_PARAMS="$_DB_PARAMS"
         DB_INIT_SQL="$_DB_INIT_SQL"
-        if [ -n "$_PR_NUMBER" ]; then
-          SERVICE_NAME="ihavenever-pr-$_PR_NUMBER"
-          DB_PARAMS="?currentSchema=pr_$_PR_NUMBER"
-          DB_INIT_SQL="CREATE SCHEMA IF NOT EXISTS pr_$_PR_NUMBER;"
+        if [ "$TRIGGER_NAME" = "rmgpgab-ihavenever-pr" ]; then
+          PR_JSON=$$(curl -s -H "Accept: application/vnd.github+json" https://api.github.com/repos/interkelstar/ihavenever/commits/$COMMIT_SHA/pulls)
+          PR_NUMBER=$$(echo "$$PR_JSON" | grep -m 1 '"number":' | awk '{print $2}' | tr -d ',')
+          if [ -n "$$PR_NUMBER" ]; then
+            SERVICE_NAME="ihavenever-pr-$$PR_NUMBER"
+            DB_PARAMS="?currentSchema=pr_$$PR_NUMBER"
+            DB_INIT_SQL="CREATE SCHEMA IF NOT EXISTS pr_$$PR_NUMBER;"
+          fi
         fi
         echo "export SERVICE_NAME=\"$$SERVICE_NAME\"" > /workspace/build_env.sh
         echo "export DB_PARAMS=\"$$DB_PARAMS\"" >> /workspace/build_env.sh
