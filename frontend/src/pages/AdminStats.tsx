@@ -30,9 +30,9 @@ interface StatsData {
 // Generate demo data to show if database is empty
 const generateDemoData = (): StatsData => {
     const now = new Date();
-    const historical: HistoricalStat[] = Array.from({ length: 15 }).map((_, i) => {
+    const historical: HistoricalStat[] = Array.from({ length: 30 }).map((_, i) => {
         const date = new Date();
-        date.setDate(now.getDate() - (15 - i) * 2);
+        date.setDate(now.getDate() - (30 - i) * 1.5); // Spread over ~45 days
         const questionsTotal = Math.floor(Math.random() * 30) + 15;
         const questionsShown = Math.floor(Math.random() * (questionsTotal - 5)) + 5;
         const questionsPredefined = Math.floor(questionsTotal * (Math.random() * 0.4 + 0.5)); // 50-90% predefined
@@ -72,6 +72,10 @@ const AdminStats: React.FC = () => {
     const [authError, setAuthError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'overview' | 'active' | 'historical'>('overview');
     const [hoveredPoint, setHoveredPoint] = useState<{ x: number; y: number; label: string; value: number } | null>(null);
+
+    // Time filter states
+    const [timeUnit, setTimeUnit] = useState<'all' | 'month' | 'week'>('all');
+    const [timeOffset, setTimeOffset] = useState<number>(0);
 
     // Load credentials from localStorage if available
     const [authHeader, setAuthHeader] = useState<string | null>(() => {
@@ -205,66 +209,140 @@ const AdminStats: React.FC = () => {
         );
     }
 
-    // Prepare combined calculations
-    const stats = data || generateDemoData();
-    const totalHistoricalRooms = stats.historical.length;
-    const totalRooms = stats.totalActiveRooms + totalHistoricalRooms;
+    const rawStats = data || generateDemoData();
 
-    const totalHistoricalQuestions = stats.historical.reduce((sum, h) => sum + h.questionsTotal, 0);
-    const totalQuestions = stats.totalActiveQuestions + totalHistoricalQuestions;
+    // Calculate dates and labels for time filters
+    const getPeriodRange = () => {
+        let start: Date | null = null;
+        let end: Date | null = null;
 
-    const totalHistoricalShown = stats.historical.reduce((sum, h) => sum + h.questionsShown, 0);
-    const totalShown = stats.totalActiveShownQuestions + totalHistoricalShown;
+        if (timeUnit === 'month') {
+            const targetDate = new Date();
+            targetDate.setMonth(targetDate.getMonth() + timeOffset);
+            start = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1, 0, 0, 0);
+            end = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0, 23, 59, 59);
+        } else if (timeUnit === 'week') {
+            const targetDate = new Date();
+            const day = targetDate.getDay();
+            const diff = targetDate.getDate() - day + (day === 0 ? -6 : 1);
+            const monday = new Date(targetDate.setDate(diff));
+            monday.setHours(0, 0, 0, 0);
+            
+            start = new Date(monday.getTime() + timeOffset * 7 * 24 * 60 * 60 * 1000);
+            end = new Date(start.getTime() + 6 * 24 * 60 * 60 * 1000 + 23 * 60 * 60 * 1000 + 59 * 60 * 1000 + 59 * 1000);
+        }
+        return { start, end };
+    };
 
-    const totalHistoricalPredefined = stats.historical.reduce((sum, h) => sum + h.questionsPredefined, 0);
-    const totalPredefined = stats.totalActivePredefinedQuestions + totalHistoricalPredefined;
+    const { start, end } = getPeriodRange();
+
+    const getPeriodLabel = () => {
+        if (timeUnit === 'all') return 'Все время';
+        if (timeUnit === 'month') {
+            const targetDate = new Date();
+            targetDate.setMonth(targetDate.getMonth() + timeOffset);
+            return targetDate.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
+        }
+        if (timeUnit === 'week' && start && end) {
+            return `${start.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })} — ${end.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+        }
+        return '';
+    };
+    const periodLabel = getPeriodLabel();
+
+    // Filter data by selected date range
+    const filteredHistorical = rawStats.historical.filter(h => {
+        if (!start || !end) return true;
+        const d = new Date(h.creationDate);
+        return d >= start && d <= end;
+    });
+
+    const filteredActive = rawStats.activeRooms.filter(r => {
+        if (!start || !end) return true;
+        const d = new Date(r.dateCreated);
+        return d >= start && d <= end;
+    });
+
+    // Calculations based on filtered data
+    const totalHistoricalRooms = filteredHistorical.length;
+    const totalRooms = filteredActive.length + totalHistoricalRooms;
+
+    const totalHistoricalQuestions = filteredHistorical.reduce((sum, h) => sum + h.questionsTotal, 0);
+    const totalActiveQuestions = filteredActive.reduce((sum, r) => sum + r.questionsTotal, 0);
+    const totalQuestions = totalActiveQuestions + totalHistoricalQuestions;
+
+    const totalHistoricalShown = filteredHistorical.reduce((sum, h) => sum + h.questionsShown, 0);
+    const totalActiveShown = filteredActive.reduce((sum, r) => sum + r.questionsShown, 0);
+    const totalShown = totalActiveShown + totalHistoricalShown;
+
+    const totalHistoricalPredefined = filteredHistorical.reduce((sum, h) => sum + h.questionsPredefined, 0);
+    const totalActivePredefined = filteredActive.reduce((sum, r) => sum + r.questionsPredefined, 0);
+    const totalPredefined = totalActivePredefined + totalHistoricalPredefined;
     const totalCustom = totalQuestions - totalPredefined;
 
     const showRate = totalQuestions > 0 ? (totalShown / totalQuestions) * 100 : 0;
     const predefinedRate = totalQuestions > 0 ? (totalPredefined / totalQuestions) * 100 : 0;
     const customRate = 100 - predefinedRate;
 
-    // Process room creation timeline
-    // Group rooms by date
-    const timelineMap: { [key: string]: number } = {};
-    const processDate = (dateStr: string) => {
-        try {
-            const d = new Date(dateStr);
-            return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
-        } catch {
-            return 'Unknown';
+    // Process room creation timeline (fill all days for selected week/month or dynamic for all time)
+    let timelineData: { date: string; count: number }[] = [];
+
+    const processDateLabel = (date: Date) => {
+        return date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
+    };
+
+    if (timeUnit === 'week' && start) {
+        timelineData = Array.from({ length: 7 }).map((_, i) => {
+            const d = new Date(start.getTime() + i * 24 * 60 * 60 * 1000);
+            return { date: processDateLabel(d), count: 0 };
+        });
+    } else if (timeUnit === 'month' && start && end) {
+        const daysInMonth = end.getDate();
+        timelineData = Array.from({ length: daysInMonth }).map((_, i) => {
+            const d = new Date(start.getFullYear(), start.getMonth(), i + 1);
+            return { date: processDateLabel(d), count: 0 };
+        });
+    }
+
+    const fillTimeline = (dateStr: string) => {
+        const d = new Date(dateStr);
+        const label = processDateLabel(d);
+        const existing = timelineData.find(t => t.date === label);
+        if (existing) {
+            existing.count++;
+        } else if (timeUnit === 'all') {
+            timelineData.push({ date: label, count: 1 });
         }
     };
 
-    stats.historical.forEach(h => {
-        const key = processDate(h.creationDate);
-        timelineMap[key] = (timelineMap[key] || 0) + 1;
-    });
-    stats.activeRooms.forEach(r => {
-        const key = processDate(r.dateCreated);
-        timelineMap[key] = (timelineMap[key] || 0) + 1;
-    });
+    filteredHistorical.forEach(h => fillTimeline(h.creationDate));
+    filteredActive.forEach(r => fillTimeline(r.dateCreated));
 
-    // Sort timeline keys (assuming they are DD.MM formats we can map chronologically)
-    const timelineData = Object.entries(timelineMap)
-        .map(([date, count]) => ({ date, count }))
-        // Simple sort by day/month mapping
-        .sort((a, b) => {
-            const [dayA, monthA] = a.date.split('.').map(Number);
-            const [dayB, monthB] = b.date.split('.').map(Number);
-            return (monthA * 32 + dayA) - (monthB * 32 + dayB);
+    if (timeUnit === 'all') {
+        // Group & sort for all-time
+        const groupedMap: { [key: string]: number } = {};
+        timelineData.forEach(item => {
+            groupedMap[item.date] = (groupedMap[item.date] || 0) + item.count;
         });
 
-    // Ensure we have at least 5 points for a beautiful chart
-    if (timelineData.length < 5 && timelineData.length > 0) {
-        // pad with some older zero dates
-        const firstDateStr = timelineData[0].date;
-        const [day, month] = firstDateStr.split('.').map(Number);
-        for (let i = 4; i > 0; i--) {
-            const prevDate = new Date(2026, month - 1, day - i);
-            const prevLabel = prevDate.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
-            if (!timelineMap[prevLabel]) {
-                timelineData.unshift({ date: prevLabel, count: 0 });
+        timelineData = Object.entries(groupedMap)
+            .map(([date, count]) => ({ date, count }))
+            .sort((a, b) => {
+                const [dayA, monthA] = a.date.split('.').map(Number);
+                const [dayB, monthB] = b.date.split('.').map(Number);
+                return (monthA * 32 + dayA) - (monthB * 32 + dayB);
+            });
+
+        // Pad to at least 5 points
+        if (timelineData.length < 5 && timelineData.length > 0) {
+            const firstDateStr = timelineData[0].date;
+            const [day, month] = firstDateStr.split('.').map(Number);
+            for (let i = 4; i > 0; i--) {
+                const prevDate = new Date(2026, month - 1, day - i);
+                const prevLabel = processDateLabel(prevDate);
+                if (!groupedMap[prevLabel]) {
+                    timelineData.unshift({ date: prevLabel, count: 0 });
+                }
             }
         }
     }
@@ -296,7 +374,6 @@ const AdminStats: React.FC = () => {
                 linePath += `M ${x} ${y}`;
                 areaPath += `M ${x} ${paddingTop + plotHeight} L ${x} ${y}`;
             } else {
-                // smooth curves using bezier control points
                 const prevPoint = points[i - 1];
                 const cpX1 = prevPoint.x + (x - prevPoint.x) / 2;
                 const cpY1 = prevPoint.y;
@@ -315,7 +392,7 @@ const AdminStats: React.FC = () => {
     return (
         <div className="w-full text-gray-200">
             {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                 <div>
                     <h1 className="text-3xl font-extrabold text-white text-left mb-1 flex items-center gap-2">
                         <span>📊</span> Панель статистики
@@ -331,7 +408,7 @@ const AdminStats: React.FC = () => {
                 <div className="flex gap-3">
                     <button
                         onClick={toggleDemoMode}
-                        className={`px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider border transition-all ${
+                        className={`px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider border transition-all cursor-pointer ${
                             isDemo
                                 ? 'bg-amber-500/20 border-amber-500 text-amber-300'
                                 : 'bg-white/5 border-white/10 hover:bg-white/10 text-white'
@@ -342,12 +419,77 @@ const AdminStats: React.FC = () => {
                     {!isDemo && (
                         <button
                             onClick={handleLogout}
-                            className="px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider bg-red-500/10 border border-red-500/30 text-red-300 hover:bg-red-500/20 transition-all"
+                            className="px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider bg-red-500/10 border border-red-500/30 text-red-300 hover:bg-red-500/20 transition-all cursor-pointer"
                         >
                             Выйти
                         </button>
                     )}
                 </div>
+            </div>
+
+            {/* Time Filter Toolbar */}
+            <div className="glass-card p-4 mb-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/10">
+                    <button
+                        onClick={() => { setTimeUnit('all'); setTimeOffset(0); }}
+                        className={`px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                            timeUnit === 'all'
+                                ? 'bg-blue-500 text-white shadow-md'
+                                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                        }`}
+                    >
+                        Все время
+                    </button>
+                    <button
+                        onClick={() => { setTimeUnit('month'); setTimeOffset(0); }}
+                        className={`px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                            timeUnit === 'month'
+                                ? 'bg-blue-500 text-white shadow-md'
+                                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                        }`}
+                    >
+                        По месяцам
+                    </button>
+                    <button
+                        onClick={() => { setTimeUnit('week'); setTimeOffset(0); }}
+                        className={`px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                            timeUnit === 'week'
+                                ? 'bg-blue-500 text-white shadow-md'
+                                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                        }`}
+                    >
+                        По неделям
+                    </button>
+                </div>
+
+                {timeUnit !== 'all' && (
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => setTimeOffset(prev => prev - 1)}
+                            className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white transition-all cursor-pointer"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <span className="text-sm font-bold text-white tracking-wide min-w-[150px] text-center capitalize">
+                            {periodLabel}
+                        </span>
+                        <button
+                            onClick={() => setTimeOffset(prev => prev + 1)}
+                            disabled={timeOffset === 0}
+                            className={`w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white transition-all ${
+                                timeOffset === 0
+                                    ? 'opacity-20 cursor-not-allowed'
+                                    : 'hover:bg-white/10 cursor-pointer'
+                            }`}
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* KPI Cards Grid */}
@@ -361,10 +503,10 @@ const AdminStats: React.FC = () => {
                     <div className="flex items-baseline justify-between mt-2">
                         <span className="text-4xl font-extrabold text-white">{totalRooms}</span>
                         <span className="text-xs text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full font-semibold">
-                            {stats.totalActiveRooms} акт.
+                            {filteredActive.length} акт.
                         </span>
                     </div>
-                    <p className="text-xs text-gray-400 mt-2">С учетом удаленных комнат</p>
+                    <p className="text-xs text-gray-400 mt-2">За выбранный период</p>
                 </motion.div>
 
                 {/* Card 2 */}
@@ -376,10 +518,10 @@ const AdminStats: React.FC = () => {
                     <div className="flex items-baseline justify-between mt-2">
                         <span className="text-4xl font-extrabold text-white">{totalQuestions}</span>
                         <span className="text-xs text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full font-semibold">
-                            {stats.totalActiveQuestions} в акт.
+                            {totalActiveQuestions} в акт.
                         </span>
                     </div>
-                    <p className="text-xs text-gray-400 mt-2">База всех созданных вопросов</p>
+                    <p className="text-xs text-gray-400 mt-2">Создано за выбранный период</p>
                 </motion.div>
 
                 {/* Card 3 */}
@@ -394,7 +536,6 @@ const AdminStats: React.FC = () => {
                             {showRate.toFixed(0)}% вовлеч.
                         </span>
                     </div>
-                    {/* Tiny Progress bar */}
                     <div className="w-full bg-white/5 rounded-full h-1.5 mt-3 overflow-hidden">
                         <div className="bg-emerald-500 h-1.5 rounded-full" style={{ width: `${showRate}%` }}></div>
                     </div>
@@ -412,7 +553,6 @@ const AdminStats: React.FC = () => {
                             {predefinedRate.toFixed(0)}%
                         </span>
                     </div>
-                    {/* Custom vs Predefined bar */}
                     <div className="w-full bg-purple-500 rounded-full h-1.5 mt-3 overflow-hidden flex">
                         <div className="bg-cyan-400 h-1.5" style={{ width: `${predefinedRate}%` }}></div>
                     </div>
@@ -429,7 +569,7 @@ const AdminStats: React.FC = () => {
                     </div>
 
                     <div className="relative h-60 w-full mt-2">
-                        {timelineData.length > 1 ? (
+                        {timelineData.length > 0 && maxTimelineValue > 0 ? (
                             <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-full">
                                 <defs>
                                     <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
@@ -467,16 +607,18 @@ const AdminStats: React.FC = () => {
                                 })}
 
                                 {/* Area Fill */}
-                                <path d={areaPath} fill="url(#chartGradient)" />
+                                {areaPath && <path d={areaPath} fill="url(#chartGradient)" />}
 
                                 {/* Glowing Stroke */}
-                                <path
-                                    d={linePath}
-                                    fill="none"
-                                    stroke="#3b82f6"
-                                    strokeWidth="3.5"
-                                    strokeLinecap="round"
-                                />
+                                {linePath && (
+                                    <path
+                                        d={linePath}
+                                        fill="none"
+                                        stroke="#3b82f6"
+                                        strokeWidth="3.5"
+                                        strokeLinecap="round"
+                                    />
+                                )}
 
                                 {/* Interactive Dots */}
                                 {points.map((p, idx) => (
@@ -490,7 +632,6 @@ const AdminStats: React.FC = () => {
                                         strokeWidth="2"
                                         className="transition-all cursor-pointer duration-150"
                                         onMouseEnter={(e) => {
-                                            const rect = e.currentTarget.getBoundingClientRect();
                                             setHoveredPoint({
                                                 x: p.x,
                                                 y: p.y,
@@ -504,8 +645,7 @@ const AdminStats: React.FC = () => {
 
                                 {/* X-axis labels */}
                                 {timelineData.map((d, i) => {
-                                    // limit labels to keep it clean
-                                    const step = Math.ceil(timelineData.length / 8);
+                                    const step = Math.max(Math.ceil(timelineData.length / 8), 1);
                                     if (i % step !== 0 && i !== timelineData.length - 1) return null;
 
                                     const x = paddingLeft + (i / (timelineData.length - 1)) * plotWidth;
@@ -552,11 +692,9 @@ const AdminStats: React.FC = () => {
                         <p className="text-xs text-gray-400 mb-6">Пропорция встроенных и пользовательских вопросов</p>
                     </div>
 
-                    {/* SVG Radial Progress */}
                     <div className="flex flex-col items-center justify-center gap-6">
                         <div className="relative w-36 h-36">
                             <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                                {/* Track */}
                                 <circle
                                     cx="50"
                                     cy="50"
@@ -565,22 +703,20 @@ const AdminStats: React.FC = () => {
                                     stroke="rgba(255,255,255,0.05)"
                                     strokeWidth="10"
                                 />
-                                {/* Custom slice */}
                                 <circle
                                     cx="50"
                                     cy="50"
                                     r="40"
                                     fill="transparent"
-                                    stroke="#a855f7" // purple-500
+                                    stroke="#a855f7"
                                     strokeWidth="10"
                                 />
-                                {/* Predefined slice overlay */}
                                 <circle
                                     cx="50"
                                     cy="50"
                                     r="40"
                                     fill="transparent"
-                                    stroke="#22d3ee" // cyan-400
+                                    stroke="#22d3ee"
                                     strokeWidth="10"
                                     strokeDasharray={`${2 * Math.PI * 40}`}
                                     strokeDashoffset={`${2 * Math.PI * 40 * (1 - predefinedRate / 100)}`}
@@ -593,7 +729,6 @@ const AdminStats: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Legends */}
                         <div className="w-full grid grid-cols-2 gap-3 text-center mt-2">
                             <div className="bg-cyan-500/5 border border-cyan-500/20 rounded-xl p-2">
                                 <div className="flex items-center justify-center gap-1.5 mb-0.5">
@@ -621,29 +756,29 @@ const AdminStats: React.FC = () => {
                 <div className="flex border-b border-white/10 pb-4 mb-6">
                     <button
                         onClick={() => setActiveTab('overview')}
-                        className={`mr-6 pb-2 text-sm font-semibold border-b-2 transition-all ${
+                        className={`mr-6 pb-2 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
                             activeTab === 'overview'
                                 ? 'border-blue-500 text-white'
                                 : 'border-transparent text-gray-400 hover:text-white'
                         }`}
                     >
-                        Активные комнаты ({stats.totalActiveRooms})
+                        Активные комнаты ({filteredActive.length})
                     </button>
                     <button
                         onClick={() => setActiveTab('historical')}
-                        className={`pb-2 text-sm font-semibold border-b-2 transition-all ${
+                        className={`pb-2 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
                             activeTab === 'historical'
                                 ? 'border-blue-500 text-white'
                                 : 'border-transparent text-gray-400 hover:text-white'
                         }`}
                     >
-                        История сессий ({stats.historical.length})
+                        История сессий ({filteredHistorical.length})
                     </button>
                 </div>
 
                 {activeTab === 'overview' && (
                     <div className="overflow-x-auto">
-                        {stats.activeRooms.length > 0 ? (
+                        {filteredActive.length > 0 ? (
                             <table className="w-full text-left border-collapse text-sm">
                                 <thead>
                                     <tr className="border-b border-white/5 text-gray-400 text-xs font-bold uppercase tracking-wider">
@@ -656,7 +791,7 @@ const AdminStats: React.FC = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {stats.activeRooms.map((room, idx) => {
+                                    {filteredActive.map((room, idx) => {
                                         const customCount = room.questionsTotal - room.questionsPredefined;
                                         const pctShown = room.questionsTotal > 0 ? (room.questionsShown / room.questionsTotal) * 100 : 0;
                                         return (
@@ -698,7 +833,7 @@ const AdminStats: React.FC = () => {
                             </table>
                         ) : (
                             <div className="text-center py-10 text-gray-500">
-                                Нет активных игровых комнат в базе данных
+                                Нет активных комнат за выбранный период
                             </div>
                         )}
                     </div>
@@ -706,7 +841,7 @@ const AdminStats: React.FC = () => {
 
                 {activeTab === 'historical' && (
                     <div className="overflow-x-auto">
-                        {stats.historical.length > 0 ? (
+                        {filteredHistorical.length > 0 ? (
                             <table className="w-full text-left border-collapse text-sm">
                                 <thead>
                                     <tr className="border-b border-white/5 text-gray-400 text-xs font-bold uppercase tracking-wider">
@@ -719,7 +854,7 @@ const AdminStats: React.FC = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {stats.historical.map((hist, idx) => {
+                                    {filteredHistorical.map((hist, idx) => {
                                         const customCount = hist.questionsTotal - hist.questionsPredefined;
                                         const pctShown = hist.questionsTotal > 0 ? (hist.questionsShown / hist.questionsTotal) * 100 : 0;
                                         return (
@@ -762,7 +897,7 @@ const AdminStats: React.FC = () => {
                             </table>
                         ) : (
                             <div className="text-center py-10 text-gray-500">
-                                В истории пока нет записей об удаленных сессиях
+                                В истории пока нет записей за выбранный период
                             </div>
                         )}
                     </div>
