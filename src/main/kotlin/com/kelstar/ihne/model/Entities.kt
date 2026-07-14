@@ -32,6 +32,7 @@ data class Room(
     val language: String = "ru"
 ) {
     val dateCreated: Instant = Instant.now()
+    var isPaid: Boolean? = false
     @OneToMany(mappedBy = "roomCode", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     var questions: Set<Question> = emptySet()
 }
@@ -43,6 +44,18 @@ data class Statistics(
     val questionsShown: Int,
     val questionsPredefined: Int,
 ) {
+    @Id
+    @GeneratedValue
+    var id: Long? = null
+}
+
+@Entity
+data class ArchivedQuestion(
+    @Column(columnDefinition = "TEXT")
+    val question: String,
+    val language: String
+) {
+    val dateArchived: Instant = Instant.now()
     @Id
     @GeneratedValue
     var id: Long? = null

@@ -2,8 +2,10 @@ package com.kelstar.ihne.service
 
 import com.kelstar.ihne.model.Room
 import com.kelstar.ihne.model.Statistics
+import com.kelstar.ihne.model.ArchivedQuestion
 import com.kelstar.ihne.repository.RoomRepository
 import com.kelstar.ihne.repository.StatisticsRepository
+import com.kelstar.ihne.repository.ArchivedQuestionRepository
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.scheduling.annotation.Scheduled
@@ -15,7 +17,8 @@ import java.time.Instant
 @Service
 class RoomService(
     private val roomRepository: RoomRepository,
-    private val statisticsRepository: StatisticsRepository
+    private val statisticsRepository: StatisticsRepository,
+    private val archivedQuestionRepository: ArchivedQuestionRepository
 ) {
 
     @Transactional
@@ -30,6 +33,13 @@ class RoomService(
     fun roomExists(code: Int) = roomRepository.existsById(code)
     
     fun getRoom(code: Int): Room? = roomRepository.findByIdOrNull(code)
+
+    @Transactional
+    fun markRoomAsPaid(code: Int): Room {
+        val room = roomRepository.findByIdOrNull(code) ?: throw RuntimeException("Room not found")
+        room.isPaid = true
+        return roomRepository.saveAndFlush(room)
+    }
 
     @Scheduled(cron = "0 0 0 28 * *")
     @SchedulerLock(name = "deleteOldRooms")
@@ -51,6 +61,18 @@ class RoomService(
                 ))
             }
         }
+        
+        // Archive custom user questions before deleting rooms
+        val customQuestionsToArchive = roomsToDelete.flatMap { room ->
+            room.questions
+                .filter { !it.isPredefined }
+                .map { ArchivedQuestion(it.question, room.language) }
+        }
+        if (customQuestionsToArchive.isNotEmpty()) {
+            archivedQuestionRepository.saveAll(customQuestionsToArchive)
+            println("${customQuestionsToArchive.size} user questions were archived")
+        }
+
         roomRepository.deleteAll(roomsToDelete)
         println("${roomsToDelete.size} rooms were deleted")
     }

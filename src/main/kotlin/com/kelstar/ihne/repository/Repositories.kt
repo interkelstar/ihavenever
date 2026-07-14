@@ -3,6 +3,7 @@ package com.kelstar.ihne.repository
 import com.kelstar.ihne.model.Question
 import com.kelstar.ihne.model.Room
 import com.kelstar.ihne.model.Statistics
+import com.kelstar.ihne.model.ArchivedQuestion
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
@@ -23,3 +24,5 @@ interface QuestionRepository : JpaRepository<Question, Long> {
 }
 
 interface StatisticsRepository : JpaRepository<Statistics, Long>
+
+interface ArchivedQuestionRepository : JpaRepository<ArchivedQuestion, Long>
