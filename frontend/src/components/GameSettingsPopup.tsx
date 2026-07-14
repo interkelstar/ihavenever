@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { loadQuestions } from '../api/client';
 import { posthog } from '../analytics';
+import { useTranslation } from '../i18n';
 
 interface GameSettingsPopupProps {
     roomCode: number;
@@ -18,6 +19,7 @@ const GameSettingsPopup: React.FC<GameSettingsPopupProps> = ({ roomCode, isOpen,
     const [loadStatus, setLoadStatus] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const popupRef = useRef<HTMLDivElement>(null);
+    const { t } = useTranslation();
 
     // Clear status when trigger changes
     useEffect(() => {
@@ -27,7 +29,6 @@ const GameSettingsPopup: React.FC<GameSettingsPopupProps> = ({ roomCode, isOpen,
     // Close on click outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            // Check if click is on the gear button - if so, let the button's own onClick handle it
             const target = event.target as HTMLElement;
             const isToggleButton = target.closest('#settings-toggle-btn');
 
@@ -52,14 +53,14 @@ const GameSettingsPopup: React.FC<GameSettingsPopupProps> = ({ roomCode, isOpen,
         try {
             const count = await loadQuestions(roomCode, { size, datasetName });
             if (count === 0) {
-                setLoadStatus({ text: "Все вопросы из этого набора уже загружены", type: 'success' });
+                setLoadStatus({ text: t('load_status_duplicate'), type: 'success' });
             } else {
-                setLoadStatus({ text: `Успешно загружено ${count} вопросов!`, type: 'success' });
+                setLoadStatus({ text: t('load_status_success', { count }), type: 'success' });
                 if (onQuestionsLoaded) {
                     onQuestionsLoaded();
                 }
                 posthog.capture('questions_imported', {
-                    source: analyticsSource || 'game_unknown', // fallback
+                    source: analyticsSource || 'game_unknown',
                     count: count,
                     dataset: datasetName,
                     size: size
@@ -67,7 +68,7 @@ const GameSettingsPopup: React.FC<GameSettingsPopupProps> = ({ roomCode, isOpen,
             }
         } catch (error) {
             console.error("Failed to load questions", error);
-            setLoadStatus({ text: "Ошибка загрузки вопросов", type: 'error' });
+            setLoadStatus({ text: t('load_status_error'), type: 'error' });
         } finally {
             setIsLoading(false);
         }
@@ -92,11 +93,11 @@ const GameSettingsPopup: React.FC<GameSettingsPopupProps> = ({ roomCode, isOpen,
                     }}
                     className="bg-zinc-900/95 backdrop-blur-lg p-5 rounded-2xl shadow-lg border border-white/20 text-white"
                 >
-                    <h3 className="mt-0 text-lg mb-4 font-semibold">Настройки игры</h3>
+                    <h3 className="mt-0 text-lg mb-4 font-semibold">{t('game_settings_title')}</h3>
 
                     <form onSubmit={handleLoadQuestions}>
                         <div className="mb-0">
-                            <label className="block mb-1.5 text-sm text-gray-200">Добавить вопросы</label>
+                            <label className="block mb-1.5 text-sm text-gray-200">{t('add_questions_label')}</label>
                             <div className="flex gap-2">
                                 <select
                                     value={size}
@@ -112,8 +113,8 @@ const GameSettingsPopup: React.FC<GameSettingsPopupProps> = ({ roomCode, isOpen,
                                     onChange={(e) => setDatasetName(e.target.value)}
                                     className="modern-input flex-2 p-2 text-sm"
                                 >
-                                    <option value="common">Стандартных</option>
-                                    <option value="horny">Пошлых</option>
+                                    <option value="common">{t('dataset_common')}</option>
+                                    <option value="horny">{t('dataset_horny')}</option>
                                 </select>
                             </div>
                         </div>
@@ -133,7 +134,7 @@ const GameSettingsPopup: React.FC<GameSettingsPopupProps> = ({ roomCode, isOpen,
                             className="modern-btn btn-secondary w-full p-2 text-sm"
                             disabled={isLoading}
                         >
-                            {isLoading ? "Загрузка..." : "Загрузить"}
+                            {isLoading ? t('loading') : t('load_btn')}
                         </button>
                     </form>
                 </motion.div>

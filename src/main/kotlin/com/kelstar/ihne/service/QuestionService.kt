@@ -4,6 +4,7 @@ import com.kelstar.ihne.model.ImportParametersDto
 import com.kelstar.ihne.model.Question
 import com.kelstar.ihne.model.QuestionDto
 import com.kelstar.ihne.repository.QuestionRepository
+import com.kelstar.ihne.repository.RoomRepository
 import org.springframework.data.domain.Example
 import org.springframework.data.domain.ExampleMatcher
 import org.springframework.data.repository.findByIdOrNull
@@ -15,7 +16,8 @@ import java.io.InputStream
 @Service
 class QuestionService(
     private val questionRepository: QuestionRepository,
-    private val importService: ImportService
+    private val importService: ImportService,
+    private val roomRepository: RoomRepository
 ) {
 
     @Transactional
@@ -97,10 +99,13 @@ class QuestionService(
     }
 
     fun importQuestionsByParameters(importParametersDto: ImportParametersDto, roomCode: Int): Long {
+        val room = roomRepository.findByIdOrNull(roomCode) ?: throw IllegalArgumentException("Room $roomCode not found")
+        val lang = room.language
+        val filename = "questions/${importParametersDto.datasetName}_$lang.txt"
         val iStream = this.javaClass
             .classLoader
-            .getResourceAsStream("questions/${importParametersDto.datasetName}.txt")
-            ?: throw IllegalArgumentException("questions/${importParametersDto.datasetName}.txt is not found")
+            .getResourceAsStream(filename)
+            ?: throw IllegalArgumentException("$filename is not found")
         
         return importQuestionsFromStream(iStream, roomCode, importParametersDto.size)
     }

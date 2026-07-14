@@ -2,8 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createRoom, checkRoomExists } from '../api/client';
 import { motion } from 'framer-motion';
+import CodeInput from '../components/CodeInput';
+import LanguageSelector from '../components/LanguageSelector';
+import { useTranslation } from '../i18n';
 
 const Home: React.FC = () => {
+    const { language, setLanguage, t } = useTranslation();
     const [code, setCode] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -13,11 +17,11 @@ const Home: React.FC = () => {
         setLoading(true);
         setError(null);
         try {
-            const newRoom = await createRoom();
+            const newRoom = await createRoom(language);
             navigate(`/room/${newRoom.code}/host`);
         } catch (error) {
             console.error("Failed to create room", error);
-            setError("Не удалось создать комнату. Попробуйте еще раз.");
+            setError(t('error_create'));
         } finally {
             setLoading(false);
         }
@@ -27,82 +31,86 @@ const Home: React.FC = () => {
         e.preventDefault();
 
         if (!code) {
-            setError("Пожалуйста, введите код комнаты.");
+            setError(t('error_no_code'));
             return;
         }
 
         if (code.length !== 6) {
-            setError("Код должен состоять из 6 цифр.");
+            setError(t('error_wrong_length'));
             return;
         }
 
         setLoading(true);
         setError(null);
         try {
-            const exists = await checkRoomExists(parseInt(code));
-            if (exists) {
+            const roomData = await checkRoomExists(parseInt(code));
+            if (roomData) {
+                setLanguage(roomData.language);
                 navigate(`/room/${code}`);
             } else {
-                setError(`Комната ${code} не найдена.`);
+                setError(t('error_not_found', { code }));
             }
         } catch (error) {
             console.error("Failed to check room existence", error);
-            setError("Произошла ошибка при проверке комнаты.");
+            setError(t('error_validation'));
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-        >
-            <div className="glass-card">
-                <h1>Я никогда не...</h1>
+        <>
+            {/* Elegant glassmorphic Language Dropdown in the top-right of the viewport */}
+            <LanguageSelector />
 
-                <div className="mb-6">
-                    <h2>Чтобы начать играть ты можешь</h2>
-                    <button
-                        onClick={handleCreateGame}
-                        className="modern-btn btn-primary"
-                        disabled={loading}
-                    >
-                        {loading ? 'Загрузка...' : 'Создать новую игру'}
-                    </button>
-                </div>
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+            >
+                <div className="glass-card">
+                    <h1>{t('title')}</h1>
 
-                <div className="my-6">
-                    <h2>Либо</h2>
-                </div>
-
-                <form onSubmit={handleJoinGame}>
-                    <div className="mb-4">
-                        <input
-                            type="number"
-                            className="modern-input"
-                            value={code}
-                            onChange={(e) => setCode(e.target.value)}
-                            placeholder="Ввести тут 6 цифр кода"
+                    <div className="mb-6">
+                        <h2>{t('subtitle')}</h2>
+                        <button
+                            onClick={handleCreateGame}
+                            className="modern-btn btn-primary"
                             disabled={loading}
-                        />
+                        >
+                            {loading ? t('loading') : t('create_btn')}
+                        </button>
                     </div>
-                    {error && (
-                        <div className="modern-alert alert-error mb-4">
-                            {error}
+
+                    <h2 style={{ marginTop: '16px', marginBottom: '4px' }}>{t('or')}</h2>
+
+                    <form onSubmit={handleJoinGame}>
+                        <div className="mb-4">
+                            <label className="block text-center text-secondary mb-2 text-sm tracking-wider">
+                                {t('room_code_label')}
+                            </label>
+                            <CodeInput
+                                value={code}
+                                onChange={setCode}
+                                disabled={loading}
+                            />
                         </div>
-                    )}
-                    <button
-                        type="submit"
-                        className="modern-btn btn-primary"
-                        disabled={loading}
-                    >
-                        {loading ? 'Проверка...' : 'Присоединиться'}
-                    </button>
-                </form>
-            </div>
-        </motion.div>
+                        {error && (
+                            <div className="modern-alert alert-error mb-4">
+                                {error}
+                            </div>
+                        )}
+                        <button
+                            type="submit"
+                            className="modern-btn btn-primary"
+                            disabled={loading}
+                        >
+                            {loading ? t('checking') : t('join_btn')}
+                        </button>
+                    </form>
+                </div>
+            </motion.div>
+        </>
     );
 };
 

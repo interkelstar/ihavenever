@@ -17,14 +17,16 @@ class RoomRestController(
 ) {
     
     @PostMapping
-    fun createRoom(): RoomDto {
-        return RoomDto(roomService.createNewRoom().code)
+    fun createRoom(@RequestParam(required = false, defaultValue = "ru") lang: String): RoomDto {
+        val room = roomService.createNewRoom(lang)
+        return RoomDto(room.code, room.language)
     }
     
     @GetMapping("/{code}")
-    fun getRoomExist(@PathVariable code: Int): ResponseEntity<Void> {
-        return if (roomService.roomExists(code)) {
-            ResponseEntity.ok().build()
+    fun getRoom(@PathVariable code: Int): ResponseEntity<RoomDto> {
+        val room = roomService.getRoom(code)
+        return if (room != null) {
+            ResponseEntity.ok(RoomDto(room.code, room.language))
         } else {
             ResponseEntity.notFound().build()
         }

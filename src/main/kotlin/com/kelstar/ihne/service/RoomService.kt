@@ -19,12 +19,12 @@ class RoomService(
 ) {
 
     @Transactional
-    fun createNewRoom(): Room {
+    fun createNewRoom(language: String): Room {
         val newCode = IntRange(100_000, 999_999)
             .minus(roomRepository.findAll().map { it.code }.toSet())
             .shuffled()
             .firstOrNull() ?: throw RuntimeException() //TODO change for code not found
-        return roomRepository.saveAndFlush(Room(newCode))
+        return roomRepository.saveAndFlush(Room(newCode, language))
     }
 
     fun roomExists(code: Int) = roomRepository.existsById(code)

@@ -1,12 +1,16 @@
-import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
-import { loadQuestions, uploadQuestions } from '../api/client';
+import { loadQuestions, uploadQuestions, checkRoomExists } from '../api/client';
 import { motion } from 'framer-motion';
 import { posthog } from '../analytics';
+import { useTranslation } from '../i18n';
 
 const Host: React.FC = () => {
     const { code } = useParams<{ code: string }>();
+    const navigate = useNavigate();
+    const { language, setLanguage, t } = useTranslation();
+
     const [datasetName, setDatasetName] = useState('common');
     const [size, setSize] = useState(10);
     const [loadStatus, setLoadStatus] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
@@ -14,7 +18,23 @@ const Host: React.FC = () => {
     const [customFile, setCustomFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    // Construct the joining URL for the QR code
+    useEffect(() => {
+        const validate = async () => {
+            if (!code) return;
+            try {
+                const roomData = await checkRoomExists(parseInt(code));
+                if (roomData) {
+                    setLanguage(roomData.language);
+                } else {
+                    navigate('/404');
+                }
+            } catch (error) {
+                console.error("Failed to validate room", error);
+            }
+        };
+        validate();
+    }, [code, navigate, setLanguage]);
+
     const constructJoinUrl = () => {
         const url = new URL(`${window.location.origin}/room/${code}`);
         const currentParams = new URLSearchParams(window.location.search);
@@ -30,14 +50,14 @@ const Host: React.FC = () => {
         e.preventDefault();
         if (!code) return;
         setIsLoading(true);
-        setLoadStatus(null); // Clear previous status
+        setLoadStatus(null);
 
         try {
             const count = await loadQuestions(parseInt(code), { size, datasetName });
             if (count === 0) {
-                setLoadStatus({ text: "Все вопросы из этого набора уже загружены", type: 'success' });
+                setLoadStatus({ text: t('load_status_duplicate'), type: 'success' });
             } else {
-                setLoadStatus({ text: `Успешно загружено ${count} вопросов!`, type: 'success' });
+                setLoadStatus({ text: t('load_status_success', { count }), type: 'success' });
                 posthog.capture('questions_imported', {
                     source: 'host_page',
                     count: count,
@@ -47,7 +67,7 @@ const Host: React.FC = () => {
             }
         } catch (error) {
             console.error("Failed to load questions", error);
-            setLoadStatus({ text: "Ошибка загрузки вопросов", type: 'error' });
+            setLoadStatus({ text: t('load_status_error'), type: 'error' });
         } finally {
             setIsLoading(false);
         }
@@ -57,26 +77,23 @@ const Host: React.FC = () => {
         e.preventDefault();
         if (!code || !customFile) return;
         setIsLoading(true);
-        setImportStatus(null); // Clear previous status
+        setImportStatus(null);
 
         try {
             const count = await uploadQuestions(parseInt(code), customFile);
-            setImportStatus({ text: `Файл успешно загружен! Добавлено ${count} вопросов.`, type: 'success' });
+            setImportStatus({ text: t('upload_status_success', { count }), type: 'success' });
             posthog.capture('own_file_uploaded', {
                 source: 'host_page',
                 count: count
             });
             setCustomFile(null);
-            // Reset file input manually if needed or just rely on state
         } catch (error) {
             console.error("Failed to upload file", error);
-            setImportStatus({ text: "Ошибка загрузки файла", type: 'error' });
+            setImportStatus({ text: t('upload_status_error'), type: 'error' });
         } finally {
             setIsLoading(false);
         }
     };
-
-
 
     return (
         <motion.div
@@ -86,13 +103,13 @@ const Host: React.FC = () => {
             style={{ width: '100%' }}
         >
             <div className="glass-card text-center">
-                <h1>Комната номер</h1>
+                <h1>{t('room_number')}</h1>
                 <h1 className="text-6xl -mt-4 !mb-0">{code}</h1>
             </div>
 
             <div className="glass-card mb-5">
                 <p className="text-center text-lg mb-4">
-                    Комната создана! Остальные могут ввести код или сканировать QR-код, чтобы подключиться.
+                    {t('room_created_desc')}
                 </p>
 
                 <div className="qr-container">
@@ -102,7 +119,7 @@ const Host: React.FC = () => {
 
             <div className="glass-card">
                 <p className="text-center text-lg mb-4">
-                    По желанию загрузи вопросы из набора.
+                    {t('load_dataset_desc')}
                 </p>
 
                 <form onSubmit={handleLoadQuestions} className="mb-6">
@@ -122,8 +139,8 @@ const Host: React.FC = () => {
                                 onChange={(e) => setDatasetName(e.target.value)}
                                 className="modern-input flex-2 !mb-0"
                             >
-                                <option value="common">Стандартных</option>
-                                <option value="horny">Пошлых</option>
+                                <option value="common">{t('dataset_common')}</option>
+                                <option value="horny">{t('dataset_horny')}</option>
                             </select>
                         </div>
                     </div>
@@ -139,12 +156,12 @@ const Host: React.FC = () => {
                     )}
 
                     <button type="submit" className="modern-btn btn-secondary mt-4" disabled={isLoading}>
-                        {isLoading ? "Загрузка..." : "Загрузить"}
+                        {isLoading ? t('loading') : t('load_btn')}
                     </button>
                 </form>
 
                 <div className="text-center my-6 pt-5 border-t border-white/10">
-                    <p className="mb-2">А можно загрузить свой файл с вопросами</p>
+                    <p className="mb-2">{t('upload_file_desc')}</p>
                     <form onSubmit={handleFileUpload}>
                         <div className="form-group">
                             <input
@@ -165,7 +182,7 @@ const Host: React.FC = () => {
                         )}
 
                         <button type="submit" className="modern-btn btn-secondary" disabled={!customFile || isLoading}>
-                            {isLoading ? "Загрузка..." : "Импорт"}
+                            {isLoading ? t('loading') : t('upload_btn')}
                         </button>
                     </form>
                 </div>
@@ -173,7 +190,7 @@ const Host: React.FC = () => {
                 <div className="text-center mt-6 pt-5 border-t border-white/10">
                     <Link to={`/room/${code}/game`} target="_blank" style={{ textDecoration: 'none' }}>
                         <button className="modern-btn btn-primary">
-                            К вопросам!
+                            {t('to_questions_btn')}
                         </button>
                     </Link>
                 </div>

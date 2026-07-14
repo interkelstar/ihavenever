@@ -12,21 +12,18 @@ export const api = axios.create({
 // Actually, let's just make the functions wrapper to call the api.
 
 // Home
-export const createRoom = async () => {
-    const response = await api.post('/room');
-    // The backend returns RoomDto { code: number } directly? Or wrapped?
-    // Based on RoomRestController: fun createRoom(): ResponseEntity<RoomDto>
-    // So response.data is RoomDto.
+export const createRoom = async (lang: string = 'ru') => {
+    const response = await api.post(`/room?lang=${lang}`);
     return response.data;
 };
 
 export const checkRoomExists = async (code: number) => {
     try {
-        await api.get(`/room/${code}`);
-        return true;
+        const response = await api.get(`/room/${code}`);
+        return response.data; // Returns RoomDto { code: number, language: string }
     } catch (error: any) {
         if (error.response && error.response.status === 404) {
-            return false;
+            return null;
         }
         throw error;
     }

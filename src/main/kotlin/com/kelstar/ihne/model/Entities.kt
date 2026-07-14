@@ -28,7 +28,8 @@ data class Room(
     @Id
     @Min(100_000)
     @Max(999_999)
-    val code: Int
+    val code: Int,
+    val language: String = "ru"
 ) {
     val dateCreated: Instant = Instant.now()
     @OneToMany(mappedBy = "roomCode", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)

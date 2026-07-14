@@ -36,11 +36,15 @@ function AppContent() {
     );
 }
 
+import { LanguageProvider } from './i18n';
+
 function App() {
     return (
-        <BrowserRouter basename={basename}>
-            <AppContent />
-        </BrowserRouter>
+        <LanguageProvider>
+            <BrowserRouter basename={basename}>
+                <AppContent />
+            </BrowserRouter>
+        </LanguageProvider>
     );
 }
 

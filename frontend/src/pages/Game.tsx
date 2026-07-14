@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getRandomQuestion, getNotShownCount, downloadQuestions } from '../api/client';
+import { getRandomQuestion, getNotShownCount, downloadQuestions, checkRoomExists } from '../api/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { posthog } from '../analytics';
+import { useTranslation } from '../i18n';
 
 import GameSettingsPopup from '../components/GameSettingsPopup';
 
@@ -13,12 +14,32 @@ interface Question {
 const Game: React.FC = () => {
     const { code } = useParams<{ code: string }>();
     const navigate = useNavigate();
+    const { setLanguage, t } = useTranslation();
+
     const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
     const [remainingCount, setRemainingCount] = useState<number | null>(null);
     const [isFinished, setIsFinished] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [showSettings, setShowSettings] = useState(false);
     const [wereQuestionsLoaded, setWereQuestionsLoaded] = useState(false);
+
+    // Валидация комнаты и определение языка при входе
+    useEffect(() => {
+        const validate = async () => {
+            if (!code) return;
+            try {
+                const roomData = await checkRoomExists(parseInt(code));
+                if (roomData) {
+                    setLanguage(roomData.language);
+                } else {
+                    navigate('/404');
+                }
+            } catch (error) {
+                console.error("Failed to validate room in Game screen", error);
+            }
+        };
+        validate();
+    }, [code, navigate, setLanguage]);
 
     const loadNextQuestion = React.useCallback(async () => {
         if (!code) return;
@@ -28,7 +49,6 @@ const Game: React.FC = () => {
             if (questionData) {
                 setCurrentQuestion(questionData);
                 setIsFinished(false);
-                // Update count
                 const count = await getNotShownCount(parseInt(code));
                 setRemainingCount(count);
             } else {
@@ -40,7 +60,6 @@ const Game: React.FC = () => {
                 navigate('/404');
                 return;
             }
-            // 204 No Content means no more questions usually, or we catch it here
             setIsFinished(true);
             setCurrentQuestion(null);
         } finally {
@@ -50,7 +69,7 @@ const Game: React.FC = () => {
 
     const initialLoadDone = React.useRef(false);
 
-    // Load initial question
+    // Load initial question (only after language/room checks or once mounted)
     useEffect(() => {
         if (!initialLoadDone.current) {
             loadNextQuestion();
@@ -80,7 +99,7 @@ const Game: React.FC = () => {
             document.body.removeChild(a);
             posthog.capture('questions_downloaded', {
                 roomCode: code,
-                count: remainingCount // approximate or unkown
+                count: remainingCount
             });
         } catch (error) {
             console.error("Download failed", error);
@@ -120,11 +139,11 @@ const Game: React.FC = () => {
                         exit={{ opacity: 0, x: -50 }}
                         className="glass-card text-center min-h-96 flex flex-col justify-center"
                     >
-                        <h1>Я никогда не...</h1>
+                        <h1>{t('title')}</h1>
 
                         <div className="min-h-36 flex items-center justify-center">
                             {isLoading && !currentQuestion ? (
-                                <h2>Загрузка...</h2>
+                                <h2>{t('loading')}</h2>
                             ) : (
                                 <h2 className="text-white text-3xl">
                                     {currentQuestion ? currentQuestion.question : "..."}
@@ -134,13 +153,13 @@ const Game: React.FC = () => {
 
                         <div className="mt-6">
                             <button onClick={loadNextQuestion} className="modern-btn btn-primary max-w-xs">
-                                Следующий!
+                                {t('next_btn')}
                             </button>
                         </div>
 
                         <div className="mt-6 text-secondary">
                             {remainingCount !== 0 && (
-                                <p>Осталось вопросов: {remainingCount !== null ? remainingCount : '...'}</p>
+                                <p>{t('remaining_count', { count: remainingCount !== null ? remainingCount : '...' })}</p>
                             )}
                         </div>
                     </motion.div>
@@ -151,30 +170,30 @@ const Game: React.FC = () => {
                         animate={{ opacity: 1, scale: 1 }}
                         className="glass-card text-center"
                     >
-                        <h1>Кончились вопросы!</h1>
+                        <h1>{t('finished_title')}</h1>
 
                         <div className="mb-4 mt-2">
                             <button onClick={loadNextQuestion} className="modern-btn btn-primary max-w-xs">
-                                Точно?
+                                {t('finished_check_btn')}
                             </button>
                         </div>
 
                         <div className="mb-4 mt-2">
-                            <h2>Поздравляю, это были все вопросы, заданные в этой комнате</h2>
+                            <h2>{t('finished_desc')}</h2>
                             <button onClick={() => setShowSettings(true)} className="modern-btn btn-secondary max-w-xs">
-                                Загрузить ещё!
+                                {t('finished_load_more_btn')}
                             </button>
                         </div>
 
                         <div className="mb-4 mt-2 flex flex-col items-center">
-                            <h2>Теперь их можно скачать на память!</h2>
+                            <h2>{t('finished_download_desc')}</h2>
                             <button onClick={handleDownload} className="modern-btn btn-secondary max-w-xs">
-                                Скачать все вопросы
+                                {t('finished_download_btn')}
                             </button>
                         </div>
 
                         <div className="mt-8">
-                            <h2 className="text-base">И если игра вам понравилась, на кофе кидать сюда <a href="https://revolut.me/kelstar" target="_blank" className="text-accent">Revolut</a></h2>
+                            <h2 className="text-base">{t('coffee_donate')} <a href="https://revolut.me/kelstar" target="_blank" className="text-accent">Revolut</a></h2>
                         </div>
                     </motion.div>
                 )}

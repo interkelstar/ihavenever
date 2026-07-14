@@ -5,39 +5,21 @@ import { motion } from 'framer-motion';
 import QRCodePopup from '../components/QRCodePopup';
 import BecomeHostPopup from '../components/BecomeHostPopup';
 import BecomeHostWarningPopup from '../components/BecomeHostWarningPopup';
-
-const SUGGESTIONS = [
-    'покупал вещь, которую надел всего один раз',
-    'заваривал чайный пакетик второй или третий раз подряд',
-    'смотрел целый сезон сериала за один день',
-    'отправлял сообщение не тому человеку',
-    'случайно надевал разные носки и замечал это только на улице',
-    'засыпал на работе или важной лекции',
-    'пользовался студенческим или льготным билетом после того, как закончил учебу',
-    'купался в бассейне или море прямо в одежде',
-    'ел пиццу с ананасами и искренне радовался',
-    'притворялся спящим в транспорте, чтобы не уступать место',
-    'сбегал с неудачного свидания через 15 минут',
-    'забывал поливать комнатное растение так долго, что оно засыхало',
-    'разбивал экран нового телефона в первую неделю после покупки',
-    'разговаривал с умной колонкой или голосовым помощником на эмоциях',
-    'верил в привидений после просмотра фильма ужасов',
-    'репетировал речь или важный разговор перед зеркалом',
-    'готовил блюдо по рецепту, которое в итоге пришлось выбросить',
-    'пытался открыть дверь квартиры чужими ключами',
-    'подключался к чужому Wi-Fi без разрешения',
-    'прятался в шкафу во время игры в прятки во взрослом возрасте'
-];
+import { useTranslation, SUGGESTIONS } from '../i18n';
 
 const Room: React.FC = () => {
     const { code } = useParams<{ code: string }>();
     const navigate = useNavigate();
+    const { language, setLanguage, t } = useTranslation();
+    
+    const currentSuggestions = SUGGESTIONS[language] || SUGGESTIONS['ru'];
+
     const [question, setQuestion] = useState('');
     const [okMessage, setOkMessage] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [placeholder, setPlaceholder] = useState(`...${SUGGESTIONS[0]}`);
-    const [rawSuggestion, setRawSuggestion] = useState(SUGGESTIONS[0]);
+    const [placeholder, setPlaceholder] = useState('...');
+    const [rawSuggestion, setRawSuggestion] = useState('');
     const [isFocused, setIsFocused] = useState(false);
     const [showQR, setShowQR] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
@@ -45,11 +27,19 @@ const Room: React.FC = () => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const isPointerActive = useRef(false);
 
+    // Смена подсказки при смене языка
+    useEffect(() => {
+        if (currentSuggestions.length > 0) {
+            const sug = currentSuggestions[0];
+            setRawSuggestion(sug);
+            setPlaceholder('...' + sug);
+        }
+    }, [language]);
+
     const adjustHeight = () => {
         const textarea = textareaRef.current;
         if (textarea) {
             textarea.style.height = 'auto';
-            // Only grow if focused (to show placeholder/typing) or if there's actual text
             if (isFocused || question) {
                 textarea.style.height = `${textarea.scrollHeight}px`;
             }
@@ -60,8 +50,10 @@ const Room: React.FC = () => {
         const validateRoom = async () => {
             if (!code) return;
             try {
-                const exists = await checkRoomExists(parseInt(code));
-                if (!exists) {
+                const roomData = await checkRoomExists(parseInt(code));
+                if (roomData) {
+                    setLanguage(roomData.language);
+                } else {
                     navigate('/404');
                 }
             } catch (error) {
@@ -69,15 +61,16 @@ const Room: React.FC = () => {
             }
         };
         validateRoom();
-    }, [code, navigate]);
+    }, [code, navigate, setLanguage]);
 
     useEffect(() => {
         adjustHeight();
     }, [placeholder, question, isFocused]);
 
     const refreshPlaceholder = () => {
-        const randomIndex = Math.floor(Math.random() * SUGGESTIONS.length);
-        const sug = SUGGESTIONS[randomIndex];
+        if (currentSuggestions.length === 0) return;
+        const randomIndex = Math.floor(Math.random() * currentSuggestions.length);
+        const sug = currentSuggestions[randomIndex];
         setRawSuggestion(sug);
         setPlaceholder('...' + sug);
     };
@@ -86,14 +79,11 @@ const Room: React.FC = () => {
         isPointerActive.current = true;
 
         if (isFocused && !question) {
-            // Clicked on an already focused empty field -> use the suggestion
             setQuestion(rawSuggestion);
         } else {
-            // Focusing now or field not empty -> roll for new suggestion
             refreshPlaceholder();
         }
 
-        // Reset flag quickly so onFocus can detect it
         setTimeout(() => {
             isPointerActive.current = false;
         }, 100);
@@ -101,7 +91,6 @@ const Room: React.FC = () => {
 
     const handleFocus = () => {
         setIsFocused(true);
-        // Only refresh if focus was NOT caused by a pointer event (e.g. Tab)
         if (!isPointerActive.current) {
             refreshPlaceholder();
         }
@@ -127,7 +116,7 @@ const Room: React.FC = () => {
         setErrorMessage(null);
 
         if (!question.trim()) {
-            setErrorMessage("Пожалуйста, введите вопрос!");
+            setErrorMessage(t('error_empty_question'));
             return;
         }
 
@@ -137,13 +126,13 @@ const Room: React.FC = () => {
 
         try {
             await postQuestion(parseInt(code), { question });
-            setOkMessage("Хорошо, давай ещё!");
+            setOkMessage(t('success_added'));
             setQuestion('');
         } catch (error: any) {
             if (error.response && error.response.status === 409) {
-                setErrorMessage("Такой вопрос уже был!");
+                setErrorMessage(t('error_conflict'));
             } else {
-                setErrorMessage("Ошибка при отправке. Попробуйте снова.");
+                setErrorMessage(t('error_validation'));
                 console.error(error);
             }
         } finally {
@@ -179,7 +168,7 @@ const Room: React.FC = () => {
                 transition={{ duration: 0.3 }}
                 className="glass-card"
             >
-                <h1>Задавай свой каверзный вопрос!</h1>
+                <h1>{t('add_question_btn')}</h1>
 
                 <form onSubmit={handleSubmit}>
                     <div className="floating-group">
@@ -198,11 +187,11 @@ const Room: React.FC = () => {
                             autoComplete="off"
                             rows={1}
                         />
-                        <label htmlFor="question-input">Я никогда не...</label>
+                        <label htmlFor="question-input">{t('title')}</label>
                     </div>
 
                     <button type="submit" className="modern-btn btn-primary" disabled={isLoading}>
-                        {isLoading ? "Отправка..." : "Отправить!"}
+                        {isLoading ? t('loading') : t('add_question_btn')}
                     </button>
 
                     {okMessage && (
@@ -246,7 +235,7 @@ const Room: React.FC = () => {
                                 <path d="M21 12v.01" />
                                 <path d="M12 21v-1" />
                             </svg>
-                            <span>Код комнаты: <span className="font-bold">{code}</span></span>
+                            <span>{t('room_number')}: <span className="font-bold">{code}</span></span>
                         </button>
                     </div>
                 </form>

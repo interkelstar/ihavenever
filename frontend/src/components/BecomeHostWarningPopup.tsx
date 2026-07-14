@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from '../i18n';
 
 interface BecomeHostWarningPopupProps {
     roomCode: string;
@@ -9,6 +10,7 @@ interface BecomeHostWarningPopupProps {
 
 const BecomeHostWarningPopup: React.FC<BecomeHostWarningPopupProps> = ({ roomCode, isOpen, onClose }) => {
     const popupRef = useRef<HTMLDivElement>(null);
+    const { t } = useTranslation();
 
     // Close on click outside
     useEffect(() => {
@@ -54,10 +56,10 @@ const BecomeHostWarningPopup: React.FC<BecomeHostWarningPopupProps> = ({ roomCod
                         className="bg-zinc-900/95 backdrop-blur-lg p-8 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/20 text-white max-w-sm w-full text-justify flex flex-col items-center overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="text-4xl mb-4">⚠️ВНИМАНИЕ⚠️</div>
+                        <div className="text-4xl mb-4">⚠️{t('host_warning_title')}⚠️</div>
 
                         <p className="text-gray-200 text-base mb-8 leading-relaxed">
-                            В игре должен быть только один хост, чтобы точно показались все заданные вопросы, так что нажимайте только в случае если изначальный хост закрыл вкладку, потерял телефон или отключился
+                            {t('host_warning_desc')}
                         </p>
 
                         <div className="flex flex-col gap-3 w-full">
@@ -65,13 +67,13 @@ const BecomeHostWarningPopup: React.FC<BecomeHostWarningPopupProps> = ({ roomCod
                                 onClick={onClose}
                                 className="modern-btn btn-primary w-full py-3 text-sm"
                             >
-                                Назад к игре
+                                {t('host_warning_cancel')}
                             </button>
                             <button
                                 onClick={handleConfirm}
                                 className="modern-btn btn-secondary w-full py-3 text-sm"
                             >
-                                Стать хостом
+                                {t('host_warning_confirm')}
                             </button>
                         </div>
                     </motion.div>
