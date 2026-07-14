@@ -74,3 +74,13 @@ export const downloadQuestions = async (code: number) => {
     });
     return response.data; // Blob or text
 };
+
+export const payForRoom = async (code: number) => {
+    const response = await api.post(`/room/${code}/pay`);
+    return response.data; // RoomDto { code: number, language: string, isPaid: boolean }
+};
+
+export const generateAiQuestions = async (code: number) => {
+    const response = await api.post(`/room/${code}/generate-ai`);
+    return response.data; // { count: number }
+};

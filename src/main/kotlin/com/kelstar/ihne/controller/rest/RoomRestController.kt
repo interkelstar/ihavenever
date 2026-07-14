@@ -19,18 +19,29 @@ class RoomRestController(
     @PostMapping
     fun createRoom(@RequestParam(required = false, defaultValue = "ru") lang: String): RoomDto {
         val room = roomService.createNewRoom(lang)
-        return RoomDto(room.code, room.language)
+        return RoomDto(room.code, room.language, room.isPaid ?: false)
     }
     
     @GetMapping("/{code}")
     fun getRoom(@PathVariable code: Int): ResponseEntity<RoomDto> {
         val room = roomService.getRoom(code)
         return if (room != null) {
-            ResponseEntity.ok(RoomDto(room.code, room.language))
+            ResponseEntity.ok(RoomDto(room.code, room.language, room.isPaid ?: false))
         } else {
             ResponseEntity.notFound().build()
         }
     }    
+
+    @PostMapping("/{code}/pay")
+    fun payForRoom(@PathVariable code: Int): ResponseEntity<RoomDto> {
+        val room = roomService.getRoom(code)
+        return if (room != null) {
+            val updatedRoom = roomService.markRoomAsPaid(code)
+            ResponseEntity.ok(RoomDto(updatedRoom.code, updatedRoom.language, updatedRoom.isPaid ?: false))
+        } else {
+            ResponseEntity.notFound().build()
+        }
+    }
     
     @GetMapping("/{code}/notShownCount")
     fun getNotShownCount(@PathVariable code: Int): ResponseEntity<Long> {
@@ -59,6 +70,24 @@ class RoomRestController(
             ResponseEntity.ok(count)
         } else {
             ResponseEntity.notFound().build()
+        }
+    }
+
+    @PostMapping("/{code}/generate-ai")
+    fun generateAiQuestions(@PathVariable code: Int): ResponseEntity<Any> {
+        return try {
+            val count = questionService.generateAiQuestions(code)
+            ResponseEntity.ok(mapOf("count" to count))
+        } catch (e: IllegalStateException) {
+            if (e.message == "Room is not paid") {
+                ResponseEntity.status(402).body(mapOf("error" to e.message))
+            } else {
+                ResponseEntity.internalServerError().body(mapOf("error" to e.message))
+            }
+        } catch (e: IllegalArgumentException) {
+            ResponseEntity.badRequest().body(mapOf("error" to e.message))
+        } catch (e: Exception) {
+            ResponseEntity.internalServerError().body(mapOf("error" to e.message))
         }
     }
     

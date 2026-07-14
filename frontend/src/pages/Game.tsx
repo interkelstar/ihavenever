@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getRandomQuestion, getNotShownCount, downloadQuestions, checkRoomExists } from '../api/client';
+import { getRandomQuestion, getNotShownCount, downloadQuestions, checkRoomExists, generateAiQuestions } from '../api/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { posthog } from '../analytics';
 import { useTranslation } from '../i18n';
 
 import GameSettingsPopup from '../components/GameSettingsPopup';
+import CoffeeGatePopup from '../components/CoffeeGatePopup';
+import AiPaymentPopup from '../components/AiPaymentPopup';
 
 interface Question {
     question: string;
@@ -23,6 +25,18 @@ const Game: React.FC = () => {
     const [showSettings, setShowSettings] = useState(false);
     const [wereQuestionsLoaded, setWereQuestionsLoaded] = useState(false);
 
+    // Monetization gate states
+    const [questionsShownThisSession, setQuestionsShownThisSession] = useState(0);
+    const [gateShown, setGateShown] = useState(false);
+    const [showCoffeeGate, setShowCoffeeGate] = useState(false);
+
+    // AI Generation states
+    const [isPaid, setIsPaid] = useState(false);
+    const [showAiPay, setShowAiPay] = useState(false);
+    const [aiLoading, setAiLoading] = useState(false);
+    const [aiSuccessMessage, setAiSuccessMessage] = useState<string | null>(null);
+    const [aiErrorMessage, setAiErrorMessage] = useState<string | null>(null);
+
     // Валидация комнаты и определение языка при входе
     useEffect(() => {
         const validate = async () => {
@@ -31,6 +45,7 @@ const Game: React.FC = () => {
                 const roomData = await checkRoomExists(parseInt(code));
                 if (roomData) {
                     setLanguage(roomData.language);
+                    setIsPaid(roomData.isPaid);
                 } else {
                     navigate('/404');
                 }
@@ -51,6 +66,15 @@ const Game: React.FC = () => {
                 setIsFinished(false);
                 const count = await getNotShownCount(parseInt(code));
                 setRemainingCount(count);
+
+                // Monetization soft gate check after 10 questions shown
+                setQuestionsShownThisSession(prev => {
+                    const nextCount = prev + 1;
+                    if (nextCount === 10 && !gateShown) {
+                        setShowCoffeeGate(true);
+                    }
+                    return nextCount;
+                });
             } else {
                 setIsFinished(true);
                 setCurrentQuestion(null);
@@ -65,7 +89,7 @@ const Game: React.FC = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [code, navigate]);
+    }, [code, navigate, gateShown]);
 
     const initialLoadDone = React.useRef(false);
 
@@ -103,6 +127,37 @@ const Game: React.FC = () => {
             });
         } catch (error) {
             console.error("Download failed", error);
+        }
+    };
+
+    const handleGenerateAiQuestions = async () => {
+        if (!code) return;
+        if (!isPaid) {
+            setShowAiPay(true);
+            return;
+        }
+
+        setAiLoading(true);
+        setAiSuccessMessage(null);
+        setAiErrorMessage(null);
+        posthog.capture('ai_generation_requested', { roomCode: code });
+        try {
+            const result = await generateAiQuestions(parseInt(code));
+            setAiSuccessMessage(t('finished_ai_success', { count: result.count }));
+            setWereQuestionsLoaded(true);
+            posthog.capture('ai_generation_success', { roomCode: code, count: result.count });
+        } catch (error: any) {
+            console.error(error);
+            if (error.response && error.response.status === 402) {
+                setIsPaid(false);
+                setShowAiPay(true);
+            } else if (error.response && error.response.status === 400) {
+                setAiErrorMessage(t('finished_ai_error_vibe'));
+            } else {
+                setAiErrorMessage(t('error_validation'));
+            }
+        } finally {
+            setAiLoading(false);
         }
     };
 
@@ -185,7 +240,33 @@ const Game: React.FC = () => {
                             </button>
                         </div>
 
-                        <div className="mb-4 mt-2 flex flex-col items-center">
+                        {/* AI Questions Generation block */}
+                        <div className="mb-4 mt-6 pt-5 border-t border-white/10 flex flex-col items-center">
+                            <h2>{t('finished_ai_title')}</h2>
+                            <p className="text-secondary text-sm mb-4 max-w-sm">
+                                {t('finished_ai_desc')}
+                            </p>
+                            <button
+                                onClick={handleGenerateAiQuestions}
+                                className="modern-btn btn-primary max-w-xs font-bold"
+                                disabled={aiLoading}
+                            >
+                                {aiLoading ? t('finished_ai_loading') : t('finished_ai_btn')}
+                            </button>
+
+                            {aiSuccessMessage && (
+                                <div className="modern-alert alert-success text-xs mt-3 w-full max-w-xs">
+                                    {aiSuccessMessage}
+                                </div>
+                            )}
+                            {aiErrorMessage && (
+                                <div className="modern-alert alert-error text-xs mt-3 w-full max-w-xs">
+                                    {aiErrorMessage}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="mb-4 mt-6 pt-5 border-t border-white/10 flex flex-col items-center">
                             <h2>{t('finished_download_desc')}</h2>
                             <button onClick={handleDownload} className="modern-btn btn-secondary max-w-xs">
                                 {t('finished_download_btn')}
@@ -198,6 +279,25 @@ const Game: React.FC = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {/* Coffee payment soft gate */}
+            <CoffeeGatePopup
+                isOpen={showCoffeeGate}
+                onClose={() => {
+                    setShowCoffeeGate(false);
+                    setGateShown(true);
+                }}
+            />
+
+            {/* AI Generation hard gate */}
+            {code && (
+                <AiPaymentPopup
+                    roomCode={parseInt(code)}
+                    isOpen={showAiPay}
+                    onClose={() => setShowAiPay(false)}
+                    onSuccess={() => setIsPaid(true)}
+                />
+            )}
         </div>
     );
 };

@@ -12,12 +12,12 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
 
-
 @Service
 class QuestionService(
     private val questionRepository: QuestionRepository,
     private val importService: ImportService,
-    private val roomRepository: RoomRepository
+    private val roomRepository: RoomRepository,
+    private val geminiService: GeminiService
 ) {
 
     @Transactional
@@ -135,6 +135,43 @@ class QuestionService(
         } catch (ex: Exception) {
             throw QuestionDaoException(ex)
         }
+    }
+
+    @Transactional
+    fun generateAiQuestions(roomCode: Int): Int {
+        val room = roomRepository.findByIdOrNull(roomCode) 
+            ?: throw IllegalArgumentException("Room $roomCode not found")
+        
+        if (room.isPaid != true) {
+            throw IllegalStateException("Room is not paid")
+        }
+
+        val customQuestions = questionRepository.findAllByRoomCode(roomCode)
+            .filter { !it.isPredefined }
+            .map { it.question }
+
+        if (customQuestions.size < 3) {
+            throw IllegalArgumentException("Need at least 3 custom questions to detect the vibe of the room")
+        }
+
+        val aiQuestions = geminiService.generateQuestions(customQuestions, room.language)
+        if (aiQuestions.isEmpty()) {
+            return 0
+        }
+
+        val existingQuestions = questionRepository.findAllByRoomCode(roomCode)
+            .map { it.question.lowercase() }
+            .toSet()
+
+        val questionsToSave = aiQuestions
+            .filter { it.lowercase() !in existingQuestions }
+            .map { Question(it, roomCode, isPredefined = false) }
+
+        if (questionsToSave.isNotEmpty()) {
+            questionRepository.saveAll(questionsToSave)
+        }
+
+        return questionsToSave.size
     }
 
     private fun sanitizeQuestion(rawQuestion: String): String {
