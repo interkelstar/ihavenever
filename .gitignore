@@ -35,10 +35,12 @@ bin/
 frontend/node_modules/
 /src/main/resources/static/v2-static/
 /.ai/
-/frontend/public/
+/frontend/public/*
+!/frontend/public/favicon.png
 release/ihne.jar
 /src/main/resources/static/assets/
 /src/main/resources/static/index.html
+/src/main/resources/static/favicon.png
 
 ### CRaC checkpoint artifacts ###
 crac-check/

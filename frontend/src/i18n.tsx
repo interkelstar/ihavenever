@@ -461,11 +461,6 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const [language, setLangState] = useState<Language>(() => {
         const saved = localStorage.getItem('game_language') as Language;
         if (saved && TRANSLATIONS[saved]) return saved;
-        
-        const locale = navigator.language.slice(0, 2);
-        if (locale === 'uk' || locale === 'ua') return 'uk';
-        if (locale === 'pl') return 'pl';
-        if (locale === 'en') return 'en';
         return 'ru';
     });
 

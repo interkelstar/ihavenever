@@ -9,9 +9,9 @@ const LanguageSelector: React.FC = () => {
 
     const languages: { code: Language; label: string }[] = [
         { code: 'ru', label: 'ru' },
-        { code: 'en', label: 'en' },
         { code: 'uk', label: 'ua' },
-        { code: 'pl', label: 'pl' }
+        { code: 'pl', label: 'pl' },
+        { code: 'en', label: 'en' }
     ];
 
     const currentLabel = languages.find(l => l.code === language)?.label || 'ru';
