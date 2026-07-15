@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export type Language = 'ru' | 'en' | 'uk' | 'pl';
 
@@ -170,7 +170,8 @@ export const TRANSLATIONS = {
         finished_load_more_btn: "Загрузить ещё!",
         finished_download_desc: "Теперь их можно скачать на память!",
         finished_download_btn: "Скачать все вопросы",
-        coffee_donate: "И если игра вам понравилась, на кофе кидать сюда",
+        coffee_donate: "А если игра вам понравилась, вы можете",
+        coffee_donate_btn: "поддержать автора",
         
         // Language Select
         lang_ru: "Русский",
@@ -257,7 +258,8 @@ export const TRANSLATIONS = {
         finished_load_more_btn: "Load more!",
         finished_download_desc: "Now you can download them as a keepsake!",
         finished_download_btn: "Download all questions",
-        coffee_donate: "And if you enjoyed the game, buy me a coffee here",
+        coffee_donate: "And if you enjoyed the game, you can",
+        coffee_donate_btn: "buy me a coffee",
         
         // Language Select
         lang_ru: "Русский",
@@ -344,7 +346,8 @@ export const TRANSLATIONS = {
         finished_load_more_btn: "Завантажити ще!",
         finished_download_desc: "Тепер їх можна завантажити на згадку!",
         finished_download_btn: "Завантажити всі питання",
-        coffee_donate: "І якщо гра вам сподобалася, на каву кидати сюди",
+        coffee_donate: "А якщо гра вам сподобалася, ви можете",
+        coffee_donate_btn: "підтримати автора",
         
         // Language Select
         lang_ru: "Русский",
@@ -431,7 +434,8 @@ export const TRANSLATIONS = {
         finished_load_more_btn: "Załaduj więcej!",
         finished_download_desc: "Teraz możesz je pobrać na pamiątkę!",
         finished_download_btn: "Pobierz wszystkie pytania",
-        coffee_donate: "A jeśli gra Ci się podobała, możesz postawić mi kawę tutaj",
+        coffee_donate: "A jeśli gra Ci się podobała, możesz",
+        coffee_donate_btn: "postawić mi kawę",
         
         // Language Select
         lang_ru: "Русский",
@@ -460,6 +464,46 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (locale === 'en') return 'en';
         return 'ru';
     });
+
+    useEffect(() => {
+        const updateBmcWidget = (lang: Language) => {
+            const oldWidget = document.getElementById('BMC-Widget-Script');
+            const oldBtn = document.getElementById('bmc-wbtn');
+            const oldStyle = document.getElementById('bmc-wbtn-style');
+            const oldIframe = document.querySelector('iframe[src*="buymeacoffee"]');
+            const oldContainer = document.getElementById('bmc-wbtn-container');
+
+            if (oldWidget) oldWidget.remove();
+            if (oldBtn) oldBtn.remove();
+            if (oldStyle) oldStyle.remove();
+            if (oldIframe) oldIframe.remove();
+            if (oldContainer) oldContainer.remove();
+
+            document.querySelectorAll('[id^="bmc-"], [class^="bmc-"]').forEach(el => el.remove());
+
+            let message = "Нравится игра? Тогда поддержи меня!";
+            if (lang === 'en') message = "Like the game? Support me!";
+            if (lang === 'uk') message = "Подобається гра? Тоді підтримай мене!";
+            if (lang === 'pl') message = "Podoba Ci się gra? Wesprzyj mnie!";
+
+            const script = document.createElement('script');
+            script.id = 'BMC-Widget-Script';
+            script.src = "https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js";
+            script.setAttribute('data-name', 'BMC-Widget');
+            script.setAttribute('data-cfasync', 'false');
+            script.setAttribute('data-id', 'kelstar');
+            script.setAttribute('data-description', 'Support me on Buy me a coffee!');
+            script.setAttribute('data-message', message);
+            script.setAttribute('data-color', '#BD5FFF');
+            script.setAttribute('data-position', 'Right');
+            script.setAttribute('data-x_margin', '15');
+            script.setAttribute('data-y_margin', '23');
+
+            document.head.appendChild(script);
+        };
+
+        updateBmcWidget(language);
+    }, [language]);
 
     const setLanguage = (lang: Language) => {
         setLangState(lang);

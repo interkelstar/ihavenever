@@ -274,7 +274,22 @@ const Game: React.FC = () => {
                         </div>
 
                         <div className="mt-8">
-                            <h2 className="text-base">{t('coffee_donate')} <a href="https://revolut.me/kelstar" target="_blank" className="text-accent">Revolut</a></h2>
+                            <h2 className="text-base">
+                                {t('coffee_donate')}{' '}
+                                <button
+                                    onClick={() => {
+                                        const bmcBtn = document.getElementById('bmc-wbtn');
+                                        if (bmcBtn) {
+                                            (bmcBtn as HTMLElement).click();
+                                        } else {
+                                            window.open('https://buymeacoffee.com/kelstar', '_blank');
+                                        }
+                                    }}
+                                    className="text-accent underline cursor-pointer bg-transparent border-0 p-0 font-medium inline"
+                                >
+                                    {t('coffee_donate_btn')}
+                                </button>
+                            </h2>
                         </div>
                     </motion.div>
                 )}
