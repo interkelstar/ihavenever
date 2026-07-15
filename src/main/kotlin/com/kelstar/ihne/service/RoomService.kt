@@ -45,7 +45,7 @@ class RoomService(
     @SchedulerLock(name = "deleteOldRooms")
     @Transactional
     fun deleteOldRooms() {
-        val roomsToDelete = roomRepository.findAll()
+        val roomsToDelete = roomRepository.findAllWithQuestions()
             .filter { room ->
                 room.questions.all {
                     Instant.now().epochSecond - it.dateAdded.epochSecond > Duration.ofDays(1).toSeconds()

@@ -20,7 +20,7 @@ class AdminRestController(
     @Transactional(readOnly = true)
     fun getStatistics(): AdminStatsDto {
         val historical = statisticsRepository.findAll()
-        val activeRooms = roomRepository.findAll().map { room ->
+        val activeRooms = roomRepository.findAllWithQuestions().map { room ->
             val questions = room.questions
             ActiveRoomStatsDto(
                 code = room.code,

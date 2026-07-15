@@ -4,11 +4,16 @@ import com.kelstar.ihne.model.Question
 import com.kelstar.ihne.model.Room
 import com.kelstar.ihne.model.Statistics
 import com.kelstar.ihne.model.ArchivedQuestion
+import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 
-interface RoomRepository : JpaRepository<Room, Int>
+interface RoomRepository : JpaRepository<Room, Int> {
+    @EntityGraph(attributePaths = ["questions"])
+    @Query("SELECT r FROM Room r")
+    fun findAllWithQuestions(): List<Room>
+}
 
 interface QuestionRepository : JpaRepository<Question, Long> {
 
