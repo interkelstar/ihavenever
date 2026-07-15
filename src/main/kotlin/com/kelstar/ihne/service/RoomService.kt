@@ -66,7 +66,7 @@ class RoomService(
         val customQuestionsToArchive = roomsToDelete.flatMap { room ->
             room.questions
                 .filter { !it.isPredefined }
-                .map { ArchivedQuestion(it.question, room.language) }
+                .map { ArchivedQuestion(it.question, room.language, room.code) }
         }
         if (customQuestionsToArchive.isNotEmpty()) {
             archivedQuestionRepository.saveAll(customQuestionsToArchive)

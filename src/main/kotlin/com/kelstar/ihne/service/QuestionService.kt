@@ -139,6 +139,13 @@ class QuestionService(
 
     @Transactional
     fun generateAiQuestions(roomCode: Int): Int {
+        val geminiEnabled = System.getenv("GEMINI_ENABLED")?.toBoolean() 
+            ?: System.getProperty("gemini.enabled")?.toBoolean() 
+            ?: false
+        if (!geminiEnabled) {
+            throw IllegalStateException("AI generation is disabled")
+        }
+
         val room = roomRepository.findByIdOrNull(roomCode) 
             ?: throw IllegalArgumentException("Room $roomCode not found")
         

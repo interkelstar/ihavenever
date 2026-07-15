@@ -2,7 +2,7 @@ spring.config.activate.on-profile: "local"
 spring:
   datasource:
     driver-class-name: org.h2.Driver
-    url: jdbc:h2:file:./db/database
+    url: jdbc:h2:file:./db/database;AUTO_SERVER=TRUE
     username: sa
     password:
 server:

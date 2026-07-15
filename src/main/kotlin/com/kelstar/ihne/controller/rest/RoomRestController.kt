@@ -19,14 +19,14 @@ class RoomRestController(
     @PostMapping
     fun createRoom(@RequestParam(required = false, defaultValue = "ru") lang: String): RoomDto {
         val room = roomService.createNewRoom(lang)
-        return RoomDto(room.code, room.language, room.isPaid ?: false)
+        return RoomDto(room.code, room.language, room.isPaid ?: false, isAiEnabled())
     }
     
     @GetMapping("/{code}")
     fun getRoom(@PathVariable code: Int): ResponseEntity<RoomDto> {
         val room = roomService.getRoom(code)
         return if (room != null) {
-            ResponseEntity.ok(RoomDto(room.code, room.language, room.isPaid ?: false))
+            ResponseEntity.ok(RoomDto(room.code, room.language, room.isPaid ?: false, isAiEnabled()))
         } else {
             ResponseEntity.notFound().build()
         }
@@ -37,10 +37,16 @@ class RoomRestController(
         val room = roomService.getRoom(code)
         return if (room != null) {
             val updatedRoom = roomService.markRoomAsPaid(code)
-            ResponseEntity.ok(RoomDto(updatedRoom.code, updatedRoom.language, updatedRoom.isPaid ?: false))
+            ResponseEntity.ok(RoomDto(updatedRoom.code, updatedRoom.language, updatedRoom.isPaid ?: false, isAiEnabled()))
         } else {
             ResponseEntity.notFound().build()
         }
+    }
+
+    private fun isAiEnabled(): Boolean {
+        return System.getenv("GEMINI_ENABLED")?.toBoolean() 
+            ?: System.getProperty("gemini.enabled")?.toBoolean() 
+            ?: false
     }
     
     @GetMapping("/{code}/notShownCount")

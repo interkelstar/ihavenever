@@ -36,6 +36,7 @@ const Game: React.FC = () => {
     const [aiLoading, setAiLoading] = useState(false);
     const [aiSuccessMessage, setAiSuccessMessage] = useState<string | null>(null);
     const [aiErrorMessage, setAiErrorMessage] = useState<string | null>(null);
+    const [aiEnabled, setAiEnabled] = useState(false);
 
     // Валидация комнаты и определение языка при входе
     useEffect(() => {
@@ -46,6 +47,7 @@ const Game: React.FC = () => {
                 if (roomData) {
                     setLanguage(roomData.language);
                     setIsPaid(roomData.isPaid);
+                    setAiEnabled(roomData.aiEnabled);
                 } else {
                     navigate('/404');
                 }
@@ -241,30 +243,32 @@ const Game: React.FC = () => {
                         </div>
 
                         {/* AI Questions Generation block */}
-                        <div className="mb-4 mt-6 pt-5 border-t border-white/10 flex flex-col items-center">
-                            <h2>{t('finished_ai_title')}</h2>
-                            <p className="text-secondary text-sm mb-4 max-w-sm">
-                                {t('finished_ai_desc')}
-                            </p>
-                            <button
-                                onClick={handleGenerateAiQuestions}
-                                className="modern-btn btn-primary max-w-xs font-bold"
-                                disabled={aiLoading}
-                            >
-                                {aiLoading ? t('finished_ai_loading') : t('finished_ai_btn')}
-                            </button>
+                        {aiEnabled && (
+                            <div className="mb-4 mt-6 pt-5 border-t border-white/10 flex flex-col items-center">
+                                <h2>{t('finished_ai_title')}</h2>
+                                <p className="text-secondary text-sm mb-4 max-w-sm">
+                                    {t('finished_ai_desc')}
+                                </p>
+                                <button
+                                    onClick={handleGenerateAiQuestions}
+                                    className="modern-btn btn-primary max-w-xs font-bold"
+                                    disabled={aiLoading}
+                                >
+                                    {aiLoading ? t('finished_ai_loading') : t('finished_ai_btn')}
+                                </button>
 
-                            {aiSuccessMessage && (
-                                <div className="modern-alert alert-success text-xs mt-3 w-full max-w-xs">
-                                    {aiSuccessMessage}
-                                </div>
-                            )}
-                            {aiErrorMessage && (
-                                <div className="modern-alert alert-error text-xs mt-3 w-full max-w-xs">
-                                    {aiErrorMessage}
-                                </div>
-                            )}
-                        </div>
+                                {aiSuccessMessage && (
+                                    <div className="modern-alert alert-success text-xs mt-3 w-full max-w-xs">
+                                        {aiSuccessMessage}
+                                    </div>
+                                )}
+                                {aiErrorMessage && (
+                                    <div className="modern-alert alert-error text-xs mt-3 w-full max-w-xs">
+                                        {aiErrorMessage}
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
                         <div className="mb-4 mt-6 pt-5 border-t border-white/10 flex flex-col items-center">
                             <h2>{t('finished_download_desc')}</h2>
@@ -300,7 +304,7 @@ const Game: React.FC = () => {
             />
 
             {/* AI Generation hard gate */}
-            {code && (
+            {aiEnabled && code && (
                 <AiPaymentPopup
                     roomCode={parseInt(code)}
                     isOpen={showAiPay}
