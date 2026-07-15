@@ -15,7 +15,7 @@ plugins {
 }
 
 node {
-    version.set("20.10.0")
+    version.set("22.14.0")
     download.set(true)
     nodeProjectDir.set(file("frontend"))
 }
