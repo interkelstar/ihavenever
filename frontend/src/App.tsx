@@ -12,6 +12,8 @@ import './index.css';
 const basename = '/';
 
 import Footer from './components/Footer';
+import { LanguageProvider } from './i18n';
+import BuyMeACoffeeWidget from './components/BuyMeACoffeeWidget';
 
 function AppContent() {
     const location = useLocation();
@@ -35,9 +37,6 @@ function AppContent() {
         </div>
     );
 }
-
-import { LanguageProvider } from './i18n';
-import BuyMeACoffeeWidget from './components/BuyMeACoffeeWidget';
 
 function App() {
     return (
