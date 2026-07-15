@@ -14,12 +14,7 @@ const CoffeeGatePopup: React.FC<CoffeeGatePopupProps> = ({ isOpen, onClose }) =>
 
     const handleBuyClick = () => {
         posthog.capture('coffee_gate_buy_click', { step });
-        const bmcBtn = document.getElementById('bmc-wbtn');
-        if (bmcBtn) {
-            (bmcBtn as HTMLElement).click();
-        } else {
-            window.open('https://buymeacoffee.com/kelstar', '_blank');
-        }
+        window.dispatchEvent(new Event('trigger-bmc-widget'));
     };
 
     const handleFreeClick = () => {

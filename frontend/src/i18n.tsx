@@ -164,6 +164,7 @@ export const TRANSLATIONS = {
         ai_pay_success_toast: "Доступ успешно разблокирован! Теперь вы можете генерировать вопросы.",
         game_settings_title: "Настройки игры",
         add_questions_label: "Добавить вопросы",
+        bmc_tooltip: "Нравится игра? Тогда поддержи меня! ☕️",
         finished_title: "Кончились вопросы!",
         finished_check_btn: "Точно?",
         finished_desc: "Поздравляю, это были все вопросы, заданные в этой комнате",
@@ -252,6 +253,7 @@ export const TRANSLATIONS = {
         ai_pay_success_toast: "Access unlocked successfully! Now you can generate questions.",
         game_settings_title: "Game Settings",
         add_questions_label: "Add questions",
+        bmc_tooltip: "Like the game? Support me! ☕️",
         finished_title: "Out of questions!",
         finished_check_btn: "Are you sure?",
         finished_desc: "Congratulations, those were all the questions asked in this room",
@@ -340,6 +342,7 @@ export const TRANSLATIONS = {
         ai_pay_success_toast: "Доступ успішно розблоковано! Тепер ви можете генерувати питання.",
         game_settings_title: "Налаштування гри",
         add_questions_label: "Додати питання",
+        bmc_tooltip: "Подобається гра? Тоді підтримай мене! ☕️",
         finished_title: "Питання закінчилися!",
         finished_check_btn: "Точно?",
         finished_desc: "Вітаємо, це були всі питання, задані в цій кімнаті",
@@ -428,6 +431,7 @@ export const TRANSLATIONS = {
         ai_pay_success_toast: "Dostęp odblokowany pomyślnie! Teraz możesz generować pytania.",
         game_settings_title: "Ustawienia gry",
         add_questions_label: "Dodaj pytania",
+        bmc_tooltip: "Podoba Ci się gra? Wesprzyj mnie! ☕️",
         finished_title: "Koniec pytań!",
         finished_check_btn: "Na pewno?",
         finished_desc: "Gratulacje, to były wszystkie pytania zadane w tym pokoju",
@@ -465,45 +469,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         return 'ru';
     });
 
-    useEffect(() => {
-        const updateBmcWidget = (lang: Language) => {
-            const oldWidget = document.getElementById('BMC-Widget-Script');
-            const oldBtn = document.getElementById('bmc-wbtn');
-            const oldStyle = document.getElementById('bmc-wbtn-style');
-            const oldIframe = document.querySelector('iframe[src*="buymeacoffee"]');
-            const oldContainer = document.getElementById('bmc-wbtn-container');
 
-            if (oldWidget) oldWidget.remove();
-            if (oldBtn) oldBtn.remove();
-            if (oldStyle) oldStyle.remove();
-            if (oldIframe) oldIframe.remove();
-            if (oldContainer) oldContainer.remove();
-
-            document.querySelectorAll('[id^="bmc-"], [class^="bmc-"]').forEach(el => el.remove());
-
-            let message = "Нравится игра? Тогда поддержи меня!";
-            if (lang === 'en') message = "Like the game? Support me!";
-            if (lang === 'uk') message = "Подобається гра? Тоді підтримай мене!";
-            if (lang === 'pl') message = "Podoba Ci się gra? Wesprzyj mnie!";
-
-            const script = document.createElement('script');
-            script.id = 'BMC-Widget-Script';
-            script.src = "https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js";
-            script.setAttribute('data-name', 'BMC-Widget');
-            script.setAttribute('data-cfasync', 'false');
-            script.setAttribute('data-id', 'kelstar');
-            script.setAttribute('data-description', 'Support me on Buy me a coffee!');
-            script.setAttribute('data-message', message);
-            script.setAttribute('data-color', '#BD5FFF');
-            script.setAttribute('data-position', 'Right');
-            script.setAttribute('data-x_margin', '15');
-            script.setAttribute('data-y_margin', '23');
-
-            document.head.appendChild(script);
-        };
-
-        updateBmcWidget(language);
-    }, [language]);
 
     const setLanguage = (lang: Language) => {
         setLangState(lang);

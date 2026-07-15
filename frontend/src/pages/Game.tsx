@@ -278,12 +278,7 @@ const Game: React.FC = () => {
                                 {t('coffee_donate')}{' '}
                                 <button
                                     onClick={() => {
-                                        const bmcBtn = document.getElementById('bmc-wbtn');
-                                        if (bmcBtn) {
-                                            (bmcBtn as HTMLElement).click();
-                                        } else {
-                                            window.open('https://buymeacoffee.com/kelstar', '_blank');
-                                        }
+                                        window.dispatchEvent(new Event('trigger-bmc-widget'));
                                     }}
                                     className="text-accent underline cursor-pointer bg-transparent border-0 p-0 font-medium inline"
                                 >

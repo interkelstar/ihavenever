@@ -18,12 +18,7 @@ const AiPaymentPopup: React.FC<AiPaymentPopupProps> = ({ roomCode, isOpen, onClo
 
     const handleGoToPay = () => {
         posthog.capture('ai_pay_external_click', { roomCode });
-        const bmcBtn = document.getElementById('bmc-wbtn');
-        if (bmcBtn) {
-            (bmcBtn as HTMLElement).click();
-        } else {
-            window.open('https://buymeacoffee.com/kelstar', '_blank');
-        }
+        window.dispatchEvent(new Event('trigger-bmc-widget'));
     };
 
     const handleCheckPayment = async () => {

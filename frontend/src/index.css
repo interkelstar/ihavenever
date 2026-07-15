@@ -311,3 +311,12 @@ h2 {
     margin: 0;
   }
 }
+
+/* Scrollbar hider utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none !important;  /* IE and Edge */
+  scrollbar-width: none !important;  /* Firefox */
+}

@@ -37,6 +37,7 @@ function AppContent() {
 }
 
 import { LanguageProvider } from './i18n';
+import BuyMeACoffeeWidget from './components/BuyMeACoffeeWidget';
 
 function App() {
     return (
@@ -44,6 +45,7 @@ function App() {
             <BrowserRouter basename={basename}>
                 <AppContent />
             </BrowserRouter>
+            <BuyMeACoffeeWidget />
         </LanguageProvider>
     );
 }
