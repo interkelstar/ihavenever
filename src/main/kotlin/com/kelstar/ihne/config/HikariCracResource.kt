@@ -125,6 +125,12 @@ class HikariCracResource(private val dataSource: DataSource) : Resource {
                     val dialect = if (dbProfile == "mysql") "org.hibernate.dialect.MySQLDialect" else "org.hibernate.dialect.PostgreSQLDialect"
                     jpaProperties.setProperty("hibernate.dialect", dialect)
                     jpaProperties.setProperty("hibernate.physical_naming_strategy", "org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy")
+                    val schema = if (finalUrl.contains("currentSchema=")) {
+                        finalUrl.substringAfter("currentSchema=").substringBefore("&")
+                    } else {
+                        "public"
+                    }
+                    jpaProperties.setProperty("hibernate.default_schema", schema)
                     emfBuilder.setJpaProperties(jpaProperties)
                     
                     emfBuilder.afterPropertiesSet()

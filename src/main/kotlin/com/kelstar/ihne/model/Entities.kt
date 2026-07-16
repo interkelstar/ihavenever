@@ -19,7 +19,8 @@ data class Question(
     var wasShown = false
     var dateAdded: Instant = Instant.now()
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "question_seq_gen")
+    @SequenceGenerator(name = "question_seq_gen", sequenceName = "question_seq", allocationSize = 50)
     var id: Long? = null
 }
 
@@ -49,7 +50,8 @@ data class Statistics(
     val questionsPredefined: Int,
 ) {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "statistics_seq_gen")
+    @SequenceGenerator(name = "statistics_seq_gen", sequenceName = "statistics_seq", allocationSize = 50)
     var id: Long? = null
 }
 
@@ -66,6 +68,7 @@ data class ArchivedQuestion(
 
     val dateArchived: Instant = Instant.now()
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "archived_question_seq_gen")
+    @SequenceGenerator(name = "archived_question_seq_gen", sequenceName = "archived_question_seq", allocationSize = 50)
     var id: Long? = null
 }
