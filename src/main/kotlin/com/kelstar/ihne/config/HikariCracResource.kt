@@ -122,7 +122,8 @@ class HikariCracResource(private val dataSource: DataSource) : Resource {
                     
                     val jpaProperties = java.util.Properties()
                     jpaProperties.setProperty("hibernate.hbm2ddl.auto", "update")
-                    jpaProperties.setProperty("hibernate.temp.use_jdbc_metadata_defaults", "false")
+                    val dialect = if (dbProfile == "mysql") "org.hibernate.dialect.MySQLDialect" else "org.hibernate.dialect.PostgreSQLDialect"
+                    jpaProperties.setProperty("hibernate.dialect", dialect)
                     emfBuilder.setJpaProperties(jpaProperties)
                     
                     emfBuilder.afterPropertiesSet()
