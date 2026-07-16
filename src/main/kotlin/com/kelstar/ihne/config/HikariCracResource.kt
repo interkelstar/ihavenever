@@ -110,6 +110,22 @@ class HikariCracResource(private val dataSource: DataSource) : Resource {
 
             val newDs = HikariDataSource(config)
 
+            // Pre-create sequences for PostgreSQL to bypass Hibernate catalog search bugs
+            if (dbProfile == "postgres") {
+                try {
+                    newDs.connection.use { conn ->
+                        conn.createStatement().use { stmt ->
+                            stmt.execute("CREATE SEQUENCE IF NOT EXISTS question_seq START WITH 1 INCREMENT BY 50;")
+                            stmt.execute("CREATE SEQUENCE IF NOT EXISTS statistics_seq START WITH 1 INCREMENT BY 50;")
+                            stmt.execute("CREATE SEQUENCE IF NOT EXISTS archived_question_seq START WITH 1 INCREMENT BY 50;")
+                        }
+                    }
+                    logger.info("CRaC afterRestore: PostgreSQL sequences verified/created successfully")
+                } catch (e: Exception) {
+                    logger.error("Failed to pre-create PostgreSQL sequences: ${e.message}", e)
+                }
+            }
+
             // Trigger Hibernate DDL-auto update programmatically on the new database pool
             // to ensure schema changes (new tables/columns) are applied automatically on restore
             if (dbProfile == "postgres" || dbProfile == "mysql") {
