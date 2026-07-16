@@ -72,7 +72,7 @@ substitutions:
   _AR_REPOSITORY: 'cloud-run-source-deploy'
   _DEPLOY_REGION: 'europe-west1'
   _SERVICE_NAME: 'ihavenever'
-  _DB_PARAMS: ''
+  _DB_PARAMS: '?prepareThreshold=0'
   _DB_INIT_SQL: ''
   _TRIGGER_ID: ''
   _PR_NUMBER: ''
