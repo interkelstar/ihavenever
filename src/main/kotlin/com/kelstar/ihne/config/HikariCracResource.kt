@@ -110,6 +110,29 @@ class HikariCracResource(private val dataSource: DataSource) : Resource {
 
             val newDs = HikariDataSource(config)
 
+            // Trigger Hibernate DDL-auto update programmatically on the new database pool
+            // to ensure schema changes (new tables/columns) are applied automatically on restore
+            if (dbProfile == "postgres" || dbProfile == "mysql") {
+                try {
+                    logger.info("CRaC afterRestore: triggering Hibernate schema update (ddl-auto) on the new database")
+                    val emfBuilder = org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean()
+                    emfBuilder.dataSource = newDs
+                    emfBuilder.setPackagesToScan("com.kelstar.ihne.model")
+                    emfBuilder.jpaVendorAdapter = org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter()
+                    
+                    val jpaProperties = java.util.Properties()
+                    jpaProperties.setProperty("hibernate.hbm2ddl.auto", "update")
+                    jpaProperties.setProperty("hibernate.temp.use_jdbc_metadata_defaults", "false")
+                    emfBuilder.setJpaProperties(jpaProperties)
+                    
+                    emfBuilder.afterPropertiesSet()
+                    emfBuilder.destroy()
+                    logger.info("CRaC afterRestore: Hibernate schema update completed successfully")
+                } catch (e: Exception) {
+                    logger.error("Failed to run programmatic Hibernate schema update on afterRestore: ${e.message}", e)
+                }
+            }
+
             if (dataSource is RoutingDataSource) {
                 dataSource.updateTargetDataSource(newDs)
                 logger.info("RoutingDataSource delegate successfully updated with new connection pool")
