@@ -13,6 +13,7 @@ interface HistoricalStat {
 interface ActiveRoom {
     code: number;
     dateCreated: string;
+    isPaid: boolean;
     questionsTotal: number;
     questionsShown: number;
     questionsPredefined: number;
@@ -25,6 +26,15 @@ interface StatsData {
     totalActiveQuestions: number;
     totalActiveShownQuestions: number;
     totalActivePredefinedQuestions: number;
+}
+
+interface AdminQuestion {
+    id: number;
+    question: string;
+    roomCode: number;
+    isPredefined: boolean;
+    wasShown: boolean;
+    dateAdded: string;
 }
 
 // Generate demo data to show if database is empty
@@ -46,10 +56,10 @@ const generateDemoData = (): StatsData => {
     });
 
     const activeRooms: ActiveRoom[] = [
-        { code: 789456, dateCreated: new Date(now.getTime() - 1000 * 60 * 30).toISOString(), questionsTotal: 25, questionsShown: 12, questionsPredefined: 18 },
-        { code: 456123, dateCreated: new Date(now.getTime() - 1000 * 60 * 120).toISOString(), questionsTotal: 40, questionsShown: 35, questionsPredefined: 20 },
-        { code: 112233, dateCreated: new Date(now.getTime() - 1000 * 60 * 360).toISOString(), questionsTotal: 15, questionsShown: 0, questionsPredefined: 15 },
-        { code: 998877, dateCreated: new Date(now.getTime() - 1000 * 60 * 1440 * 2).toISOString(), questionsTotal: 30, questionsShown: 10, questionsPredefined: 25 }
+        { code: 789456, dateCreated: new Date(now.getTime() - 1000 * 60 * 30).toISOString(), isPaid: true, questionsTotal: 25, questionsShown: 12, questionsPredefined: 18 },
+        { code: 456123, dateCreated: new Date(now.getTime() - 1000 * 60 * 120).toISOString(), isPaid: false, questionsTotal: 40, questionsShown: 35, questionsPredefined: 20 },
+        { code: 112233, dateCreated: new Date(now.getTime() - 1000 * 60 * 360).toISOString(), isPaid: false, questionsTotal: 15, questionsShown: 0, questionsPredefined: 15 },
+        { code: 998877, dateCreated: new Date(now.getTime() - 1000 * 60 * 1440 * 2).toISOString(), isPaid: true, questionsTotal: 30, questionsShown: 10, questionsPredefined: 25 }
     ];
 
     return {
@@ -70,8 +80,9 @@ const AdminStats: React.FC = () => {
     const [username, setUsername] = useState('admin');
     const [password, setPassword] = useState('');
     const [authError, setAuthError] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<'overview' | 'active' | 'historical'>('overview');
+    const [activeTab, setActiveTab] = useState<'overview' | 'active' | 'historical' | 'questions'>('overview');
     const [hoveredPoint, setHoveredPoint] = useState<{ x: number; y: number; label: string; value: number } | null>(null);
+    const [questions, setQuestions] = useState<AdminQuestion[]>([]);
 
     // Time filter states
     const [timeUnit, setTimeUnit] = useState<'all' | 'month' | 'week'>('all');
@@ -87,8 +98,12 @@ const AdminStats: React.FC = () => {
         setAuthError(null);
         try {
             const config = headerToUse ? { headers: { 'Authorization': headerToUse } } : {};
-            const response = await axios.get('/admin/api/statistics', config);
-            setData(response.data);
+            const [statsRes, qsRes] = await Promise.all([
+                axios.get('/admin/api/statistics', config),
+                axios.get('/admin/api/questions', config).catch(() => ({ data: [] }))
+            ]);
+            setData(statsRes.data);
+            setQuestions(qsRes.data || []);
             setAuthRequired(false);
             if (headerToUse) {
                 localStorage.setItem('admin_auth_header', headerToUse);
@@ -134,7 +149,50 @@ const AdminStats: React.FC = () => {
         } else {
             setIsDemo(true);
             setData(generateDemoData());
+            setQuestions([]);
             setAuthRequired(false);
+        }
+    };
+
+    const deleteRoom = async (code: number) => {
+        if (!window.confirm(`Вы уверены, что хотите удалить комнату ${code}?`)) return;
+        try {
+            await axios.delete(`/admin/api/rooms/${code}`, { headers: { 'Authorization': authHeader } });
+            fetchStats();
+        } catch (e) {
+            console.error(e);
+            alert('Ошибка при удалении комнаты');
+        }
+    };
+
+    const deleteQuestion = async (id: number) => {
+        if (!window.confirm('Удалить вопрос?')) return;
+        try {
+            await axios.delete(`/admin/api/questions/${id}`, { headers: { 'Authorization': authHeader } });
+            fetchStats();
+        } catch (e) {
+            console.error(e);
+            alert('Ошибка при удалении вопроса');
+        }
+    };
+
+    const toggleRoomPaid = async (code: number) => {
+        try {
+            await axios.patch(`/admin/api/rooms/${code}/toggle-paid`, {}, { headers: { 'Authorization': authHeader } });
+            fetchStats();
+        } catch (e) {
+            console.error(e);
+            alert('Ошибка при изменении статуса AI/Play');
+        }
+    };
+
+    const toggleQuestionShown = async (id: number) => {
+        try {
+            await axios.patch(`/admin/api/questions/${id}/toggle-shown`, {}, { headers: { 'Authorization': authHeader } });
+            fetchStats();
+        } catch (e) {
+            console.error(e);
+            alert('Ошибка при изменении статуса вопроса');
         }
     };
 
@@ -766,13 +824,23 @@ const AdminStats: React.FC = () => {
                     </button>
                     <button
                         onClick={() => setActiveTab('historical')}
-                        className={`pb-2 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
+                        className={`mr-6 pb-2 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
                             activeTab === 'historical'
                                 ? 'border-blue-500 text-white'
                                 : 'border-transparent text-gray-400 hover:text-white'
                         }`}
                     >
                         История сессий ({filteredHistorical.length})
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('questions')}
+                        className={`pb-2 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
+                            activeTab === 'questions'
+                                ? 'border-blue-500 text-white'
+                                : 'border-transparent text-gray-400 hover:text-white'
+                        }`}
+                    >
+                        Все вопросы ({questions.length})
                     </button>
                 </div>
 
@@ -786,8 +854,10 @@ const AdminStats: React.FC = () => {
                                         <th className="pb-3 px-4">Создана</th>
                                         <th className="pb-3 px-4 text-center">Вопросов всего</th>
                                         <th className="pb-3 px-4 text-center">Встроенных</th>
-                                        <th className="pb-3 px-4 text-center">Пользовательских</th>
+                                        <th className="pb-3 px-4 text-center">Своих</th>
+                                        <th className="pb-3 px-4 text-center">AI / Play</th>
                                         <th className="pb-3 pl-4">Просмотрено</th>
+                                        <th className="pb-3 pl-4">Действия</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -816,6 +886,11 @@ const AdminStats: React.FC = () => {
                                                 <td className="py-4 px-4 text-center text-purple-400 font-medium">
                                                     {customCount}
                                                 </td>
+                                                <td className="py-4 px-4 text-center">
+                                                    <button onClick={() => toggleRoomPaid(room.code)} className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${room.isPaid ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30' : 'bg-gray-500/10 text-gray-400 border border-gray-500/30 hover:bg-gray-500/20'}`}>
+                                                        {room.isPaid ? 'AI Enabled' : 'Off'}
+                                                    </button>
+                                                </td>
                                                 <td className="py-4 pl-4 w-52">
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-24 bg-white/5 rounded-full h-2 overflow-hidden">
@@ -825,6 +900,9 @@ const AdminStats: React.FC = () => {
                                                             {room.questionsShown} / {room.questionsTotal}
                                                         </span>
                                                     </div>
+                                                </td>
+                                                <td className="py-4 pl-4">
+                                                    <button onClick={() => deleteRoom(room.code)} className="text-red-400 hover:text-red-300 text-xs font-bold uppercase transition-colors">Удалить</button>
                                                 </td>
                                             </tr>
                                         );
@@ -898,6 +976,53 @@ const AdminStats: React.FC = () => {
                         ) : (
                             <div className="text-center py-10 text-gray-500">
                                 В истории пока нет записей за выбранный период
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {activeTab === 'questions' && (
+                    <div className="overflow-x-auto">
+                        {questions.length > 0 ? (
+                            <table className="w-full text-left border-collapse text-sm">
+                                <thead>
+                                    <tr className="border-b border-white/5 text-gray-400 text-xs font-bold uppercase tracking-wider">
+                                        <th className="pb-3 pr-4">Комната</th>
+                                        <th className="pb-3 px-4">Текст</th>
+                                        <th className="pb-3 px-4">Добавлен</th>
+                                        <th className="pb-3 px-4">Тип</th>
+                                        <th className="pb-3 px-4">Статус</th>
+                                        <th className="pb-3 pl-4">Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {questions.map((q) => (
+                                        <tr key={q.id} className="border-b border-white/5 hover:bg-white/2 transition-colors">
+                                            <td className="py-4 pr-4 font-mono font-bold text-gray-300">{q.roomCode}</td>
+                                            <td className="py-4 px-4 text-white font-medium max-w-xs truncate" title={q.question}>{q.question}</td>
+                                            <td className="py-4 px-4 text-gray-400">
+                                                {new Date(q.dateAdded).toLocaleString('ru-RU', {
+                                                    day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
+                                                })}
+                                            </td>
+                                            <td className="py-4 px-4">
+                                                {q.isPredefined ? <span className="text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full font-semibold text-xs">Встроенный</span> : <span className="text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full font-semibold text-xs">Свой</span>}
+                                            </td>
+                                            <td className="py-4 px-4">
+                                                <button onClick={() => toggleQuestionShown(q.id)} className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${q.wasShown ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20' : 'bg-gray-500/10 text-gray-400 border border-gray-500/30 hover:bg-gray-500/20'}`}>
+                                                    {q.wasShown ? 'Показан' : 'Ожидает'}
+                                                </button>
+                                            </td>
+                                            <td className="py-4 pl-4">
+                                                <button onClick={() => deleteQuestion(q.id)} className="text-red-400 hover:text-red-300 text-xs font-bold uppercase transition-colors">Удалить</button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        ) : (
+                            <div className="text-center py-10 text-gray-500">
+                                Нет вопросов
                             </div>
                         )}
                     </div>
