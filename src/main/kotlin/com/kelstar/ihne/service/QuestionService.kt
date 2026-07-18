@@ -8,8 +8,10 @@ import com.kelstar.ihne.repository.RoomRepository
 import org.springframework.data.domain.Example
 import org.springframework.data.domain.ExampleMatcher
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.server.ResponseStatusException
 import java.io.InputStream
 
 @Service
@@ -99,14 +101,14 @@ class QuestionService(
     }
 
     fun importQuestionsByParameters(importParametersDto: ImportParametersDto, roomCode: Int): Long {
-        val room = roomRepository.findByIdOrNull(roomCode) ?: throw IllegalArgumentException("Room $roomCode not found")
+        val room = roomRepository.findByIdOrNull(roomCode) ?: throw RoomNotFoundException(roomCode)
         val lang = room.language
         val filename = "questions/${importParametersDto.datasetName}_$lang.txt"
         val iStream = this.javaClass
             .classLoader
             .getResourceAsStream(filename)
-            ?: throw IllegalArgumentException("$filename is not found")
-        
+            ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "$filename is not found")
+
         return importQuestionsFromStream(iStream, roomCode, importParametersDto.size)
     }
     
@@ -139,21 +141,20 @@ class QuestionService(
 
     @Transactional
     fun generateAiQuestions(roomCode: Int): Int {
-        val geminiEnabled = System.getenv("GEMINI_ENABLED")?.toBoolean() 
-            ?: System.getProperty("gemini.enabled")?.toBoolean() 
-            ?: false
-        if (!geminiEnabled) {
-            throw IllegalStateException("AI generation is disabled")
+        if (!geminiService.isEnabled) {
+            throw AiGenerationDisabledException()
         }
 
-        val room = roomRepository.findByIdOrNull(roomCode) 
+        val room = roomRepository.findByIdOrNull(roomCode)
             ?: throw IllegalArgumentException("Room $roomCode not found")
-        
+
         if (room.isPaid != true) {
-            throw IllegalStateException("Room is not paid")
+            throw RoomNotPaidException()
         }
 
-        val customQuestions = questionRepository.findAllByRoomCode(roomCode)
+        val roomQuestions = questionRepository.findAllByRoomCode(roomCode)
+
+        val customQuestions = roomQuestions
             .filter { !it.isPredefined }
             .map { it.question }
 
@@ -166,12 +167,16 @@ class QuestionService(
             return 0
         }
 
-        val existingQuestions = questionRepository.findAllByRoomCode(roomCode)
+        val existingQuestions = roomQuestions
             .map { it.question.lowercase() }
             .toSet()
 
+        // Gemini can echo near-duplicate lines within the same batch; without deduping here,
+        // saveAll would violate the (question, roomCode) unique constraint and roll back the
+        // whole transaction.
         val questionsToSave = aiQuestions
             .filter { it.lowercase() !in existingQuestions }
+            .distinctBy { it.lowercase() }
             .map { Question(it, roomCode, isPredefined = false) }
 
         if (questionsToSave.isNotEmpty()) {

@@ -1,9 +1,12 @@
 package com.kelstar.ihne.controller.rest
 
+import com.kelstar.ihne.model.Question
 import com.kelstar.ihne.model.Statistics
 import com.kelstar.ihne.repository.QuestionRepository
 import com.kelstar.ihne.repository.RoomRepository
 import com.kelstar.ihne.repository.StatisticsRepository
+import com.kelstar.ihne.service.QuestionNotFoundException
+import com.kelstar.ihne.service.RoomNotFoundException
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
@@ -57,24 +60,15 @@ class AdminRestController(
     @PatchMapping("/rooms/{code}/toggle-paid")
     @Transactional
     fun toggleRoomPaid(@PathVariable code: Int) {
-        val room = roomRepository.findByIdOrNull(code) ?: return
+        val room = roomRepository.findByIdOrNull(code) ?: throw RoomNotFoundException(code)
         room.isPaid = !(room.isPaid ?: false)
         roomRepository.save(room)
     }
 
     @GetMapping("/questions")
     @Transactional(readOnly = true)
-    fun getAllQuestions(): List<AdminQuestionDto> {
-        return questionRepository.findAllByOrderByDateAdded().map {
-            AdminQuestionDto(
-                id = it.id!!,
-                question = it.question,
-                roomCode = it.roomCode,
-                isPredefined = it.isPredefined,
-                wasShown = it.wasShown,
-                dateAdded = it.dateAdded
-            )
-        }
+    fun getAllQuestions(): List<Question> {
+        return questionRepository.findAllByOrderByDateAdded()
     }
 
     @DeleteMapping("/questions/{id}")
@@ -86,7 +80,7 @@ class AdminRestController(
     @PatchMapping("/questions/{id}/toggle-shown")
     @Transactional
     fun toggleQuestionShown(@PathVariable id: Long) {
-        val question = questionRepository.findByIdOrNull(id) ?: return
+        val question = questionRepository.findByIdOrNull(id) ?: throw QuestionNotFoundException(id)
         question.wasShown = !question.wasShown
         questionRepository.save(question)
     }
@@ -108,13 +102,4 @@ data class ActiveRoomStatsDto(
     val questionsTotal: Int,
     val questionsShown: Int,
     val questionsPredefined: Int
-)
-
-data class AdminQuestionDto(
-    val id: Long,
-    val question: String,
-    val roomCode: Int,
-    val isPredefined: Boolean,
-    val wasShown: Boolean,
-    val dateAdded: Instant
 )

@@ -10,16 +10,33 @@ import org.springframework.web.client.RestTemplate
 import java.net.URI
 
 @Service
-class GeminiService {
+class GeminiService(
+    @Value("\${gemini.api.key:}") private val apiKey: String
+) {
     private val objectMapper = ObjectMapper()
-    @Value("\${gemini.api.key:}")
-    private lateinit var apiKeyEnv: String
-
     private val restTemplate = RestTemplate()
 
+    /**
+     * Single source of truth for whether Gemini-backed AI question generation is enabled.
+     *
+     * CRaC subtlety: on a Cloud Run restore, the JVM resumes from a checkpoint taken at
+     * training/build time, so `System.getenv()` still reflects the *training-time* process
+     * environment - it will NOT pick up a `GEMINI_ENABLED` value set on the fresh Cloud Run
+     * revision. run-app.sh only re-dumps `DB_`/`SPRING_DATASOURCE_`/`SPRING_PROFILES_ACTIVE`
+     * vars into /tmp/env.properties before restore (see HikariCracResource.afterRestore),
+     * and nothing currently promotes `GEMINI_ENABLED` into a JVM system property either. We
+     * still fall back to `System.getProperty("gemini.enabled")` so this keeps working for
+     * plain (non-CRaC) runs today, and picks up the flag automatically with no further code
+     * changes if the env-dump/restore mechanism is ever extended to cover it.
+     */
+    val isEnabled: Boolean
+        get() = System.getenv("GEMINI_ENABLED")?.toBoolean()
+            ?: System.getProperty("gemini.enabled")?.toBoolean()
+            ?: false
+
     fun generateQuestions(customQuestions: List<String>, language: String): List<String> {
-        val apiKey = apiKeyEnv.takeIf { it.isNotEmpty() } 
-            ?: System.getenv("GEMINI_API_KEY") 
+        val resolvedApiKey = apiKey.takeIf { it.isNotEmpty() }
+            ?: System.getenv("GEMINI_API_KEY")
             ?: throw IllegalStateException("GEMINI_API_KEY is not configured")
 
         val prompt = """
@@ -33,7 +50,7 @@ class GeminiService {
             Return the output strictly as a plain list of statements, one statement per line, without any numbering, bullets, quotes, prefixes (like "Never have I ever" or "Я никогда не"), titles, or introductory/concluding text.
         """.trimIndent()
 
-        val url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey"
+        val url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$resolvedApiKey"
         
         val headers = HttpHeaders().apply {
             contentType = MediaType.APPLICATION_JSON

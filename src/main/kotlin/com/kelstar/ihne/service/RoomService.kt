@@ -36,7 +36,7 @@ class RoomService(
 
     @Transactional
     fun markRoomAsPaid(code: Int): Room {
-        val room = roomRepository.findByIdOrNull(code) ?: throw RuntimeException("Room not found")
+        val room = roomRepository.findByIdOrNull(code) ?: throw RoomNotFoundException(code)
         room.isPaid = true
         return roomRepository.saveAndFlush(room)
     }
