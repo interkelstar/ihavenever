@@ -7,13 +7,22 @@ steps:
       - |
         SERVICE_NAME="$_SERVICE_NAME"
         DB_PARAMS="$_DB_PARAMS"
+        if [[ "$DB_PARAMS" != *prepareThreshold=0* ]]; then
+          if [[ "$DB_PARAMS" == \?* ]]; then
+            DB_PARAMS="$DB_PARAMS&prepareThreshold=0"
+          elif [ -n "$DB_PARAMS" ]; then
+            DB_PARAMS="?$DB_PARAMS&prepareThreshold=0"
+          else
+            DB_PARAMS="?prepareThreshold=0"
+          fi
+        fi
         DB_INIT_SQL="$_DB_INIT_SQL"
         if [ "$TRIGGER_NAME" = "rmgpgab-ihavenever-pr" ]; then
           PR_JSON=$$(curl -s -H "Accept: application/vnd.github+json" https://api.github.com/repos/interkelstar/ihavenever/commits/$COMMIT_SHA/pulls)
           PR_NUMBER=$$(echo "$$PR_JSON" | grep -m 1 '"number":' | awk '{print $2}' | tr -d ',')
           if [ -n "$$PR_NUMBER" ]; then
             SERVICE_NAME="ihavenever-pr-$$PR_NUMBER"
-            DB_PARAMS="?currentSchema=pr_$$PR_NUMBER"
+            DB_PARAMS="?currentSchema=pr_$$PR_NUMBER&prepareThreshold=0"
             DB_INIT_SQL="CREATE SCHEMA IF NOT EXISTS pr_$$PR_NUMBER;"
           fi
         fi
