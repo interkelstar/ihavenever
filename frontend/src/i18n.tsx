@@ -63,7 +63,7 @@ export const SUGGESTIONS = {
         'вірив у привидів після перегляду фільму жахів',
         'репетирував промову або важливу розмову перед дзеркалом',
         'готував страву за рецептом, яку в результаті довелося викинути',
-        'намагався відкрити двері картири чужими ключами',
+        'намагався відкрити двері квартири чужими ключами',
         'підключався до чужого Wi-Fi без дозволу',
         'ховався у шафі під час гри в хованки у дорослому віці'
     ],
@@ -109,14 +109,10 @@ export const TRANSLATIONS = {
         // Room.tsx
         add_question_btn: "Добавить вопрос",
         become_host_btn: "Стать хостом",
-        start_game_btn: "Начать игру",
-        added_count: "Добавлено вопросов: {count}",
         error_empty_question: "Пожалуйста, напишите вопрос.",
         error_conflict: "Такой вопрос уже есть в этой комнате!",
         success_added: "Вопрос успешно добавлен!",
-        qr_btn: "QR-код",
-        placeholder_prefix: "...",
-        
+
         lost_host_desc: "Если вы потеряли хоста, то можно",
         host_warning_title: "ВНИМАНИЕ",
         host_warning_desc: "В игре должен быть только один хост, чтобы точно показались все заданные вопросы, так что нажимайте только в случае если изначальный хост закрыл вкладку, потерял телефон или отключился",
@@ -161,7 +157,8 @@ export const TRANSLATIONS = {
         ai_pay_btn: "Оплатить доступ ($5)",
         ai_pay_check_btn: "Я оплатил / Проверить доступ",
         ai_pay_cancel: "Назад",
-        ai_pay_success_toast: "Доступ успешно разблокирован! Теперь вы можете генерировать вопросы.",
+        ai_pay_pending: "Платеж еще не подтвержден. Пожалуйста, попробуйте через пару секунд.",
+        ai_pay_check_error: "Ошибка при проверке оплаты. Пожалуйста, попробуйте еще раз.",
         game_settings_title: "Настройки игры",
         add_questions_label: "Добавить вопросы",
         bmc_tooltip: "Нравится игра? Тогда поддержи меня!",
@@ -173,12 +170,6 @@ export const TRANSLATIONS = {
         finished_download_btn: "Скачать все вопросы",
         coffee_donate: "А если игра вам понравилась, вы можете",
         coffee_donate_btn: "поддержать автора",
-        
-        // Language Select
-        lang_ru: "Русский",
-        lang_en: "English",
-        lang_uk: "Українська",
-        lang_pl: "Polski"
     },
     en: {
         title: "Never Have I Ever...",
@@ -198,14 +189,10 @@ export const TRANSLATIONS = {
         // Room.tsx
         add_question_btn: "Add question",
         become_host_btn: "Become Host",
-        start_game_btn: "Start Game",
-        added_count: "Questions added: {count}",
         error_empty_question: "Please write a question.",
         error_conflict: "This exact question already exists in this room!",
         success_added: "Question successfully added!",
-        qr_btn: "QR Code",
-        placeholder_prefix: "...",
-        
+
         lost_host_desc: "If you lost the host, you can",
         host_warning_title: "WARNING",
         host_warning_desc: "There should only be one host in the game to ensure all questions are displayed properly. Only click this if the original host has closed their tab, lost their phone, or disconnected.",
@@ -240,7 +227,7 @@ export const TRANSLATIONS = {
         coffee_gate_promise_btn: "I promise to support later",
         coffee_gate_back_btn: "Yes, support now",
         finished_ai_title: "Want to continue the game?",
-        finished_ai_desc: "AI will generate 20 unique questions based on your room's vibe (inside jokes, names, jokes)!",
+        finished_ai_desc: "AI will generate 20 unique questions based on your room's vibe (inside jokes, names, stories)!",
         finished_ai_btn: "Generate AI Questions ✨",
         finished_ai_loading: "AI is thinking and generating...",
         finished_ai_error_vibe: "Need at least 3 custom questions from players to catch the vibe!",
@@ -250,7 +237,8 @@ export const TRANSLATIONS = {
         ai_pay_btn: "Unlock Access ($5)",
         ai_pay_check_btn: "I paid / Check access",
         ai_pay_cancel: "Back",
-        ai_pay_success_toast: "Access unlocked successfully! Now you can generate questions.",
+        ai_pay_pending: "Payment not confirmed yet. Please try again in a moment.",
+        ai_pay_check_error: "Error checking payment. Please try again.",
         game_settings_title: "Game Settings",
         add_questions_label: "Add questions",
         bmc_tooltip: "Like the game? Support me!",
@@ -262,12 +250,6 @@ export const TRANSLATIONS = {
         finished_download_btn: "Download all questions",
         coffee_donate: "And if you enjoyed the game, you can",
         coffee_donate_btn: "buy me a coffee",
-        
-        // Language Select
-        lang_ru: "Русский",
-        lang_en: "English",
-        lang_uk: "Українська",
-        lang_pl: "Polski"
     },
     uk: {
         title: "Я ніколи не...",
@@ -287,14 +269,10 @@ export const TRANSLATIONS = {
         // Room.tsx
         add_question_btn: "Додати питання",
         become_host_btn: "Стати хостом",
-        start_game_btn: "Почати гру",
-        added_count: "Додано питань: {count}",
         error_empty_question: "Будь ласка, напишіть питання.",
         error_conflict: "Таке питання вже є в цій кімнаті!",
         success_added: "Питання успішно додано!",
-        qr_btn: "QR-код",
-        placeholder_prefix: "...",
-        
+
         lost_host_desc: "Якщо ви втратили хоста, то можна",
         host_warning_title: "УВАГА",
         host_warning_desc: "У грі має бути лише один хост, щоб точно показалися всі задані питання, тому натискайте лише у випадку, якщо початковий хост закрив вкладку, втратив телефон або відключився.",
@@ -339,7 +317,8 @@ export const TRANSLATIONS = {
         ai_pay_btn: "Оплатити доступ ($5)",
         ai_pay_check_btn: "Я оплатив / Перевірити доступ",
         ai_pay_cancel: "Назад",
-        ai_pay_success_toast: "Доступ успішно розблоковано! Тепер ви можете генерувати питання.",
+        ai_pay_pending: "Платіж ще не підтверджено. Будь ласка, спробуйте за кілька секунд.",
+        ai_pay_check_error: "Помилка під час перевірки оплати. Будь ласка, спробуйте ще раз.",
         game_settings_title: "Налаштування гри",
         add_questions_label: "Додати питання",
         bmc_tooltip: "Подобається гра? Тоді підтримай мене!",
@@ -351,12 +330,6 @@ export const TRANSLATIONS = {
         finished_download_btn: "Завантажити всі питання",
         coffee_donate: "А якщо гра вам сподобалася, ви можете",
         coffee_donate_btn: "підтримати автора",
-        
-        // Language Select
-        lang_ru: "Русский",
-        lang_en: "English",
-        lang_uk: "Українська",
-        lang_pl: "Polski"
     },
     pl: {
         title: "Nigdy nie...",
@@ -376,14 +349,10 @@ export const TRANSLATIONS = {
         // Room.tsx
         add_question_btn: "Dodaj pytanie",
         become_host_btn: "Zostań hostem",
-        start_game_btn: "Rozpocznij grę",
-        added_count: "Dodane pytania: {count}",
         error_empty_question: "Proszę napisać pytanie.",
         error_conflict: "To pytanie już istnieje w tym pokoju!",
         success_added: "Pytanie zostało pomyślnie dodane!",
-        qr_btn: "Kod QR",
-        placeholder_prefix: "...",
-        
+
         lost_host_desc: "Jeśli zgubiłeś hosta, możesz",
         host_warning_title: "UWAGA",
         host_warning_desc: "W grze powinien być tylko jeden host, aby mieć pewność, że wszystkie zadane pytania zostaną wyświetlone, więc klikaj tylko wtedy, gdy oryginalny host zamknął kartę, zgubił telefon lub rozłączył się.",
@@ -418,7 +387,7 @@ export const TRANSLATIONS = {
         coffee_gate_promise_btn: "Obiecuję wesprzeć później",
         coffee_gate_back_btn: "Tak, wesprzyj teraz",
         finished_ai_title: "Chcesz kontynuować grę?",
-        finished_ai_desc: "AI wygeneruje 20 unikalnych pytań na podstawie atmosfery twojego pokoju (żartów, imion, żartów)!",
+        finished_ai_desc: "AI wygeneruje 20 unikalnych pytań na podstawie atmosfery twojego pokoju (wewnętrznych żartów, imion, wspomnień)!",
         finished_ai_btn: "Generuj pytania AI ✨",
         finished_ai_loading: "AI myśli i generuje...",
         finished_ai_error_vibe: "Potrzeba co najmniej 3 własnych pytań od graczy, aby poczuć klimat!",
@@ -428,7 +397,8 @@ export const TRANSLATIONS = {
         ai_pay_btn: "Odblokuj dostęp ($5)",
         ai_pay_check_btn: "Zapłaciłem / Sprawdź dostęp",
         ai_pay_cancel: "Wstecz",
-        ai_pay_success_toast: "Dostęp odblokowany pomyślnie! Teraz możesz generować pytania.",
+        ai_pay_pending: "Płatność nie została jeszcze potwierdzona. Spróbuj ponownie za chwilę.",
+        ai_pay_check_error: "Błąd podczas sprawdzania płatności. Spróbuj ponownie później.",
         game_settings_title: "Ustawienia gry",
         add_questions_label: "Dodaj pytania",
         bmc_tooltip: "Podoba Ci się gra? Wesprzyj mnie!",
@@ -440,12 +410,6 @@ export const TRANSLATIONS = {
         finished_download_btn: "Pobierz wszystkie pytania",
         coffee_donate: "A jeśli gra Ci się podobała, możesz",
         coffee_donate_btn: "postawić mi kawę",
-        
-        // Language Select
-        lang_ru: "Русский",
-        lang_en: "English",
-        lang_uk: "Українська",
-        lang_pl: "Polski"
     }
 };
 

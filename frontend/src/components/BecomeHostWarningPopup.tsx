@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '../i18n';
+import ModalShell from './ModalShell';
 
 interface BecomeHostWarningPopupProps {
     roomCode: string;
@@ -36,50 +36,38 @@ const BecomeHostWarningPopup: React.FC<BecomeHostWarningPopupProps> = ({ roomCod
     };
 
     return (
-        <AnimatePresence>
-            {isOpen && (
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="fixed inset-0 z-[1001] flex items-center justify-center p-4"
-                    style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)' }}
+        <ModalShell
+            isOpen={isOpen}
+            onClose={onClose}
+            zIndexClassName="z-[1001]"
+            overlayBackground="rgba(0,0,0,0.6)"
+            overlayBlur="blur(8px)"
+            cardClassName="bg-zinc-900/95 backdrop-blur-lg p-8 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/20 text-white max-w-sm w-full text-justify flex flex-col items-center overflow-hidden"
+            springDuration={0.3}
+            springBounce={0.3}
+            cardRef={popupRef}
+        >
+            <div className="text-4xl mb-4">⚠️{t('host_warning_title')}⚠️</div>
+
+            <p className="text-gray-200 text-base mb-8 leading-relaxed">
+                {t('host_warning_desc')}
+            </p>
+
+            <div className="flex flex-col gap-3 w-full">
+                <button
                     onClick={onClose}
+                    className="modern-btn btn-primary w-full py-3 text-sm"
                 >
-                    <motion.div
-                        ref={popupRef}
-                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        transition={{ type: "spring", duration: 0.3, bounce: 0.3 }}
-                        className="bg-zinc-900/95 backdrop-blur-lg p-8 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/20 text-white max-w-sm w-full text-justify flex flex-col items-center overflow-hidden"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div className="text-4xl mb-4">⚠️{t('host_warning_title')}⚠️</div>
-
-                        <p className="text-gray-200 text-base mb-8 leading-relaxed">
-                            {t('host_warning_desc')}
-                        </p>
-
-                        <div className="flex flex-col gap-3 w-full">
-                            <button
-                                onClick={onClose}
-                                className="modern-btn btn-primary w-full py-3 text-sm"
-                            >
-                                {t('host_warning_cancel')}
-                            </button>
-                            <button
-                                onClick={handleConfirm}
-                                className="modern-btn btn-secondary w-full py-3 text-sm"
-                            >
-                                {t('host_warning_confirm')}
-                            </button>
-                        </div>
-                    </motion.div>
-                </motion.div>
-            )}
-        </AnimatePresence>
+                    {t('host_warning_cancel')}
+                </button>
+                <button
+                    onClick={handleConfirm}
+                    className="modern-btn btn-secondary w-full py-3 text-sm"
+                >
+                    {t('host_warning_confirm')}
+                </button>
+            </div>
+        </ModalShell>
     );
 };
 

@@ -154,11 +154,27 @@ const AdminStats: React.FC = () => {
         }
     };
 
+    // Recompute the top-level active-room aggregates from a fresh activeRooms array,
+    // so StatsData stays internally consistent even though the UI derives its own
+    // numbers from the (filtered) arrays rather than these fields.
+    const recomputeActiveAggregates = (activeRooms: ActiveRoom[]) => ({
+        totalActiveRooms: activeRooms.length,
+        totalActiveQuestions: activeRooms.reduce((sum, r) => sum + r.questionsTotal, 0),
+        totalActiveShownQuestions: activeRooms.reduce((sum, r) => sum + r.questionsShown, 0),
+        totalActivePredefinedQuestions: activeRooms.reduce((sum, r) => sum + r.questionsPredefined, 0)
+    });
+
     const deleteRoom = async (code: number) => {
         if (!window.confirm(`Вы уверены, что хотите удалить комнату ${code}?`)) return;
         try {
             await axios.delete(`/admin/api/rooms/${code}`, { headers: { 'Authorization': authHeader } });
-            fetchStats();
+            setData(prev => {
+                if (!prev) return prev;
+                const activeRooms = prev.activeRooms.filter(r => r.code !== code);
+                return { ...prev, activeRooms, ...recomputeActiveAggregates(activeRooms) };
+            });
+            // Deleting a room cascades to its questions server-side, so drop them locally too.
+            setQuestions(prev => prev.filter(q => q.roomCode !== code));
         } catch (e) {
             console.error(e);
             alert('Ошибка при удалении комнаты');
@@ -169,7 +185,23 @@ const AdminStats: React.FC = () => {
         if (!window.confirm('Удалить вопрос?')) return;
         try {
             await axios.delete(`/admin/api/questions/${id}`, { headers: { 'Authorization': authHeader } });
-            fetchStats();
+            const deleted = questions.find(q => q.id === id);
+            setQuestions(prev => prev.filter(q => q.id !== id));
+            if (deleted) {
+                setData(prev => {
+                    if (!prev) return prev;
+                    const activeRooms = prev.activeRooms.map(r => {
+                        if (r.code !== deleted.roomCode) return r;
+                        return {
+                            ...r,
+                            questionsTotal: r.questionsTotal - 1,
+                            questionsShown: deleted.wasShown ? r.questionsShown - 1 : r.questionsShown,
+                            questionsPredefined: deleted.isPredefined ? r.questionsPredefined - 1 : r.questionsPredefined
+                        };
+                    });
+                    return { ...prev, activeRooms, ...recomputeActiveAggregates(activeRooms) };
+                });
+            }
         } catch (e) {
             console.error(e);
             alert('Ошибка при удалении вопроса');
@@ -179,7 +211,11 @@ const AdminStats: React.FC = () => {
     const toggleRoomPaid = async (code: number) => {
         try {
             await axios.patch(`/admin/api/rooms/${code}/toggle-paid`, {}, { headers: { 'Authorization': authHeader } });
-            fetchStats();
+            setData(prev => {
+                if (!prev) return prev;
+                const activeRooms = prev.activeRooms.map(r => r.code === code ? { ...r, isPaid: !r.isPaid } : r);
+                return { ...prev, activeRooms };
+            });
         } catch (e) {
             console.error(e);
             alert('Ошибка при изменении статуса AI/Play');
@@ -189,7 +225,19 @@ const AdminStats: React.FC = () => {
     const toggleQuestionShown = async (id: number) => {
         try {
             await axios.patch(`/admin/api/questions/${id}/toggle-shown`, {}, { headers: { 'Authorization': authHeader } });
-            fetchStats();
+            const target = questions.find(q => q.id === id);
+            setQuestions(prev => prev.map(q => q.id === id ? { ...q, wasShown: !q.wasShown } : q));
+            if (target) {
+                const delta = target.wasShown ? -1 : 1;
+                setData(prev => {
+                    if (!prev) return prev;
+                    const activeRooms = prev.activeRooms.map(r => {
+                        if (r.code !== target.roomCode) return r;
+                        return { ...r, questionsShown: r.questionsShown + delta };
+                    });
+                    return { ...prev, activeRooms, ...recomputeActiveAggregates(activeRooms) };
+                });
+            }
         } catch (e) {
             console.error(e);
             alert('Ошибка при изменении статуса вопроса');

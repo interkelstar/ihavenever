@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '../i18n';
 import { posthog } from '../analytics';
+import ModalShell from './ModalShell';
 
 interface CoffeeGatePopupProps {
     isOpen: boolean;
@@ -33,26 +34,20 @@ const CoffeeGatePopup: React.FC<CoffeeGatePopupProps> = ({ isOpen, onClose }) =>
     };
 
     return (
-        <AnimatePresence>
-            {isOpen && (
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="fixed inset-0 z-[1002] flex items-center justify-center p-4"
-                    style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(12px)' }}
-                >
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        transition={{ type: "spring", duration: 0.4, bounce: 0.25 }}
-                        className="bg-zinc-900/90 backdrop-blur-xl p-8 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] border border-white/20 text-white max-w-md w-full text-center flex flex-col items-center overflow-hidden"
-                    >
-                        <div className="text-5xl mb-4">☕️</div>
+        <ModalShell
+            isOpen={isOpen}
+            onClose={onClose}
+            closeOnOverlayClick={false}
+            zIndexClassName="z-[1002]"
+            overlayBackground="rgba(0,0,0,0.75)"
+            overlayBlur="blur(12px)"
+            cardClassName="bg-zinc-900/90 backdrop-blur-xl p-8 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] border border-white/20 text-white max-w-md w-full text-center flex flex-col items-center overflow-hidden"
+            springDuration={0.4}
+            springBounce={0.25}
+        >
+            <div className="text-5xl mb-4">☕️</div>
 
-                        <AnimatePresence mode="wait">
+            <AnimatePresence mode="wait">
                             {step === 1 ? (
                                 <motion.div
                                     key="step-1"
@@ -115,12 +110,9 @@ const CoffeeGatePopup: React.FC<CoffeeGatePopupProps> = ({ isOpen, onClose }) =>
                                         </button>
                                     </div>
                                 </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </motion.div>
-                </motion.div>
             )}
-        </AnimatePresence>
+            </AnimatePresence>
+        </ModalShell>
     );
 };
 
