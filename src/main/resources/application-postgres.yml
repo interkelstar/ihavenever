@@ -15,3 +15,16 @@ spring:
       minimum-idle: 2
       maximum-pool-size: 5
       max-lifetime: 600000 #10 mins
+  flyway:
+    enabled: true
+    # Existing prod/PR databases were already populated by ddl-auto=update before Flyway
+    # existed; baseline instead of failing the first time Flyway sees them. Migrations
+    # V1-V3 are all still applied on top of the baseline (see their guard comments).
+    baseline-on-migrate: true
+    baseline-version: "0"
+    # No schemas/default-schema configured on purpose: the connection's own default schema
+    # (search_path, driven by the ?currentSchema=... param in DB_PARAMS for PR previews)
+    # is what Flyway should operate against - not a hardcoded one.
+  jpa:
+    hibernate:
+      ddl-auto: validate

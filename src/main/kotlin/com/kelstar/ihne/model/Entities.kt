@@ -30,12 +30,9 @@ data class Room(
     @Min(100_000)
     @Max(999_999)
     val code: Int,
-    @Column(name = "language", nullable = true)
-    private val lang: String? = "ru"
+    @Column(name = "language", nullable = false)
+    val language: String = "ru"
 ) {
-    val language: String
-        get() = lang ?: "ru"
-
     val dateCreated: Instant = Instant.now()
     var isPaid: Boolean? = false
     @OneToMany(mappedBy = "roomCode", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
@@ -59,13 +56,10 @@ data class Statistics(
 data class ArchivedQuestion(
     @Column(columnDefinition = "TEXT")
     val question: String,
-    @Column(name = "language", nullable = true)
-    private val lang: String? = "ru",
+    @Column(name = "language", nullable = false)
+    val language: String = "ru",
     val roomCode: Int? = null
 ) {
-    val language: String
-        get() = lang ?: "ru"
-
     val dateArchived: Instant = Instant.now()
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "archived_question_seq_gen")

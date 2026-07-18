@@ -5,5 +5,9 @@ spring:
     url: jdbc:h2:file:./db/database;AUTO_SERVER=TRUE
     username: sa
     password:
+  # Migrations under db/migration are Postgres dialect only; local dev keeps using H2 with
+  # ddl-auto=update (from application.yml), so Flyway must stay off for this profile.
+  flyway:
+    enabled: false
 server:
   port: 8080

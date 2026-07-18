@@ -100,6 +100,11 @@ dependencies {
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("net.javacrumbs.shedlock:shedlock-spring:7.2.2")
     implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:7.2.2")
+    // Spring Boot 4 split Flyway autoconfiguration out of spring-boot-autoconfigure into
+    // its own starter (spring-boot-flyway) - flyway-core alone no longer triggers
+    // FlywayAutoConfiguration. See spring-boot-starter-flyway.
+    implementation("org.springframework.boot:spring-boot-starter-flyway")
+    implementation("org.flywaydb:flyway-database-postgresql")
 
     runtimeOnly("com.h2database:h2")
     runtimeOnly("com.mysql:mysql-connector-j")

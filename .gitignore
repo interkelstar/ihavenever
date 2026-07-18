@@ -28,7 +28,7 @@ nbdist/
 .vscode/
 
 ### h2 local db ###
-db/
+/db/
 
 ### Build artefacts ###
 bin/

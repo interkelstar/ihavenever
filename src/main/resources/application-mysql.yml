@@ -14,3 +14,12 @@ spring:
       minimum-idle: 2
       maximum-pool-size: 5
       max-lifetime: 600000 #10 mins
+  # This profile appears to be dead: a legacy Heroku/docker-compose deployment path
+  # (docker-compose.yml last touched 2022, alongside heroku.yml/Procfile) that predates the
+  # current Cloud Run + CRaC + Supabase/Postgres deployment (cloudbuild.yaml and
+  # build-crac.sh both hardcode DB_PROFILE=postgres). The db/migration/*.sql scripts are
+  # Postgres dialect only, so Flyway is left disabled here; this profile keeps its old
+  # ddl-auto=update behavior (from application.yml) and is otherwise unmaintained/untested
+  # by this change.
+  flyway:
+    enabled: false
