@@ -1,5 +1,6 @@
 package com.kelstar.ihne.controller.rest
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.kelstar.ihne.model.Question
 import com.kelstar.ihne.model.Statistics
 import com.kelstar.ihne.repository.QuestionRepository
@@ -98,6 +99,7 @@ data class AdminStatsDto(
 data class ActiveRoomStatsDto(
     val code: Int,
     val dateCreated: Instant,
+    @get:JsonProperty("isPaid")
     val isPaid: Boolean,
     val questionsTotal: Int,
     val questionsShown: Int,

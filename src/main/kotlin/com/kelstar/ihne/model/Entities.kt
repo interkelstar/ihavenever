@@ -1,5 +1,6 @@
 package com.kelstar.ihne.model
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.Instant
 import jakarta.persistence.*
 import jakarta.validation.constraints.Max
@@ -14,6 +15,7 @@ import jakarta.validation.constraints.Min
 data class Question(
     val question: String,
     val roomCode: Int,
+    @get:JsonProperty("isPredefined")
     var isPredefined: Boolean = false,
 ) {
     var wasShown = false
