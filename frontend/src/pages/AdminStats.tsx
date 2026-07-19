@@ -37,6 +37,41 @@ interface AdminQuestion {
     dateAdded: string;
 }
 
+interface ArchivedRoom {
+    roomCode: number;
+    language: string;
+    questionCount: number;
+    lastArchived: string;
+}
+
+interface AiPreviewResponse {
+    prompt?: string;
+    language?: string;
+    seedCount?: number;
+    questions?: string[];
+}
+
+interface AiGenResult {
+    id: string;
+    timestamp: string;
+    roomCode: number | null;
+    language: string;
+    seedCount: number;
+    questions: string[];
+    prompt: string;
+    editedPrompt: string;
+    collapsed: boolean;
+}
+
+const AI_LANGUAGES: { code: string; label: string }[] = [
+    { code: 'ru', label: 'RU' },
+    { code: 'en', label: 'EN' },
+    { code: 'uk', label: 'UK' },
+    { code: 'pl', label: 'PL' }
+];
+
+const MAX_AI_RESULTS = 3;
+
 // Generate demo data to show if database is empty
 const generateDemoData = (): StatsData => {
     const now = new Date();
@@ -80,9 +115,21 @@ const AdminStats: React.FC = () => {
     const [username, setUsername] = useState('admin');
     const [password, setPassword] = useState('');
     const [authError, setAuthError] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<'overview' | 'active' | 'historical' | 'questions'>('overview');
+    const [activeTab, setActiveTab] = useState<'overview' | 'active' | 'historical' | 'questions' | 'ai-lab'>('overview');
     const [hoveredPoint, setHoveredPoint] = useState<{ x: number; y: number; label: string; value: number } | null>(null);
     const [questions, setQuestions] = useState<AdminQuestion[]>([]);
+
+    // AI Lab state
+    const [aiRooms, setAiRooms] = useState<ArchivedRoom[]>([]);
+    const [aiRoomsLoading, setAiRoomsLoading] = useState(false);
+    const [aiRoomsError, setAiRoomsError] = useState<string | null>(null);
+    const [aiRoomsLoaded, setAiRoomsLoaded] = useState(false);
+    const [aiSelectedRoom, setAiSelectedRoom] = useState<number | null>(null);
+    const [aiLanguage, setAiLanguage] = useState<string>('ru');
+    const [aiGenerating, setAiGenerating] = useState(false);
+    const [aiGenError, setAiGenError] = useState<string | null>(null);
+    const [aiResults, setAiResults] = useState<AiGenResult[]>([]);
+    const [aiCopiedId, setAiCopiedId] = useState<string | null>(null);
 
     // Time filter states
     const [timeUnit, setTimeUnit] = useState<'all' | 'month' | 'week'>('all');
@@ -241,6 +288,115 @@ const AdminStats: React.FC = () => {
         } catch (e) {
             console.error(e);
             alert('Ошибка при изменении статуса вопроса');
+        }
+    };
+
+    // --- AI Lab helpers ---
+
+    const fetchArchivedRooms = async () => {
+        setAiRoomsLoading(true);
+        setAiRoomsError(null);
+        try {
+            const config = authHeader ? { headers: { 'Authorization': authHeader } } : {};
+            const res = await axios.get('/admin/api/ai/archived-rooms', config);
+            setAiRooms(Array.isArray(res.data) ? res.data : []);
+        } catch (e) {
+            console.error(e);
+            setAiRoomsError('Не удалось загрузить архивные комнаты');
+        } finally {
+            setAiRoomsLoading(false);
+            setAiRoomsLoaded(true);
+        }
+    };
+
+    useEffect(() => {
+        if (activeTab === 'ai-lab' && !aiRoomsLoaded && !aiRoomsLoading) {
+            fetchArchivedRooms();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [activeTab]);
+
+    const selectAiRoom = (room: ArchivedRoom) => {
+        setAiSelectedRoom(room.roomCode);
+        if (room.language && AI_LANGUAGES.some(l => l.code === room.language)) {
+            setAiLanguage(room.language);
+        }
+    };
+
+    const clearAiRoomSelection = () => setAiSelectedRoom(null);
+
+    const runAiPreview = async (body: { roomCode?: number; language?: string; prompt?: string }) => {
+        setAiGenerating(true);
+        setAiGenError(null);
+        try {
+            const config = authHeader ? { headers: { 'Authorization': authHeader } } : {};
+            const res = await axios.post('/admin/api/ai/preview', body, config);
+            const data: AiPreviewResponse = res.data || {};
+            const prompt = typeof data.prompt === 'string' ? data.prompt : (body.prompt || '');
+            const result: AiGenResult = {
+                id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+                timestamp: new Date().toISOString(),
+                roomCode: typeof body.roomCode === 'number' ? body.roomCode : null,
+                language: data.language || body.language || aiLanguage,
+                seedCount: typeof data.seedCount === 'number' ? data.seedCount : 0,
+                questions: Array.isArray(data.questions) ? data.questions : [],
+                prompt,
+                editedPrompt: prompt,
+                collapsed: false
+            };
+            setAiResults(prev => [result, ...prev.map(r => ({ ...r, collapsed: true }))].slice(0, MAX_AI_RESULTS));
+        } catch (e: any) {
+            console.error(e);
+            const status = e?.response?.status;
+            if (status === 503) {
+                setAiGenError('Gemini API key не настроен на сервере');
+            } else if (status === 502) {
+                setAiGenError('Ошибка при обращении к Gemini API');
+            } else if (status === 404) {
+                setAiGenError('Комната не найдена');
+            } else {
+                setAiGenError('Не удалось получить превью генерации');
+            }
+        } finally {
+            setAiGenerating(false);
+        }
+    };
+
+    const handleAiGenerate = () => {
+        if (aiSelectedRoom != null) {
+            runAiPreview({ roomCode: aiSelectedRoom, language: aiLanguage });
+        } else {
+            runAiPreview({ language: aiLanguage });
+        }
+    };
+
+    const handleAiRegenerate = (result: AiGenResult) => {
+        const body: { roomCode?: number; language?: string; prompt?: string } = {
+            language: result.language,
+            prompt: result.editedPrompt
+        };
+        if (result.roomCode != null) body.roomCode = result.roomCode;
+        runAiPreview(body);
+    };
+
+    const updateAiEditedPrompt = (id: string, value: string) => {
+        setAiResults(prev => prev.map(r => r.id === id ? { ...r, editedPrompt: value } : r));
+    };
+
+    const toggleAiResultCollapsed = (id: string) => {
+        setAiResults(prev => prev.map(r => r.id === id ? { ...r, collapsed: !r.collapsed } : r));
+    };
+
+    const copyAiQuestions = async (result: AiGenResult) => {
+        try {
+            const text = result.questions.map((q, i) => `${i + 1}. ${q}`).join('\n');
+            await navigator.clipboard.writeText(text);
+            setAiCopiedId(result.id);
+            setTimeout(() => {
+                setAiCopiedId(prev => prev === result.id ? null : prev);
+            }, 1500);
+        } catch (e) {
+            console.error(e);
         }
     };
 
@@ -882,13 +1038,23 @@ const AdminStats: React.FC = () => {
                     </button>
                     <button
                         onClick={() => setActiveTab('questions')}
-                        className={`pb-2 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
+                        className={`mr-6 pb-2 text-sm font-semibold border-b-2 transition-all cursor-pointer ${
                             activeTab === 'questions'
                                 ? 'border-blue-500 text-white'
                                 : 'border-transparent text-gray-400 hover:text-white'
                         }`}
                     >
                         Все вопросы ({questions.length})
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('ai-lab')}
+                        className={`pb-2 text-sm font-semibold border-b-2 transition-all cursor-pointer flex items-center gap-1.5 ${
+                            activeTab === 'ai-lab'
+                                ? 'border-amber-500 text-amber-300'
+                                : 'border-transparent text-gray-400 hover:text-white'
+                        }`}
+                    >
+                        <span>🧪</span> AI Лаборатория
                     </button>
                 </div>
 
@@ -1073,6 +1239,229 @@ const AdminStats: React.FC = () => {
                                 Нет вопросов
                             </div>
                         )}
+                    </div>
+                )}
+
+                {activeTab === 'ai-lab' && (
+                    <div>
+                        <div className="mb-6 p-4 rounded-xl bg-amber-500/5 border border-amber-500/20">
+                            <h3 className="text-base font-bold text-amber-300 flex items-center gap-2 mb-1">
+                                <span>🧪</span> Тестирование генерации вопросов Gemini
+                            </h3>
+                            <p className="text-xs text-gray-400">
+                                Экспериментальный раздел для проверки промптов и качества генерации перед включением функции для всех пользователей.
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                            {/* Archived room picker */}
+                            <div className="lg:col-span-2">
+                                <div className="flex items-center justify-between mb-3">
+                                    <h4 className="text-sm font-bold text-white uppercase tracking-wider">Архивные комнаты (сид)</h4>
+                                    <button
+                                        onClick={fetchArchivedRooms}
+                                        disabled={aiRoomsLoading}
+                                        className="text-xs text-amber-400 hover:text-amber-300 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                                    >
+                                        {aiRoomsLoading ? 'Обновление…' : 'Обновить'}
+                                    </button>
+                                </div>
+
+                                {aiRoomsError && (
+                                    <div className="modern-alert alert-error text-sm mb-3">
+                                        {aiRoomsError}
+                                    </div>
+                                )}
+
+                                <div className="border border-white/10 rounded-xl overflow-hidden">
+                                    <div className="max-h-72 overflow-y-auto overflow-x-auto">
+                                        {aiRoomsLoading && aiRooms.length === 0 ? (
+                                            <div className="text-center py-10 text-gray-500 text-sm">Загрузка комнат…</div>
+                                        ) : aiRooms.length > 0 ? (
+                                            <table className="w-full text-left border-collapse text-sm">
+                                                <thead>
+                                                    <tr className="border-b border-white/5 text-gray-400 text-xs font-bold uppercase tracking-wider sticky top-0 bg-[#161622]">
+                                                        <th className="py-2 pl-3 pr-2">Код</th>
+                                                        <th className="py-2 px-2">Язык</th>
+                                                        <th className="py-2 px-2 text-center">Вопросов</th>
+                                                        <th className="py-2 pr-3">Архивирована</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {aiRooms.map((room) => {
+                                                        const selected = aiSelectedRoom === room.roomCode;
+                                                        return (
+                                                            <tr
+                                                                key={room.roomCode}
+                                                                onClick={() => selectAiRoom(room)}
+                                                                className={`border-b border-white/5 cursor-pointer transition-colors ${
+                                                                    selected ? 'bg-amber-500/10' : 'hover:bg-white/5'
+                                                                }`}
+                                                            >
+                                                                <td className={`py-3 pl-3 pr-2 font-mono font-bold ${selected ? 'text-amber-300' : 'text-white'}`}>
+                                                                    {room.roomCode}
+                                                                </td>
+                                                                <td className="py-3 px-2 text-gray-300 uppercase text-xs">{room.language || '—'}</td>
+                                                                <td className="py-3 px-2 text-center text-gray-300">{room.questionCount ?? '—'}</td>
+                                                                <td className="py-3 pr-3 text-gray-400 text-xs">
+                                                                    {room.lastArchived ? new Date(room.lastArchived).toLocaleString('ru-RU', {
+                                                                        day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit'
+                                                                    }) : '—'}
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        ) : (
+                                            <div className="text-center py-10 text-gray-500 text-sm">Архивных комнат не найдено</div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {aiSelectedRoom != null && (
+                                    <div className="mt-2 flex items-center gap-2 text-xs">
+                                        <span className="text-gray-400">Выбрана комната как сид:</span>
+                                        <span className="font-mono font-bold text-amber-300">{aiSelectedRoom}</span>
+                                        <button onClick={clearAiRoomSelection} className="text-red-400 hover:text-red-300 uppercase font-bold cursor-pointer">
+                                            Сбросить
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Language selector + generate */}
+                            <div className="flex flex-col">
+                                <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-3">Язык генерации</h4>
+                                <p className="text-xs text-gray-400 mb-2">
+                                    Используется, если сид-комната не выбрана (генерация без примера) — либо для передачи с сидом.
+                                </p>
+                                <div className="flex flex-wrap gap-2 mb-4">
+                                    {AI_LANGUAGES.map(l => (
+                                        <button
+                                            key={l.code}
+                                            onClick={() => setAiLanguage(l.code)}
+                                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer border ${
+                                                aiLanguage === l.code
+                                                    ? 'bg-amber-500 border-amber-500 text-black'
+                                                    : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10'
+                                            }`}
+                                        >
+                                            {l.label}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div className="mt-auto">
+                                    {aiGenError && (
+                                        <div className="modern-alert alert-error text-sm mb-3">
+                                            {aiGenError}
+                                        </div>
+                                    )}
+                                    <button
+                                        onClick={handleAiGenerate}
+                                        disabled={aiGenerating}
+                                        className="modern-btn btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        style={{ background: aiGenerating ? undefined : '#f59e0b', boxShadow: 'none' }}
+                                    >
+                                        {aiGenerating && (
+                                            <span className="inline-block w-4 h-4 border-2 border-black/40 border-t-black rounded-full animate-spin"></span>
+                                        )}
+                                        {aiGenerating ? 'Генерация…' : 'Сгенерировать'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Results */}
+                        <div>
+                            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-3">
+                                Результаты генерации {aiResults.length > 0 && <span className="text-gray-500 normal-case font-medium">(последние {aiResults.length})</span>}
+                            </h4>
+
+                            {aiResults.length === 0 ? (
+                                <div className="text-center py-10 text-gray-500 text-sm border border-dashed border-white/10 rounded-xl">
+                                    Пока нет сгенерированных результатов
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {aiResults.map((result) => (
+                                        <div key={result.id} className="border border-white/10 rounded-xl overflow-hidden bg-white/2">
+                                            <div
+                                                className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-white/5 transition-colors"
+                                                onClick={() => toggleAiResultCollapsed(result.id)}
+                                            >
+                                                <div className="flex items-center gap-3 flex-wrap text-xs">
+                                                    <span className="text-white font-bold text-sm">
+                                                        {new Date(result.timestamp).toLocaleString('ru-RU', {
+                                                            day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit'
+                                                        })}
+                                                    </span>
+                                                    <span className="text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full font-semibold uppercase">
+                                                        {result.language}
+                                                    </span>
+                                                    {result.roomCode != null && (
+                                                        <span className="text-gray-300 font-mono">комната {result.roomCode}</span>
+                                                    )}
+                                                    <span className="text-gray-400">сид: {result.seedCount}</span>
+                                                    <span className="text-gray-400">вопросов: {result.questions.length}</span>
+                                                </div>
+                                                <svg
+                                                    className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ${result.collapsed ? '' : 'rotate-180'}`}
+                                                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                                >
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                                </svg>
+                                            </div>
+
+                                            {!result.collapsed && (
+                                                <div className="px-4 pb-4 border-t border-white/5 pt-4">
+                                                    <div className="mb-2 flex items-center justify-between">
+                                                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Промпт (редактируемый)</label>
+                                                    </div>
+                                                    <textarea
+                                                        value={result.editedPrompt}
+                                                        onChange={(e) => updateAiEditedPrompt(result.id, e.target.value)}
+                                                        className="w-full h-40 resize-y font-mono text-xs bg-black/30 border border-white/10 rounded-xl p-3 text-gray-200 outline-none focus:border-amber-500/50 overflow-y-auto"
+                                                        spellCheck={false}
+                                                    />
+                                                    <div className="flex justify-end mt-2">
+                                                        <button
+                                                            onClick={() => handleAiRegenerate(result)}
+                                                            disabled={aiGenerating}
+                                                            className="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider bg-amber-500/20 border border-amber-500/40 text-amber-300 hover:bg-amber-500/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                                                        >
+                                                            Перегенерировать с изменённым промптом
+                                                        </button>
+                                                    </div>
+
+                                                    <div className="mt-4 flex items-center justify-between">
+                                                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                                                            Сгенерированные вопросы ({result.questions.length})
+                                                        </label>
+                                                        <button
+                                                            onClick={() => copyAiQuestions(result)}
+                                                            className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors cursor-pointer flex items-center gap-1"
+                                                        >
+                                                            {aiCopiedId === result.id ? '✓ Скопировано' : '📋 Копировать вопросы'}
+                                                        </button>
+                                                    </div>
+                                                    {result.questions.length > 0 ? (
+                                                        <ol className="list-decimal list-inside mt-2 space-y-1.5 text-sm text-gray-200">
+                                                            {result.questions.map((q, i) => (
+                                                                <li key={i} className="pl-1">{q}</li>
+                                                            ))}
+                                                        </ol>
+                                                    ) : (
+                                                        <div className="text-xs text-gray-500 mt-2">Нет вопросов в ответе</div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
             </div>

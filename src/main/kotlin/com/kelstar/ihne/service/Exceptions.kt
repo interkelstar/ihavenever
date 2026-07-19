@@ -20,3 +20,6 @@ class RoomNotFoundException(code: Int) :
 
 class QuestionNotFoundException(id: Long) :
     ResponseStatusException(HttpStatus.NOT_FOUND, "Question $id not found")
+
+class GeminiRequestException(message: String) :
+    ResponseStatusException(HttpStatus.BAD_GATEWAY, message)

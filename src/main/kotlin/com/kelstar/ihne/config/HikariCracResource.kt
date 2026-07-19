@@ -57,6 +57,27 @@ class HikariCracResource(private val dataSource: DataSource) : Resource {
             return props.getProperty(key)?.takeIf { it.isNotBlank() } ?: System.getenv(key)?.takeIf { it.isNotBlank() }
         }
 
+        // GEMINI_* vars ride along in the same /tmp/env.properties dump (see run-app.sh) so
+        // fresh Cloud Run revision values reach the restored JVM despite System.getenv()
+        // still reflecting the checkpoint's training-time environment. Unlike the DB_* vars
+        // above, nothing here consumes them directly - they're only needed by GeminiService,
+        // which reads System.getProperty(...) at call time - so just promote them to system
+        // properties, once, if present in the dump.
+        props.getProperty("GEMINI_API_KEY")?.takeIf { it.isNotBlank() }?.let {
+            System.setProperty("gemini.api.key", it)
+        }
+        props.getProperty("GEMINI_ENABLED")?.takeIf { it.isNotBlank() }?.let {
+            System.setProperty("gemini.enabled", it)
+        }
+
+        // Same dance for the Buy Me a Coffee webhook signing secret - BmcWebhookController
+        // resolves "bmc.webhook.secret" at call time (mirroring GeminiService.resolveApiKey),
+        // so promoting it here is enough for a fresh Cloud Run revision's BMC_WEBHOOK_SECRET
+        // to reach the restored JVM.
+        props.getProperty("BMC_WEBHOOK_SECRET")?.takeIf { it.isNotBlank() }?.let {
+            System.setProperty("bmc.webhook.secret", it)
+        }
+
         // NOTE: deliberately no catch-all here past this point. A failure while rebuilding
         // the pool or migrating the schema must propagate and kill the instance rather than
         // let it start serving traffic against an unmigrated/broken datasource.
