@@ -7,11 +7,11 @@ steps:
       - |
         SERVICE_NAME="$_SERVICE_NAME"
         DB_PARAMS="$_DB_PARAMS"
-        if [[ "$DB_PARAMS" != *prepareThreshold=0* ]]; then
-          if [[ "$DB_PARAMS" == \?* ]]; then
-            DB_PARAMS="$DB_PARAMS&prepareThreshold=0"
-          elif [ -n "$DB_PARAMS" ]; then
-            DB_PARAMS="?$DB_PARAMS&prepareThreshold=0"
+        if [[ "$$DB_PARAMS" != *prepareThreshold=0* ]]; then
+          if [[ "$$DB_PARAMS" == \?* ]]; then
+            DB_PARAMS="$$DB_PARAMS&prepareThreshold=0"
+          elif [ -n "$$DB_PARAMS" ]; then
+            DB_PARAMS="?$$DB_PARAMS&prepareThreshold=0"
           else
             DB_PARAMS="?prepareThreshold=0"
           fi
