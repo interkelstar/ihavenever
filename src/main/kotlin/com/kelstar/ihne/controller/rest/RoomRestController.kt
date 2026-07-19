@@ -4,6 +4,7 @@ import com.kelstar.ihne.model.ImportParametersDto
 import com.kelstar.ihne.model.RoomDto
 import com.kelstar.ihne.service.GeminiService
 import com.kelstar.ihne.service.QuestionService
+import com.kelstar.ihne.service.RoomNotFoundException
 import com.kelstar.ihne.service.RoomService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -43,9 +44,16 @@ class RoomRestController(
         }
     }
 
+    /**
+     * Payment status check, not a payment action. This used to unconditionally flip the room
+     * to paid (the honor system) - now that Buy Me a Coffee webhook verification
+     * (see BmcWebhookController) is the only thing that can mark a room paid, this endpoint just
+     * reports current state so the frontend's "I paid / Check access" button can poll it after
+     * sending a real donation. Keeps the same route/response shape the frontend already polls.
+     */
     @PostMapping("/{code}/pay")
-    fun payForRoom(@PathVariable code: Int): RoomDto {
-        val room = roomService.markRoomAsPaid(code)
+    fun checkPaymentStatus(@PathVariable code: Int): RoomDto {
+        val room = roomService.getRoom(code) ?: throw RoomNotFoundException(code)
         return RoomDto(room.code, room.language, room.isPaid ?: false, geminiService.isEnabled)
     }
 

@@ -58,9 +58,13 @@ const AiPaymentPopup: React.FC<AiPaymentPopupProps> = ({ roomCode, isOpen, onClo
             <h2 className="text-2xl font-bold text-white mb-4">
                 {t('ai_pay_title')}
             </h2>
-            <p className="text-gray-300 text-sm mb-6 leading-relaxed">
+            <p className="text-gray-300 text-sm mb-4 leading-relaxed">
                 {t('ai_pay_desc')}
             </p>
+
+            <div className="modern-alert alert-warning text-sm font-semibold mb-6 w-full">
+                {t('ai_pay_code_hint', { code: roomCode })}
+            </div>
 
             {error && (
                 <div className="modern-alert alert-error text-xs mb-5 w-full">
