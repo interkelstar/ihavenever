@@ -122,9 +122,12 @@ class GeminiService(
             setBearerAuth(accessToken)
         }
 
+        // Unlike the AI-Studio endpoint, Vertex AI rejects contents without an explicit role
+        // ("Please use a valid role: user, model").
         val requestBody = mapOf(
             "contents" to listOf(
                 mapOf(
+                    "role" to "user",
                     "parts" to listOf(
                         mapOf("text" to prompt)
                     )
