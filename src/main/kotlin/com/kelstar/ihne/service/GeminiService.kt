@@ -80,14 +80,24 @@ class GeminiService(
         generate(buildPrompt(customQuestions, language))
 
     fun buildPrompt(seedQuestions: List<String>, language: String): String {
-        return """
-            You are a creative host of the "Never Have I Ever" party game.
+        // A room can legitimately have zero custom statements (and the admin AI Lab previews
+        // with no seeds at all) - promising the model "here is a list" and giving it nothing
+        // makes it refuse instead of generate, so the seedless prompt drops the analysis part.
+        val seedSection = if (seedQuestions.isEmpty()) {
+            "The players have not entered any custom statements, so aim for universally fun, party-friendly themes."
+        } else {
+            """
             Here is a list of custom statements that players entered during this game session:
             ${seedQuestions.joinToString("\n") { "- $it" }}
 
             Analyze these statements to capture the company's vibe, inside jokes, mentioned names, professions, hobbies, locations, or topics.
+            These statements should inspire the themes; utilize mentioned names if appropriate, but everything you generate must be completely new.
+            """.trimIndent()
+        }
+        return """
+            You are a creative host of the "Never Have I Ever" party game.
+            $seedSection
             Generate exactly 20 new original and engaging "Never Have I Ever" statements. ${languageInstruction(language)}
-            These statements should build upon the themes interesting to this company, utilize mentioned names if appropriate, but be completely new and fun.
             Return the output strictly as a plain list of statements, one statement per line, without any numbering, bullets, quotes, prefixes (like "Never have I ever" or "Я никогда не"), titles, or introductory/concluding text.
         """.trimIndent()
     }
