@@ -75,6 +75,13 @@ class HikariCracResource(private val dataSource: DataSource) : Resource {
             System.setProperty("bmc.webhook.secret", it)
         }
 
+        // And for the admin panel password - SpringSecurityConfig's UserDetailsService resolves
+        // "admin.password" per login attempt, so a value set on a fresh Cloud Run revision takes
+        // effect here despite the security beans having been built before the checkpoint.
+        props.getProperty("ADMIN_PASSWORD")?.takeIf { it.isNotBlank() }?.let {
+            System.setProperty("admin.password", it)
+        }
+
         // NOTE: deliberately no catch-all here past this point. A failure while rebuilding
         // the pool or migrating the schema must propagate and kill the instance rather than
         // let it start serving traffic against an unmigrated/broken datasource.
