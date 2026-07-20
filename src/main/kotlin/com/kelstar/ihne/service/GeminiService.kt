@@ -1,6 +1,7 @@
 package com.kelstar.ihne.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.google.auth.oauth2.GoogleCredentials
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -9,13 +10,42 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
+import java.io.IOException
 import java.net.URI
 
 @Service
 class GeminiService(
-    @Value("\${gemini.api.key:}") private val apiKey: String
+    @Value("\${gemini.project-id:ihne-294517}") private val projectId: String
 ) {
     private val objectMapper = ObjectMapper()
+
+    @Volatile
+    private var cachedCredentials: GoogleCredentials? = null
+
+    /**
+     * Lazily resolved and cached on first [generate] call - never in the constructor or a
+     * field initializer. The app is CRaC-checkpointed at build time inside a container with
+     * no Application Default Credentials available, so calling
+     * [GoogleCredentials.getApplicationDefault] eagerly would throw during bean creation and
+     * kill the checkpoint. At runtime ADC resolves differently depending on where the restored
+     * instance actually runs: on Cloud Run it's the metadata server, locally it's whatever
+     * `gcloud auth application-default login` left on disk. [GoogleCredentials] caches the
+     * access token internally, so refreshing on every call is cheap once a token is cached.
+     */
+    private fun credentials(): GoogleCredentials {
+        cachedCredentials?.let { return it }
+        synchronized(this) {
+            cachedCredentials?.let { return it }
+            val resolved = try {
+                GoogleCredentials.getApplicationDefault()
+                    .createScoped("https://www.googleapis.com/auth/cloud-platform")
+            } catch (e: IOException) {
+                throw AiGenerationDisabledException()
+            }
+            cachedCredentials = resolved
+            return resolved
+        }
+    }
 
     // A hung Gemini call must not tie up a request thread forever: bound both connect and
     // read time explicitly (RestTemplate has no timeout by default).
@@ -41,19 +71,6 @@ class GeminiService(
         get() = System.getenv("GEMINI_ENABLED")?.toBoolean()
             ?: System.getProperty("gemini.enabled")?.toBoolean()
             ?: false
-
-    /**
-     * Single-sourced API key resolution, re-checked on every call (never cached) because the
-     * @Value-injected [apiKey] field can be constructed *before* HikariCracResource.afterRestore
-     * promotes GEMINI_API_KEY into the "gemini.api.key" system property on a CRaC restore. The
-     * System.getProperty/getenv fallbacks below - not injection order - are the real guarantee
-     * that a fresh key set on the Cloud Run revision is actually picked up.
-     */
-    private fun resolveApiKey(): String =
-        apiKey.takeIf { it.isNotBlank() }
-            ?: System.getProperty("gemini.api.key")?.takeIf { it.isNotBlank() }
-            ?: System.getenv("GEMINI_API_KEY")?.takeIf { it.isNotBlank() }
-            ?: throw AiGenerationDisabledException()
 
     /**
      * Composition used by [QuestionService]: build the default prompt from the room's own
@@ -87,12 +104,22 @@ class GeminiService(
     }
 
     fun generate(prompt: String): List<String> {
-        val resolvedApiKey = resolveApiKey()
+        val creds = credentials()
+        // Token refresh is an HTTP round-trip (metadata server / OAuth endpoint), so a failure
+        // here is a runtime request failure - map it to the same 502 as a failed Gemini call,
+        // not an unhandled 500.
+        val accessToken = try {
+            creds.refreshIfExpired()
+            creds.accessToken.tokenValue
+        } catch (e: IOException) {
+            throw GeminiRequestException("Failed to obtain Vertex AI access token: ${e.message}")
+        }
 
-        val url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$resolvedApiKey"
+        val url = "https://aiplatform.googleapis.com/v1/projects/$projectId/locations/global/publishers/google/models/gemini-2.5-flash:generateContent"
 
         val headers = HttpHeaders().apply {
             contentType = MediaType.APPLICATION_JSON
+            setBearerAuth(accessToken)
         }
 
         val requestBody = mapOf(

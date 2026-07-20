@@ -57,15 +57,12 @@ class HikariCracResource(private val dataSource: DataSource) : Resource {
             return props.getProperty(key)?.takeIf { it.isNotBlank() } ?: System.getenv(key)?.takeIf { it.isNotBlank() }
         }
 
-        // GEMINI_* vars ride along in the same /tmp/env.properties dump (see run-app.sh) so
-        // fresh Cloud Run revision values reach the restored JVM despite System.getenv()
+        // GEMINI_ENABLED rides along in the same /tmp/env.properties dump (see run-app.sh) so
+        // a fresh Cloud Run revision value reaches the restored JVM despite System.getenv()
         // still reflecting the checkpoint's training-time environment. Unlike the DB_* vars
-        // above, nothing here consumes them directly - they're only needed by GeminiService,
-        // which reads System.getProperty(...) at call time - so just promote them to system
-        // properties, once, if present in the dump.
-        props.getProperty("GEMINI_API_KEY")?.takeIf { it.isNotBlank() }?.let {
-            System.setProperty("gemini.api.key", it)
-        }
+        // above, nothing here consumes it directly - it's only read by GeminiService.isEnabled,
+        // which reads System.getProperty(...) at call time - so just promote it to a system
+        // property, once, if present in the dump.
         props.getProperty("GEMINI_ENABLED")?.takeIf { it.isNotBlank() }?.let {
             System.setProperty("gemini.enabled", it)
         }

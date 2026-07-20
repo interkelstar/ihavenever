@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test
 
 class GeminiServiceTest {
 
-    private val geminiService = GeminiService(apiKey = "unused-in-these-tests")
+    private val geminiService = GeminiService(projectId = "unused-in-these-tests")
 
     @Test
     fun `buildPrompt embeds seed questions and an explicit language instruction`() {

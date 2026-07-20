@@ -97,6 +97,7 @@ dependencies {
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.49.0")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("net.javacrumbs.shedlock:shedlock-spring:7.2.2")
     implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:7.2.2")
